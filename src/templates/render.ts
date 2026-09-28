@@ -6,7 +6,7 @@ import { createI18n, type Messages } from '../i18n'
 import type { TemplateProps, TemplateRegistry } from './define'
 import type { StandardSchemaV1Issue } from './standard-schema'
 
-export interface RenderOptions {
+export interface RenderTemplateOptions {
   readonly branding: ResolvedBranding
   readonly layout: Layout
   readonly locale: string
@@ -16,9 +16,13 @@ export interface RenderOptions {
   readonly timeZone?: string | undefined
 }
 
+/** A rendered email: the subject and both versions of the body. */
 export interface RenderedEmail {
+  /** Subject line. */
   readonly subject: string
+  /** The full HTML document. */
   readonly html: string
+  /** The plain-text version. */
   readonly text: string
 }
 
@@ -35,7 +39,7 @@ export async function renderTemplate<R extends TemplateRegistry, N extends keyof
   templates: R,
   name: N,
   props: TemplateProps<R[N]>,
-  options: RenderOptions,
+  options: RenderTemplateOptions,
 ): Promise<RenderedEmail> {
   const template = Object.hasOwn(templates, name) ? templates[name] : undefined
   if (template === undefined) {

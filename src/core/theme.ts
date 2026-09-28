@@ -78,28 +78,60 @@ function relativeLuminance(hex: string): number {
   return 0.2126 * channel(1) + 0.7152 * channel(3) + 0.0722 * channel(5)
 }
 
+/** Theme tokens accepted in `branding.theme`. All optional. Colors are HEX, such as `#3b82f6` or `#fff`. */
+export interface ThemeInput {
+  /** Brand color for buttons and links. Default `#2563eb`. */
+  readonly primary?: string | undefined
+  /** Text color on `primary`. Default: white, or near-black when white is not readable on `primary`. */
+  readonly primaryText?: string | undefined
+  /** Page background around the email card. Default `#f4f4f5`. */
+  readonly background?: string | undefined
+  /** Background of the email card. Default `#ffffff`. */
+  readonly surface?: string | undefined
+  /** Main text color. Default `#18181b`. */
+  readonly text?: string | undefined
+  /** Secondary text: notes, footer, fallback links. Default `#71717a`. */
+  readonly mutedText?: string | undefined
+  /** Borders and dividers. Default `#e4e4e7`. */
+  readonly border?: string | undefined
+  /** Corner radius of the card and buttons, in pixels. Default `8`. */
+  readonly radius?: number | undefined
+}
+
+/** Branding settings: company name, links, logo, footer text and theme. */
+export interface Branding {
+  /** Shown in the header when there is no logo, in the logo alt text and in the copyright line. */
+  readonly companyName: string
+  /** Absolute http(s) URL the logo or company name links to. */
+  readonly appUrl: string
+  /** Address for the support link in the footer. */
+  readonly supportEmail: string
+  /** Absolute http(s) URL of the logo image. Without it the header shows `companyName`. */
+  readonly logoUrl?: string | undefined
+  /** Logo width in pixels. Default `120`. */
+  readonly logoWidth?: number | undefined
+  /** Logo height in pixels. Reserves space while images are blocked. */
+  readonly logoHeight?: number | undefined
+  /** Extra line at the top of the footer, such as why the recipient gets this email. */
+  readonly footerText?: string | undefined
+  /** Theme tokens. */
+  readonly theme?: ThemeInput | undefined
+}
+
 /**
  * Schema for theme tokens. Every token is optional; missing ones get defaults
  * and `primaryText` defaults to a color that stays readable on `primary`.
  */
-export const themeSchema = z
+export const themeSchema: z.ZodType<Theme, ThemeInput> = z
   .strictObject(
     {
-      /** Brand color for buttons and links. Default `#2563eb`. */
       primary: hexColor.optional(),
-      /** Text color on `primary`. Default: white, or near-black when white is not readable on `primary`. */
       primaryText: hexColor.optional(),
-      /** Page background around the email card. Default `#f4f4f5`. */
       background: hexColor.optional(),
-      /** Background of the email card. Default `#ffffff`. */
       surface: hexColor.optional(),
-      /** Main text color. Default `#18181b`. */
       text: hexColor.optional(),
-      /** Secondary text: notes, footer, fallback links. Default `#71717a`. */
       mutedText: hexColor.optional(),
-      /** Borders and dividers. Default `#e4e4e7`. */
       border: hexColor.optional(),
-      /** Corner radius of the card and buttons, in pixels. Default `8`. */
       radius: pixels.optional(),
     },
     { error: objectError },
@@ -119,24 +151,16 @@ export const themeSchema = z
   })
 
 /** Schema for branding settings: validates, trims and applies defaults. */
-export const brandingSchema = z
+export const brandingSchema: z.ZodType<ResolvedBranding, Branding> = z
   .strictObject(
     {
-      /** Shown in the header when there is no logo, in the logo alt text and in the copyright line. */
       companyName: nonEmptyText,
-      /** Absolute http(s) URL the logo or company name links to. */
       appUrl: httpUrl,
-      /** Address for the support link in the footer. */
       supportEmail: email,
-      /** Absolute http(s) URL of the logo image. Without it the header shows `companyName`. */
       logoUrl: httpUrl.optional(),
-      /** Logo width in pixels. Default `120`. */
       logoWidth: positiveInteger.optional(),
-      /** Logo height in pixels. Reserves space while images are blocked. */
       logoHeight: positiveInteger.optional(),
-      /** Extra line at the top of the footer, such as why the recipient gets this email. */
       footerText: optionalText.optional(),
-      /** Theme tokens. */
       theme: themeSchema.prefault({}),
     },
     { error: objectError },
@@ -151,12 +175,6 @@ export const brandingSchema = z
     footerText: input.footerText === '' ? undefined : input.footerText,
     theme: input.theme,
   }))
-
-/** Theme tokens accepted in `branding.theme`. All optional. */
-export type ThemeInput = z.input<typeof themeSchema>
-
-/** Branding settings: company name, links, logo, footer text and theme. */
-export type Branding = z.input<typeof brandingSchema>
 
 export function resolveTheme(input: ThemeInput = {}): Theme {
   return parseConfig(themeSchema, input, 'theme')
