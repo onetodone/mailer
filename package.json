@@ -1,6 +1,6 @@
 {
   "name": "@onetodone/mailer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Type-safe transactional emails for Node.js: built-in templates, branding, i18n and pluggable transports, fully customizable.",
   "keywords": [
     "email",
