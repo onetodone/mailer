@@ -1,5 +1,11 @@
 # @onetodone/mailer
 
+## 0.1.1
+
+### Patch Changes
+
+- d50257b: Remove source maps from the published package, which halves its unpacked size. The JavaScript and type declarations are unchanged apart from their `sourceMappingURL` comments. The JavaScript is not minified, so stack traces that point into `dist` stay readable.
+
 ## 0.1.0
 
 ### Minor Changes
