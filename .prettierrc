@@ -5,5 +5,13 @@
   "tabWidth": 2,
   "trailingComma": "all",
   "useTabs": false,
-  "printWidth": 120
+  "printWidth": 120,
+  "overrides": [
+    {
+      "files": "*.ts",
+      "options": {
+        "embeddedLanguageFormatting": "off"
+      }
+    }
+  ]
 }
