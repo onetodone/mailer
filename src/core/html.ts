@@ -139,8 +139,11 @@ export function toPlainText(markup: SafeHtml): string {
     .replace(
       /<a\b[^>]*?\bhref\s*=\s*(["'])(.*?)\1[^>]*>(.*?)<\/a>/gi,
       (_match, _quote, href: string, label: string) => {
+        const target = href.replace(/^mailto:/i, '')
         const linkText = stripTags(label).trim()
-        return linkText === '' || decodeEntities(linkText) === decodeEntities(href) ? href : `${linkText} (${href})`
+        return linkText === '' || decodeEntities(linkText) === decodeEntities(target)
+          ? target
+          : `${linkText} (${target})`
       },
     )
   return decodeEntities(stripTags(text))
