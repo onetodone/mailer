@@ -5,9 +5,15 @@ import type {
   Branding,
   LayoutContext,
   Locale,
+  MailAddress,
+  MailAddresses,
   MailerErrorCode,
+  MailTransport,
+  MemoryTransport,
   MessageKey,
+  OutgoingMessage,
   SafeHtml,
+  SendResult,
   TemplateProps,
   TemplateRenderContext,
   ThemeInput,
@@ -15,13 +21,15 @@ import type {
 } from '../src/index'
 
 describe('main entry', () => {
-  it('exposes the rendering and template API', () => {
+  it('exposes the rendering, template and transport API', () => {
     expect(Object.keys(mailer).sort()).toEqual([
       'MailerError',
+      'consoleTransport',
       'defaultLayout',
       'defineLayout',
       'defineTemplate',
       'html',
+      'memoryTransport',
       'raw',
       'safeUrl',
     ])
@@ -47,5 +55,17 @@ describe('main entry', () => {
     })
     expect(template.name).toBe('ping')
     expectTypeOf<TemplateProps<typeof template>>().toEqualTypeOf<unknown>()
+  })
+
+  it('exposes types for custom transports', () => {
+    expectTypeOf<MailTransport['send']>().parameter(0).toEqualTypeOf<OutgoingMessage>()
+    expectTypeOf<MailTransport['send']>().returns.resolves.toEqualTypeOf<SendResult>()
+    expectTypeOf({ send: () => Promise.resolve({ messageId: 'id' }) }).toExtend<MailTransport>()
+    expectTypeOf<{ name: string; address: string }>().toExtend<MailAddress>()
+    expectTypeOf<readonly MailAddress[]>().toExtend<MailAddresses>()
+    expectTypeOf(mailer.memoryTransport()).toEqualTypeOf<MemoryTransport>()
+    expectTypeOf<MemoryTransport>().toExtend<MailTransport>()
+    expectTypeOf(mailer.consoleTransport()).toEqualTypeOf<MailTransport>()
+    expectTypeOf<'TRANSPORT_FAILED'>().toExtend<MailerErrorCode>()
   })
 })

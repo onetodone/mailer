@@ -18,3 +18,6 @@ export {
   type TemplateProps,
   type TemplateRenderContext,
 } from './templates/define'
+export type { MailAddress, MailAddresses, MailTransport, OutgoingMessage, SendResult } from './transports/types'
+export { memoryTransport, type MemoryTransport } from './transports/memory'
+export { consoleTransport, type ConsoleTransportOptions } from './transports/console'
