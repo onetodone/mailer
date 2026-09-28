@@ -1,0 +1,25 @@
+Subject: Пацвердзіце email
+
+My App
+
+Пацвердзіце email
+
+Вітаем, Ліза!
+
+Дзякуй за рэгістрацыю ў My App! Пацвердзіце адрас пошты, каб актываваць акаўнт.
+
+Пацвердзіць email: https://myapp.loc/verify?token=abc123
+
+Калі кнопка не працуе, скапіюйце гэту спасылку ў браўзер:
+https://myapp.loc/verify?token=abc123
+
+---
+
+Спасылка дзейнічае 24 гадзіны.
+
+Калі вы не рэгістраваліся ў My App, проста праігнаруйце гэты ліст.
+
+--
+You received this email because you have an account at My App.
+Ёсць пытанні? Пішыце нам: support@myapp.loc
+© 2026 My App. Усе правы абаронены.

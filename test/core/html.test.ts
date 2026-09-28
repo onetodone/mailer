@@ -138,6 +138,13 @@ describe('toPlainText', () => {
     expect(toPlainText(raw('<a href="https://example.com/">https://example.com/</a>'))).toBe('https://example.com/')
   })
 
+  it('writes mailto links as the bare address', () => {
+    expect(toPlainText(raw('Write to <a href="mailto:help@example.com">help@example.com</a>.'))).toBe(
+      'Write to help@example.com.',
+    )
+    expect(toPlainText(raw('<a href="MAILTO:help@example.com">Contact us</a>'))).toBe('Contact us (help@example.com)')
+  })
+
   it('drops comments', () => {
     expect(toPlainText(raw('a<!--[if mso]>outlook<![endif]-->b'))).toBe('ab')
   })

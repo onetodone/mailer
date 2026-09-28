@@ -10,3 +10,11 @@ export {
   type LayoutMessages,
   type LayoutResult,
 } from './core/layout'
+export type { Formatters, Locale, MessageKey, Messages, Translate } from './i18n'
+export {
+  defineTemplate,
+  type Template,
+  type TemplateContent,
+  type TemplateProps,
+  type TemplateRenderContext,
+} from './templates/define'
