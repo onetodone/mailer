@@ -1,7 +1,16 @@
 import { z } from 'zod'
 
 import { parseConfig } from '../errors'
-import { safeUrl } from './html'
+import {
+  email,
+  hexColor,
+  httpUrl,
+  nonEmptyText,
+  objectError,
+  optionalText,
+  pixels,
+  positiveInteger,
+} from '../validators'
 
 /** Resolved theme tokens. Colors are lowercase `#rrggbb`. */
 export interface Theme {
@@ -49,64 +58,6 @@ const defaultLogoWidth = 120
 
 const lightText = '#ffffff'
 const darkText = '#18181b'
-
-function describeInput(input: unknown): string {
-  return typeof input === 'string' ? JSON.stringify(input) : typeof input
-}
-
-function expected(description: string) {
-  return (issue: { input?: unknown }) =>
-    issue.input === undefined ? 'is required' : `must be ${description}, received ${describeInput(issue.input)}`
-}
-
-function objectError(issue: { code?: string; keys?: readonly string[] }): string {
-  if (issue.code === 'unrecognized_keys' && issue.keys !== undefined) {
-    return `has unknown ${issue.keys.length === 1 ? 'key' : 'keys'} ${issue.keys.map((key) => `"${key}"`).join(', ')}`
-  }
-  return 'must be an object'
-}
-
-const hexColorExpectation = expected('a HEX color like "#3b82f6"')
-
-const hexColor = z
-  .string({ error: hexColorExpectation })
-  .trim()
-  .regex(/^#(?:[\da-f]{3}|[\da-f]{6})$/i, { error: hexColorExpectation })
-  .transform((value) => {
-    const digits = value.slice(1).toLowerCase()
-    return `#${digits.length === 3 ? digits.replace(/./g, '$&$&') : digits}`
-  })
-
-const pixels = z.number({ error: expected('a number of pixels') }).min(0, { error: 'must be 0 or greater' })
-
-const positiveInteger = z
-  .number({ error: expected('a positive integer') })
-  .int({ error: 'must be a positive integer' })
-  .positive({ error: 'must be a positive integer' })
-
-const nonEmptyText = z
-  .string({ error: expected('a string') })
-  .trim()
-  .min(1, { error: 'must not be empty' })
-
-const optionalText = z.string({ error: expected('a string') }).trim()
-
-const httpUrl = z
-  .string({ error: expected('an absolute http: or https: URL') })
-  .trim()
-  .transform((value, ctx) => {
-    try {
-      return safeUrl(value)
-    } catch {
-      ctx.addIssue({ code: 'custom', message: 'must be an absolute http: or https: URL', input: value })
-      return z.NEVER
-    }
-  })
-
-const email = z
-  .string({ error: expected('an email address') })
-  .trim()
-  .pipe(z.email({ error: (issue) => `must be an email address, received ${describeInput(issue.input)}` }))
 
 // Picks white unless it falls below 3:1 against the brand color, so light brand
 // colors such as yellow still get readable button labels.
