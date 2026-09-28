@@ -6,10 +6,13 @@ import type { z } from 'zod'
  * - `INVALID_CONFIG`: branding, theme or another setting failed validation.
  * - `INVALID_PROPS`: template props failed schema validation. `cause` holds the
  *   Standard Schema issues.
+ * - `TRANSPORT_FAILED`: the transport could not deliver the email. `cause`
+ *   holds the transport's error.
  * - `UNKNOWN_TEMPLATE`: no template is registered under the requested name.
  * - `UNSAFE_URL`: a URL is not an absolute `http:` or `https:` link.
  */
-export type MailerErrorCode = 'INVALID_CONFIG' | 'INVALID_PROPS' | 'UNKNOWN_TEMPLATE' | 'UNSAFE_URL'
+export type MailerErrorCode =
+  'INVALID_CONFIG' | 'INVALID_PROPS' | 'TRANSPORT_FAILED' | 'UNKNOWN_TEMPLATE' | 'UNSAFE_URL'
 
 /**
  * The error type thrown by the mailer. Check `code` to branch on the reason;

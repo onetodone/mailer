@@ -166,9 +166,6 @@ importers:
 
   .:
     dependencies:
-      nodemailer:
-        specifier: '>=6'
-        version: 10.0.11
       zod:
         specifier: ^4.6.5
         version: 4.6.5
@@ -194,6 +191,9 @@ importers:
       eslint-config-prettier:
         specifier: ^10.1.8
         version: 10.1.8(eslint@9.39.5(supports-color@7.2.0))
+      nodemailer:
+        specifier: ^10.0.11
+        version: 10.0.11
       prettier:
         specifier: ^3.9.9
         version: 3.9.9

@@ -32,6 +32,14 @@ export const hexColor = z
     return `#${digits.length === 3 ? digits.replace(/./g, '$&$&') : digits}`
   })
 
+export const flag = z.boolean({ error: expected('true or false') })
+
+export const port = z
+  .number({ error: expected('a port number from 1 to 65535') })
+  .int({ error: 'must be a port number from 1 to 65535' })
+  .min(1, { error: 'must be a port number from 1 to 65535' })
+  .max(65535, { error: 'must be a port number from 1 to 65535' })
+
 export const pixels = z.number({ error: expected('a number of pixels') }).min(0, { error: 'must be 0 or greater' })
 
 export const positiveInteger = z
