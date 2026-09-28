@@ -1,0 +1,10 @@
+.pnpm-store/
+coverage/
+dist/
+node_modules/
+*.tsbuildinfo
+CHANGELOG.md
+README.md
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
