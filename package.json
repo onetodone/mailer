@@ -1,8 +1,23 @@
 {
   "name": "@onetodone/mailer",
   "version": "0.0.1",
-  "description": "",
-  "keywords": [],
+  "description": "Type-safe transactional emails for Node.js: built-in templates, branding, i18n and pluggable transports, fully customizable.",
+  "keywords": [
+    "email",
+    "mailer",
+    "transactional-email",
+    "email-templates",
+    "email-verification",
+    "password-reset",
+    "smtp",
+    "nodemailer",
+    "i18n",
+    "typescript"
+  ],
+  "homepage": "https://github.com/onetodone/mailer#readme",
+  "bugs": {
+    "url": "https://github.com/onetodone/mailer/issues"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -13,22 +28,90 @@
     "email": "anton@holu.dev",
     "url": "https://github.com/aholu"
   },
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./smtp": {
+      "import": {
+        "types": "./dist/smtp/index.d.mts",
+        "default": "./dist/smtp/index.mjs"
+      },
+      "require": {
+        "types": "./dist/smtp/index.d.cts",
+        "default": "./dist/smtp/index.cjs"
+      }
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
+  "typesVersions": {
+    "*": {
+      "smtp": [
+        "./dist/smtp/index.d.cts"
+      ]
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
   "packageManager": "pnpm@12.6.0",
   "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "changeset": "changeset",
+    "check:package": "pnpm build && publint && attw --pack ."
   },
   "dependencies": {
     "zod": "^4.6.5"
   },
+  "peerDependencies": {
+    "nodemailer": ">=6"
+  },
+  "peerDependenciesMeta": {
+    "nodemailer": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@changesets/cli": "^3.0.3",
+    "@eslint/js": "^9.39.5",
     "@types/node": "^22",
     "dotenv-cli": "^11.0.0",
     "eslint": "^9",
+    "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.9.9",
-    "typescript": "~6"
+    "publint": "^0.3.24",
+    "tsdown": "^0.23.0",
+    "typescript": "~6",
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^5.0.2"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   }
 }
