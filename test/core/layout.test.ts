@@ -143,8 +143,8 @@ describe('defaultLayout', () => {
   })
 
   it('does not double the period after a company name that ends with one', () => {
-    const result = defaultLayout(context({ ...brandingInput, companyName: 'Acme Inc.' }))
-    expect(result.text).toContain('© 2026 Acme Inc. All rights reserved.')
+    const result = defaultLayout(context({ ...brandingInput, companyName: 'MyApp Inc.' }))
+    expect(result.text).toContain('© 2026 MyApp Inc. All rights reserved.')
   })
 
   it('builds the plain-text version from the content and footer', () => {
