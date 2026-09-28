@@ -15,8 +15,16 @@ if (user !== undefined && mailFrom === undefined) {
   process.exit(1)
 }
 
+const secureSetting = env('SMTP_SECURE')
+if (secureSetting !== undefined && secureSetting !== 'true' && secureSetting !== 'false') {
+  console.error(`SMTP_SECURE must be "true" or "false", received "${secureSetting}".`)
+  process.exit(1)
+}
+
 const host = env('SMTP_HOST') ?? 'localhost'
 const port = Number(env('SMTP_PORT') ?? 1025)
+// nodemailer never infers TLS from the port, and port 465 only speaks TLS from the first byte.
+const secure = secureSetting === undefined ? port === 465 : secureSetting === 'true'
 const to = (env('MAIL_TO') ?? 'Lizzie <lizzie@example.com>')
   .split(',')
   .map((address) => address.trim())
@@ -26,7 +34,7 @@ const mailer = createMailer({
   transport: smtpTransport({
     host,
     port,
-    secure: env('SMTP_SECURE') === 'true',
+    secure,
     auth: user === undefined ? undefined : { user, pass: env('SMTP_PASS') ?? '' },
   }),
   from: mailFrom ?? from,
