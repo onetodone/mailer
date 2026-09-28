@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { safeUrl } from './core/html'
+import type { MailAddress, MailAddresses } from './transports/types'
 
 // Messages are phrased as predicates ("must be …", "is required") so they read
 // naturally after a field path such as `branding.theme.primary`.
@@ -92,3 +93,101 @@ export const timeZone = z
     },
     { error: timeZoneExpectation },
   )
+
+export function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+const lineBreak = /[\r\n]/
+const namedAddress = /^([^<>]*)<([^<>]*)>\s*$/
+const emailFormat = z.email()
+const addressExpectation = 'an email address like "user@example.com" or "Name <user@example.com>"'
+
+type Report = (message: string, path?: readonly PropertyKey[]) => void
+
+function checkEmail(value: unknown, report: Report, path: readonly PropertyKey[]): void {
+  if (value === undefined) report('is required', path)
+  else if (typeof value !== 'string') report(`must be an email address, received ${describeInput(value)}`, path)
+  else if (lineBreak.test(value)) report('must not contain line breaks', path)
+  else if (!emailFormat.safeParse(value.trim()).success) {
+    report(`must be an email address, received ${describeInput(value)}`, path)
+  }
+}
+
+function checkAddress(value: unknown, report: Report, path: readonly PropertyKey[] = []): void {
+  if (typeof value === 'string') {
+    const address = namedAddress.exec(value)?.[2] ?? value
+    if (lineBreak.test(value)) report('must not contain line breaks', path)
+    else if (!emailFormat.safeParse(address.trim()).success) {
+      report(`must be ${addressExpectation}, received ${describeInput(value)}`, path)
+    }
+    return
+  }
+  if (!isRecord(value)) {
+    report(
+      value === undefined ? 'is required' : `must be ${addressExpectation}, received ${describeInput(value)}`,
+      path,
+    )
+    return
+  }
+  const unknownKeys = Object.keys(value).filter((key) => key !== 'name' && key !== 'address')
+  if (unknownKeys.length > 0) report(objectError({ code: 'unrecognized_keys', keys: unknownKeys }), path)
+  const { name } = value
+  if (typeof name === 'string') {
+    if (lineBreak.test(name)) report('must not contain line breaks', [...path, 'name'])
+  } else if (name !== undefined) {
+    report(`must be a string, received ${describeInput(name)}`, [...path, 'name'])
+  }
+  checkEmail(value.address, report, [...path, 'address'])
+}
+
+function reporter(ctx: z.RefinementCtx, input: unknown): Report {
+  return (message, path = []) => {
+    ctx.addIssue({ code: 'custom', message, path: [...path], input })
+  }
+}
+
+// Addresses are only checked, never transformed, so they reach the transport
+// exactly as the caller passed them. Line breaks are rejected everywhere to
+// block header injection.
+export const mailAddress = z.custom<MailAddress>().superRefine((value, ctx) => {
+  checkAddress(value, reporter(ctx, value))
+})
+
+export const mailAddresses = z.custom<MailAddresses>().superRefine((value, ctx) => {
+  const report = reporter(ctx, value)
+  if (!Array.isArray(value)) {
+    checkAddress(value, report)
+    return
+  }
+  if (value.length === 0) report('must list at least one address')
+  value.forEach((address: unknown, index) => {
+    checkAddress(address, report, [index])
+  })
+})
+
+// RFC 5322 field names: printable ASCII without spaces or colons.
+const headerName = /^[!-9;-~]+$/
+
+export const headers = z.custom<Readonly<Record<string, string>>>().superRefine((value, ctx) => {
+  const report = reporter(ctx, value)
+  if (!isRecord(value)) {
+    report('must be an object')
+    return
+  }
+  for (const [name, headerValue] of Object.entries(value)) {
+    if (!headerName.test(name)) {
+      report(`has an invalid header name ${JSON.stringify(name)}: use printable ASCII without spaces or colons`)
+    }
+    if (typeof headerValue !== 'string') report(`must be a string, received ${describeInput(headerValue)}`, [name])
+    else if (lineBreak.test(headerValue)) report('must not contain line breaks', [name])
+  }
+})
+
+export function isLocaleTag(value: string): boolean {
+  try {
+    return Intl.getCanonicalLocales(value).length === 1
+  } catch {
+    return false
+  }
+}

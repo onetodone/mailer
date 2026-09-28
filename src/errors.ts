@@ -4,6 +4,8 @@ import type { z } from 'zod'
  * Machine-readable reason attached to every {@link MailerError}.
  *
  * - `INVALID_CONFIG`: branding, theme or another setting failed validation.
+ * - `INVALID_OPTIONS`: the options passed to `send` or `render` failed
+ *   validation, such as an address, a header or the locale.
  * - `INVALID_PROPS`: template props failed schema validation. `cause` holds the
  *   Standard Schema issues.
  * - `TRANSPORT_FAILED`: the transport could not deliver the email. `cause`
@@ -12,7 +14,7 @@ import type { z } from 'zod'
  * - `UNSAFE_URL`: a URL is not an absolute `http:` or `https:` link.
  */
 export type MailerErrorCode =
-  'INVALID_CONFIG' | 'INVALID_PROPS' | 'TRANSPORT_FAILED' | 'UNKNOWN_TEMPLATE' | 'UNSAFE_URL'
+  'INVALID_CONFIG' | 'INVALID_OPTIONS' | 'INVALID_PROPS' | 'TRANSPORT_FAILED' | 'UNKNOWN_TEMPLATE' | 'UNSAFE_URL'
 
 /**
  * The error type thrown by the mailer. Check `code` to branch on the reason;
@@ -44,14 +46,26 @@ export class MailerError extends Error {
   }
 }
 
-export function parseConfig<T extends z.ZodType>(schema: T, input: unknown, root?: string): z.output<T> {
+function parse<T extends z.ZodType>(
+  schema: T,
+  input: unknown,
+  code: MailerErrorCode,
+  subject: string,
+  root?: string,
+): z.output<T> {
   const result = schema.safeParse(input)
   if (result.success) return result.data
   const details = result.error.issues.map((issue) => {
     const path = [...(root === undefined ? [] : [root]), ...issue.path.map(String)].join('.')
     return path === '' ? issue.message : `${path} ${issue.message}`
   })
-  throw new MailerError('INVALID_CONFIG', `Invalid mailer configuration: ${details.join('; ')}.`, {
-    cause: result.error,
-  })
+  throw new MailerError(code, `Invalid ${subject}: ${details.join('; ')}.`, { cause: result.error })
+}
+
+export function parseConfig<T extends z.ZodType>(schema: T, input: unknown, root?: string): z.output<T> {
+  return parse(schema, input, 'INVALID_CONFIG', 'mailer configuration', root)
+}
+
+export function parseOptions<T extends z.ZodType>(schema: T, input: unknown, method: string): z.output<T> {
+  return parse(schema, input, 'INVALID_OPTIONS', `${method} options`)
 }

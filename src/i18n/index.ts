@@ -111,6 +111,11 @@ export type LocaleMessages = DeepPartial<Messages>
 
 export type MessageSource = Readonly<Record<string, LocaleMessages | undefined>> & { readonly en: Messages }
 
+/**
+ * Text overrides by locale, for the `messages` setting. Each locale's texts are
+ * merged key by key over the built-in ones, and any locale falls back to
+ * English for the keys it leaves out.
+ */
 export type MessagesOverrides = Readonly<Record<string, LocaleMessages | undefined>>
 
 export const dictionaries = { en, be } satisfies MessageSource
