@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "paths": {
+      "@onetodone/mailer": ["../src/index.ts"],
+      "@onetodone/mailer/smtp": ["../src/smtp/index.ts"]
+    }
+  },
+  "include": ["*.ts"]
+}

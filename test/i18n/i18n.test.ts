@@ -84,8 +84,8 @@ describe('t', () => {
 
   it('always provides the company name', () => {
     expect(i18n('en').t('verifyEmail.preheader')).toBe('One step left to finish signing up for My App.')
-    expect(i18n('en').t('verifyEmail.preheader', { companyName: 'Acme' })).toBe(
-      'One step left to finish signing up for Acme.',
+    expect(i18n('en').t('verifyEmail.preheader', { companyName: 'MyApp' })).toBe(
+      'One step left to finish signing up for MyApp.',
     )
   })
 

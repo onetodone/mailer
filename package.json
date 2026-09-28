@@ -80,9 +80,11 @@
     "format:fix": "prettier --write .",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p scripts",
     "changeset": "changeset",
-    "check:package": "pnpm build && publint && attw --pack ."
+    "check:package": "pnpm build && publint && attw --pack .",
+    "preview": "pnpm build && node --env-file-if-exists=.env scripts/preview.ts",
+    "send:test": "pnpm build && node --env-file-if-exists=.env scripts/send-test.ts"
   },
   "dependencies": {
     "zod": "^4.6.5"
@@ -100,7 +102,6 @@
     "@changesets/cli": "^3.0.3",
     "@eslint/js": "^9.39.5",
     "@types/node": "^22",
-    "dotenv-cli": "^11.0.0",
     "eslint": "^9",
     "eslint-config-prettier": "^10.1.8",
     "nodemailer": "^10.0.11",
