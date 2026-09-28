@@ -111,8 +111,6 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
-          # Writes an .npmrc entry that reads NODE_AUTH_TOKEN.
-          registry-url: https://registry.npmjs.org/
 
       # This job can mint an npm publish credential, so no dependency code runs here.
       - run: pnpm install --frozen-lockfile --ignore-scripts
@@ -121,6 +119,4 @@ jobs:
         with:
           pack-dir-artifact-id: ${{ needs.pack.outputs.pack-dir-artifact-id }}
         env:
-          # Used while the package has no trusted publisher on npm; OIDC takes precedence once it has one.
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: 'true'
