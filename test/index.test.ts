@@ -5,26 +5,40 @@ import type {
   Branding,
   LayoutContext,
   Locale,
+  LocaleMessages,
   MailAddress,
   MailAddresses,
+  Mailer,
+  MailerConfig,
   MailerErrorCode,
+  MailErrorEvent,
+  MailEvent,
+  MailSentEvent,
   MailTransport,
   MemoryTransport,
   MessageKey,
+  MessagesOverrides,
   OutgoingMessage,
+  PasswordChangedProps,
+  RenderedEmail,
+  RenderOptions,
+  ResetPasswordProps,
   SafeHtml,
+  SendOptions,
   SendResult,
   TemplateProps,
   TemplateRenderContext,
   ThemeInput,
   Translate,
+  VerifyEmailProps,
 } from '../src/index'
 
 describe('main entry', () => {
-  it('exposes the rendering, template and transport API', () => {
+  it('exposes the mailer, rendering, template and transport API', () => {
     expect(Object.keys(mailer).sort()).toEqual([
       'MailerError',
       'consoleTransport',
+      'createMailer',
       'defaultLayout',
       'defineLayout',
       'defineTemplate',
@@ -67,5 +81,25 @@ describe('main entry', () => {
     expectTypeOf<MemoryTransport>().toExtend<MailTransport>()
     expectTypeOf(mailer.consoleTransport()).toEqualTypeOf<MailTransport>()
     expectTypeOf<'TRANSPORT_FAILED'>().toExtend<MailerErrorCode>()
+  })
+
+  it('exposes types for the mailer', () => {
+    const mailerInstance = mailer.createMailer({
+      transport: mailer.memoryTransport(),
+      from: 'no-reply@myapp.loc',
+      branding: { companyName: 'My App', appUrl: 'https://myapp.loc', supportEmail: 'support@myapp.loc' },
+    })
+    expectTypeOf(mailerInstance).toExtend<Mailer>()
+    expectTypeOf<Mailer['render']>().returns.resolves.toEqualTypeOf<RenderedEmail>()
+    expectTypeOf<MailerConfig>().toHaveProperty('onSent')
+    expectTypeOf<MailSentEvent>().toExtend<MailEvent>()
+    expectTypeOf<MailErrorEvent['error']>().toEqualTypeOf<unknown>()
+    expectTypeOf<SendOptions>().toHaveProperty('to')
+    expectTypeOf<RenderOptions>().toHaveProperty('locale')
+    expectTypeOf<VerifyEmailProps>().toHaveProperty('verifyUrl')
+    expectTypeOf<ResetPasswordProps>().toHaveProperty('resetUrl')
+    expectTypeOf<PasswordChangedProps>().toHaveProperty('changedAt')
+    expectTypeOf<{ pl: LocaleMessages }>().toExtend<MessagesOverrides>()
+    expectTypeOf<'INVALID_OPTIONS'>().toExtend<MailerErrorCode>()
   })
 })

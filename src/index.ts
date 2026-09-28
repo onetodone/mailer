@@ -10,7 +10,7 @@ export {
   type LayoutMessages,
   type LayoutResult,
 } from './core/layout'
-export type { Formatters, Locale, MessageKey, Messages, Translate } from './i18n'
+export type { Formatters, Locale, LocaleMessages, MessageKey, Messages, MessagesOverrides, Translate } from './i18n'
 export {
   defineTemplate,
   type Template,
@@ -18,6 +18,12 @@ export {
   type TemplateProps,
   type TemplateRenderContext,
 } from './templates/define'
+export type { RenderedEmail } from './templates/render'
+export type { VerifyEmailProps } from './templates/verify-email'
+export type { ResetPasswordProps } from './templates/reset-password'
+export type { PasswordChangedProps } from './templates/password-changed'
 export type { MailAddress, MailAddresses, MailTransport, OutgoingMessage, SendResult } from './transports/types'
 export { memoryTransport, type MemoryTransport } from './transports/memory'
 export { consoleTransport, type ConsoleTransportOptions } from './transports/console'
+export type { MailerConfig, MailErrorEvent, MailEvent, MailSentEvent } from './config'
+export { createMailer, type Mailer, type RenderOptions, type SendOptions } from './mailer'
