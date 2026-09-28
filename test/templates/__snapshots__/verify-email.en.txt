@@ -1,0 +1,25 @@
+Subject: Confirm your email
+
+My App
+
+Confirm your email
+
+Hi Lizzie,
+
+Thanks for signing up for My App! Confirm your email address to activate your account.
+
+Confirm email: https://myapp.loc/verify?token=abc123
+
+If the button doesn't work, copy this link into your browser:
+https://myapp.loc/verify?token=abc123
+
+---
+
+The link expires in 24 hours.
+
+If you didn't sign up for My App, just ignore this email.
+
+--
+You received this email because you have an account at My App.
+Questions? Write to us at support@myapp.loc
+© 2026 My App. All rights reserved.
