@@ -73,7 +73,7 @@
   "packageManager": "pnpm@12.6.0",
   "scripts": {
     "build": "tsdown",
-    "dev": "tsdown --watch",
+    "dev": "tsdown --watch --sourcemap",
     "test": "vitest run",
     "test:watch": "vitest",
     "format": "prettier --check .",
