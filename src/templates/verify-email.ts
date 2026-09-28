@@ -4,20 +4,26 @@ import { httpUrl, objectError, positiveInteger } from '../validators'
 import { defineTemplate } from './define'
 import { greeting, userName } from './shared'
 
+/** Props of the built-in `verifyEmail` template. */
+export interface VerifyEmailProps {
+  /** Recipient's name for the greeting. Without it the greeting has no name. */
+  readonly userName?: string | undefined
+  /** Absolute http(s) link that confirms the address. */
+  readonly verifyUrl: string
+  /** How long the link works, in minutes. Without it the email does not mention expiry. */
+  readonly expiresInMinutes?: number | undefined
+}
+
+const props = z.strictObject(
+  { userName, verifyUrl: httpUrl, expiresInMinutes: positiveInteger.optional() },
+  { error: objectError },
+)
+const schema: z.ZodType<z.output<typeof props>, VerifyEmailProps> = props
+
 /** Asks a new user to confirm their email address. */
 export const verifyEmail = defineTemplate({
   name: 'verifyEmail',
-  schema: z.strictObject(
-    {
-      /** Recipient's name for the greeting. Without it the greeting has no name. */
-      userName,
-      /** Absolute http(s) link that confirms the address. */
-      verifyUrl: httpUrl,
-      /** How long the link works, in minutes. Without it the email does not mention expiry. */
-      expiresInMinutes: positiveInteger.optional(),
-    },
-    { error: objectError },
-  ),
+  schema,
   render: ({ props, ui, t, format }) => ({
     subject: t('verifyEmail.subject'),
     preheader: t('verifyEmail.preheader'),

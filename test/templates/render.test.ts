@@ -8,8 +8,11 @@ import { MailerError } from '../../src/errors'
 import { buildMessages } from '../../src/i18n'
 import { builtInTemplates, type BuiltInTemplates } from '../../src/templates/built-in'
 import { defineTemplate, type TemplateProps, type TemplateRegistry } from '../../src/templates/define'
-import { renderTemplate, type RenderedEmail, type RenderOptions } from '../../src/templates/render'
+import type { PasswordChangedProps } from '../../src/templates/password-changed'
+import { renderTemplate, type RenderedEmail, type RenderTemplateOptions } from '../../src/templates/render'
+import type { ResetPasswordProps } from '../../src/templates/reset-password'
 import type { StandardSchemaV1 } from '../../src/templates/standard-schema'
+import type { VerifyEmailProps } from '../../src/templates/verify-email'
 
 const branding = resolveBranding({
   companyName: 'My App',
@@ -17,14 +20,14 @@ const branding = resolveBranding({
   supportEmail: 'support@myapp.loc',
 })
 const messages = buildMessages()
-const options: RenderOptions = { branding, layout: defaultLayout, locale: 'en', messages: messages.en }
+const options: RenderTemplateOptions = { branding, layout: defaultLayout, locale: 'en', messages: messages.en }
 const url = 'https://myapp.loc/verify?token=abc123'
 
 function renderUnchecked(
   templates: TemplateRegistry,
   name: string,
   props: unknown,
-  renderOptions: RenderOptions,
+  renderOptions: RenderTemplateOptions,
 ): Promise<RenderedEmail> {
   return renderTemplate(templates, name as never, props as never, renderOptions)
 }
@@ -75,22 +78,25 @@ describe('renderTemplate types', () => {
   })
 
   it('types props as the schema input of each template', () => {
-    expectTypeOf<TemplateProps<BuiltInTemplates['verifyEmail']>>().toEqualTypeOf<{
-      userName?: string | undefined
-      verifyUrl: string
-      expiresInMinutes?: number | undefined
+    expectTypeOf<TemplateProps<BuiltInTemplates['verifyEmail']>>().toEqualTypeOf<VerifyEmailProps>()
+    expectTypeOf<VerifyEmailProps>().toEqualTypeOf<{
+      readonly userName?: string | undefined
+      readonly verifyUrl: string
+      readonly expiresInMinutes?: number | undefined
     }>()
-    expectTypeOf<TemplateProps<BuiltInTemplates['resetPassword']>>().toEqualTypeOf<{
-      userName?: string | undefined
-      resetUrl: string
-      expiresInMinutes?: number | undefined
+    expectTypeOf<TemplateProps<BuiltInTemplates['resetPassword']>>().toEqualTypeOf<ResetPasswordProps>()
+    expectTypeOf<ResetPasswordProps>().toEqualTypeOf<{
+      readonly userName?: string | undefined
+      readonly resetUrl: string
+      readonly expiresInMinutes?: number | undefined
     }>()
-    expectTypeOf<TemplateProps<BuiltInTemplates['passwordChanged']>>().toEqualTypeOf<{
-      userName?: string | undefined
-      changedAt?: Date | undefined
-      timeZone?: string | undefined
-      ip?: string | undefined
-      supportUrl?: string | undefined
+    expectTypeOf<TemplateProps<BuiltInTemplates['passwordChanged']>>().toEqualTypeOf<PasswordChangedProps>()
+    expectTypeOf<PasswordChangedProps>().toEqualTypeOf<{
+      readonly userName?: string | undefined
+      readonly changedAt?: Date | undefined
+      readonly timeZone?: string | undefined
+      readonly ip?: string | undefined
+      readonly supportUrl?: string | undefined
     }>()
     expectTypeOf(renderTemplate<{ note: typeof note }, 'note'>)
       .parameter(2)

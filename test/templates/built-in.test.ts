@@ -5,7 +5,7 @@ import { resolveBranding } from '../../src/core/theme'
 import { MailerError } from '../../src/errors'
 import { buildMessages, dictionaries, type Locale } from '../../src/i18n'
 import { builtInTemplates } from '../../src/templates/built-in'
-import { renderTemplate, type RenderedEmail, type RenderOptions } from '../../src/templates/render'
+import { renderTemplate, type RenderedEmail, type RenderTemplateOptions } from '../../src/templates/render'
 
 const branding = resolveBranding({
   companyName: 'My App',
@@ -22,7 +22,7 @@ const resetUrl = 'https://myapp.loc/reset?token=abc123'
 const supportUrl = 'https://myapp.loc/support'
 const changedAt = new Date('2026-05-04T09:30:00Z')
 
-function options(locale: Locale = 'en', extra: Partial<RenderOptions> = {}): RenderOptions {
+function options(locale: Locale = 'en', extra: Partial<RenderTemplateOptions> = {}): RenderTemplateOptions {
   return { branding, layout: defaultLayout, locale, messages: messages[locale], ...extra }
 }
 
