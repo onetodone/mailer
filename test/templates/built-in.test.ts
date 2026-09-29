@@ -25,6 +25,8 @@ const newEmail = 'lizzie.new@example.com'
 const changedAt = new Date('2026-05-04T09:30:00Z')
 const signInUrl = 'https://myapp.loc/sign-in?token=abc123'
 const code = 'K7Q2M9XW'
+const secureUrl = 'https://myapp.loc/security?token=abc123'
+const unlockUrl = 'https://myapp.loc/unlock?token=abc123'
 
 function options(locale: Locale = 'en', extra: Partial<RenderTemplateOptions> = {}): RenderTemplateOptions {
   return { branding, layout: defaultLayout, locale, messages: messages[locale], ...extra }
@@ -123,6 +125,52 @@ const snapshotCases: [file: string, render: (locale: Locale) => Promise<Rendered
     'welcome',
     (locale) =>
       renderTemplate(builtInTemplates, 'welcome', { userName: userNames[locale] ?? 'Lizzie' }, options(locale)),
+  ],
+  [
+    'new-sign-in',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'newSignIn',
+        {
+          userName: userNames[locale] ?? 'Lizzie',
+          device: 'Chrome on macOS',
+          location: 'Berlin, Germany',
+          ip: '203.0.113.7',
+          secureUrl,
+        },
+        options(locale),
+      ),
+  ],
+  [
+    'two-factor-enabled',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'twoFactorEnabled',
+        { userName: userNames[locale] ?? 'Lizzie', ip: '203.0.113.7', supportUrl },
+        options(locale),
+      ),
+  ],
+  [
+    'two-factor-disabled',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'twoFactorDisabled',
+        { userName: userNames[locale] ?? 'Lizzie', ip: '203.0.113.7' },
+        options(locale),
+      ),
+  ],
+  [
+    'account-locked',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'accountLocked',
+        { userName: userNames[locale] ?? 'Lizzie', ip: '203.0.113.7', unlockUrl },
+        options(locale),
+      ),
   ],
 ]
 
@@ -503,6 +551,189 @@ describe('welcome', () => {
     expect(error).toMatchObject({
       code: 'INVALID_PROPS',
       message: 'Invalid props for template "welcome": ctaUrl: must be an absolute http: or https: URL.',
+    })
+  })
+})
+
+describe('newSignIn', () => {
+  it('renders without props', async () => {
+    const email = await renderTemplate(builtInTemplates, 'newSignIn', {}, options())
+    expect(email.subject).toBe('New sign-in to your account')
+    expect(email.text).toContain('\n\nHi there,\n\nWe noticed a new sign-in to your My App account.\n\n')
+    expect(email.text).not.toContain('When:')
+    expect(email.text).not.toContain('IP address:')
+    expect(email.html).toContain('<a href="mailto:support@myapp.loc"')
+    expect(email.text).toContain("If it wasn't you, write to us right away at support@myapp.loc.")
+  })
+
+  it('lists the time, device, location and IP address in order', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      'newSignIn',
+      {
+        signedInAt: changedAt,
+        timeZone: 'Europe/Minsk',
+        device: 'Firefox on Windows',
+        location: 'Minsk, Belarus',
+        ip: '203.0.113.7',
+      },
+      options(),
+    )
+    const line = lineStartingWith(email.text, 'When: ')
+    expect(line).toContain('2026')
+    expect(line).toMatch(/12:30.*GMT\+3/)
+    expect(email.text).toContain(
+      `${line}\nDevice: Firefox on Windows\nLocation: Minsk, Belarus\nIP address: 203.0.113.7`,
+    )
+  })
+
+  it('links the secure button and replaces support with it', async () => {
+    const email = await renderTemplate(builtInTemplates, 'newSignIn', { secureUrl, supportUrl }, options())
+    expect(email.html.match(/href="https:\/\/myapp\.loc\/security\?token=abc123"/g)).toHaveLength(3)
+    expect(email.text).toContain(
+      `If it wasn't you, secure your account right away.\n\nSecure your account: ${secureUrl}`,
+    )
+    expect(email.text).not.toContain('Contact support')
+    expect(email.html).not.toContain(supportUrl)
+  })
+
+  it('links the support button without a secure URL', async () => {
+    const email = await renderTemplate(builtInTemplates, 'newSignIn', { supportUrl }, options('be'))
+    expect(email.text).toContain(`Звярнуцца ў падтрымку: ${supportUrl}`)
+    expect(email.text).not.toContain('Абараніць акаўнт')
+  })
+
+  it('escapes the device and the location', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      'newSignIn',
+      { device: '<b>Browser</b>', location: 'A & B' },
+      options(),
+    )
+    expect(email.html).not.toContain('<b>Browser</b>')
+    expect(email.html).toContain('Device: &lt;b&gt;Browser&lt;/b&gt;')
+    expect(email.html).toContain('Location: A &amp; B')
+  })
+
+  it.each<[string, Record<string, unknown>, string]>([
+    ['an empty device', { device: ' ' }, 'device: must not be empty'],
+    ['a numeric location', { location: 42 }, 'location: must be a string, received number'],
+    ['an invalid date', { signedInAt: new Date('nope') }, 'signedInAt: must be a valid Date'],
+    ['a relative secure URL', { secureUrl: '/security' }, 'secureUrl: must be an absolute http: or https: URL'],
+  ])('rejects %s', async (_case, props, detail) => {
+    const error: unknown = await renderTemplate(builtInTemplates, 'newSignIn', props, options()).then(
+      () => undefined,
+      (reason: unknown) => reason,
+    )
+    expect(error).toBeInstanceOf(MailerError)
+    expect(error).toMatchObject({
+      code: 'INVALID_PROPS',
+      message: `Invalid props for template "newSignIn": ${detail}.`,
+    })
+  })
+})
+
+describe.each(['twoFactorEnabled', 'twoFactorDisabled'] as const)('%s', (template) => {
+  const subjects = {
+    twoFactorEnabled: 'Two-factor authentication was turned on',
+    twoFactorDisabled: 'Two-factor authentication was turned off',
+  }
+
+  it('renders without props', async () => {
+    const email = await renderTemplate(builtInTemplates, template, {}, options())
+    expect(email.subject).toBe(subjects[template])
+    expect(email.text).not.toContain('When:')
+    expect(email.text).not.toContain('IP address:')
+    expect(email.text).toContain("If this was you, you don't need to do anything.")
+    expect(email.html).toContain('<a href="mailto:support@myapp.loc"')
+  })
+
+  it('shows when and where the change came from', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      template,
+      { changedAt, timeZone: 'Europe/Minsk', ip: '203.0.113.7' },
+      options('be'),
+    )
+    const line = lineStartingWith(email.text, 'Калі: ')
+    expect(line).toMatch(/12:30.*GMT\+3/)
+    expect(email.text).toContain(`${line}\nIP-адрас: 203.0.113.7`)
+  })
+
+  it('links the support button to the support URL', async () => {
+    const email = await renderTemplate(builtInTemplates, template, { supportUrl }, options())
+    expect(email.text).toContain(`Contact support: ${supportUrl}`)
+    expect(email.text).not.toContain('write to us right away')
+  })
+
+  it('rejects a relative support URL', async () => {
+    const error: unknown = await renderTemplate(builtInTemplates, template, { supportUrl: '/help' }, options()).then(
+      () => undefined,
+      (reason: unknown) => reason,
+    )
+    expect(error).toMatchObject({
+      code: 'INVALID_PROPS',
+      message: `Invalid props for template "${template}": supportUrl: must be an absolute http: or https: URL.`,
+    })
+  })
+})
+
+describe('accountLocked', () => {
+  it('offers help from the support address without props', async () => {
+    const email = await renderTemplate(builtInTemplates, 'accountLocked', {}, options())
+    expect(email.subject).toBe('Your account is locked')
+    expect(email.text).not.toContain('Locked until:')
+    expect(email.text).not.toContain('Unlock account')
+    expect(email.html).toContain(
+      'Need help getting back into your account? Write to us at <a href="mailto:support@myapp.loc" style="color:#3b82f6;text-decoration:underline;">support@myapp.loc</a>.',
+    )
+    expect(email.text).toMatch(
+      /Write to us at support@myapp\.loc\.\n\n-+\n\nIf it wasn't you, someone may be trying to guess your password\./,
+    )
+  })
+
+  it('shows when the lock ends', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      'accountLocked',
+      { lockedUntil: changedAt, ip: '203.0.113.7' },
+      options('en', { timeZone: 'Asia/Tokyo' }),
+    )
+    const line = lineStartingWith(email.text, 'Locked until: ')
+    expect(line).toContain('2026')
+    expect(line).toMatch(/6:30.*GMT\+9/)
+    expect(email.text).toContain(`${line}\nIP address: 203.0.113.7`)
+  })
+
+  it('links the unlock button and replaces support with it', async () => {
+    const email = await renderTemplate(builtInTemplates, 'accountLocked', { unlockUrl, supportUrl }, options())
+    expect(email.html.match(/href="https:\/\/myapp\.loc\/unlock\?token=abc123"/g)).toHaveLength(3)
+    expect(email.text).toContain(`To unlock your account right away, click the button.\n\nUnlock account: ${unlockUrl}`)
+    expect(email.text).not.toContain('Contact support')
+    expect(email.html).not.toContain(supportUrl)
+  })
+
+  it('links the support button without an unlock URL', async () => {
+    const email = await renderTemplate(builtInTemplates, 'accountLocked', { supportUrl }, options())
+    expect(email.text).toContain(
+      `Need help getting back into your account? Contact support.\n\nContact support: ${supportUrl}`,
+    )
+  })
+
+  it.each<[string, Record<string, unknown>, string]>([
+    ['an invalid date', { lockedUntil: new Date('nope') }, 'lockedUntil: must be a valid Date'],
+    ['a date string', { lockedUntil: '2026-05-04' }, 'lockedUntil: must be a valid Date'],
+    ['a relative unlock URL', { unlockUrl: '/unlock' }, 'unlockUrl: must be an absolute http: or https: URL'],
+    ['an unknown prop', { reason: 'attempts' }, 'has unknown key "reason"'],
+  ])('rejects %s', async (_case, props, detail) => {
+    const error: unknown = await renderTemplate(builtInTemplates, 'accountLocked', props, options()).then(
+      () => undefined,
+      (reason: unknown) => reason,
+    )
+    expect(error).toBeInstanceOf(MailerError)
+    expect(error).toMatchObject({
+      code: 'INVALID_PROPS',
+      message: `Invalid props for template "accountLocked": ${detail}.`,
     })
   })
 })

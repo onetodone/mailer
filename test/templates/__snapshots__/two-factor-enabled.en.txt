@@ -1,0 +1,27 @@
+Subject: Two-factor authentication was turned on
+
+My App
+
+Two-factor authentication was turned on
+
+Hi Lizzie,
+
+Two-factor authentication was turned on for your My App account. From now on, signing in takes a second step after your password.
+
+IP address: 203.0.113.7
+
+If this was you, you don't need to do anything.
+
+---
+
+If it wasn't you, contact support right away.
+
+Contact support: https://myapp.loc/support
+
+If the button doesn't work, copy this link into your browser:
+https://myapp.loc/support
+
+--
+You received this email because you have an account at My App.
+Questions? Write to us at support@myapp.loc
+© 2026 My App. All rights reserved.

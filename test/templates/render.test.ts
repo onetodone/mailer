@@ -6,16 +6,20 @@ import { defaultLayout, defineLayout, type LayoutContext } from '../../src/core/
 import { resolveBranding } from '../../src/core/theme'
 import { MailerError } from '../../src/errors'
 import { buildMessages } from '../../src/i18n'
+import type { AccountLockedProps } from '../../src/templates/account-locked'
 import { builtInTemplates, type BuiltInTemplates } from '../../src/templates/built-in'
 import { defineTemplate, type TemplateProps, type TemplateRegistry } from '../../src/templates/define'
 import type { EmailChangeRequestedProps } from '../../src/templates/email-change-requested'
 import type { EmailChangedProps } from '../../src/templates/email-changed'
 import type { MagicLinkProps } from '../../src/templates/magic-link'
+import type { NewSignInProps } from '../../src/templates/new-sign-in'
 import type { OtpCodeProps } from '../../src/templates/otp-code'
 import type { PasswordChangedProps } from '../../src/templates/password-changed'
 import { renderTemplate, type RenderedEmail, type RenderTemplateOptions } from '../../src/templates/render'
 import type { ResetPasswordProps } from '../../src/templates/reset-password'
 import type { StandardSchemaV1 } from '../../src/templates/standard-schema'
+import type { TwoFactorDisabledProps } from '../../src/templates/two-factor-disabled'
+import type { TwoFactorEnabledProps } from '../../src/templates/two-factor-enabled'
 import type { VerifyEmailProps } from '../../src/templates/verify-email'
 import type { VerifyEmailChangeProps } from '../../src/templates/verify-email-change'
 import type { WelcomeProps } from '../../src/templates/welcome'
@@ -146,6 +150,30 @@ describe('renderTemplate types', () => {
       readonly userName?: string | undefined
       readonly ctaUrl?: string | undefined
     }>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['newSignIn']>>().toEqualTypeOf<NewSignInProps>()
+    expectTypeOf<NewSignInProps>().toEqualTypeOf<{
+      readonly userName?: string | undefined
+      readonly signedInAt?: Date | undefined
+      readonly timeZone?: string | undefined
+      readonly ip?: string | undefined
+      readonly device?: string | undefined
+      readonly location?: string | undefined
+      readonly secureUrl?: string | undefined
+      readonly supportUrl?: string | undefined
+    }>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['twoFactorEnabled']>>().toEqualTypeOf<TwoFactorEnabledProps>()
+    expectTypeOf<TwoFactorEnabledProps>().toEqualTypeOf<PasswordChangedProps>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['twoFactorDisabled']>>().toEqualTypeOf<TwoFactorDisabledProps>()
+    expectTypeOf<TwoFactorDisabledProps>().toEqualTypeOf<PasswordChangedProps>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['accountLocked']>>().toEqualTypeOf<AccountLockedProps>()
+    expectTypeOf<AccountLockedProps>().toEqualTypeOf<{
+      readonly userName?: string | undefined
+      readonly lockedUntil?: Date | undefined
+      readonly timeZone?: string | undefined
+      readonly ip?: string | undefined
+      readonly unlockUrl?: string | undefined
+      readonly supportUrl?: string | undefined
+    }>()
     expectTypeOf(renderTemplate<{ note: typeof note }, 'note'>)
       .parameter(2)
       .toEqualTypeOf<{ text: string; show: boolean }>()
@@ -157,7 +185,7 @@ describe('renderTemplate', () => {
     const error = await rejection(renderUnchecked(builtInTemplates, 'orderShipped', {}, options))
     expect(error.code).toBe('UNKNOWN_TEMPLATE')
     expect(error.message).toBe(
-      'Unknown template "orderShipped". Available templates: verifyEmail, resetPassword, passwordChanged, verifyEmailChange, emailChangeRequested, emailChanged, otpCode, magicLink, welcome.',
+      'Unknown template "orderShipped". Available templates: verifyEmail, resetPassword, passwordChanged, verifyEmailChange, emailChangeRequested, emailChanged, otpCode, magicLink, welcome, newSignIn, twoFactorEnabled, twoFactorDisabled, accountLocked.',
     )
     const inherited = await rejection(renderUnchecked(builtInTemplates, 'toString', {}, options))
     expect(inherited.code).toBe('UNKNOWN_TEMPLATE')

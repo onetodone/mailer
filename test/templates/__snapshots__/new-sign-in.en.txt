@@ -1,0 +1,29 @@
+Subject: New sign-in to your account
+
+My App
+
+New sign-in to your account
+
+Hi Lizzie,
+
+We noticed a new sign-in to your My App account.
+
+Device: Chrome on macOS
+Location: Berlin, Germany
+IP address: 203.0.113.7
+
+If this was you, you don't need to do anything.
+
+---
+
+If it wasn't you, secure your account right away.
+
+Secure your account: https://myapp.loc/security?token=abc123
+
+If the button doesn't work, copy this link into your browser:
+https://myapp.loc/security?token=abc123
+
+--
+You received this email because you have an account at My App.
+Questions? Write to us at support@myapp.loc
+© 2026 My App. All rights reserved.

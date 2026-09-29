@@ -28,6 +28,10 @@ export type { EmailChangedProps } from './templates/email-changed'
 export type { OtpCodeProps } from './templates/otp-code'
 export type { MagicLinkProps } from './templates/magic-link'
 export type { WelcomeProps } from './templates/welcome'
+export type { NewSignInProps } from './templates/new-sign-in'
+export type { TwoFactorEnabledProps } from './templates/two-factor-enabled'
+export type { TwoFactorDisabledProps } from './templates/two-factor-disabled'
+export type { AccountLockedProps } from './templates/account-locked'
 export type {
   Attachment,
   MailAddress,

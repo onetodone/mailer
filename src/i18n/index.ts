@@ -204,6 +204,106 @@ export interface WelcomeMessages {
   readonly button: string
 }
 
+/** Texts of the `newSignIn` template. */
+export interface NewSignInMessages {
+  readonly subject: string
+  /** Inbox preview text. */
+  readonly preheader: string
+  readonly heading: string
+  /** Paragraph under the greeting. */
+  readonly intro: string
+  /** Time of the sign-in, with `{date}`. */
+  readonly signedInAt: string
+  /** Device or browser of the sign-in, with `{device}`. */
+  readonly device: string
+  /** Approximate location of the sign-in, with `{location}`. */
+  readonly location: string
+  /** IP address of the sign-in, with `{ip}`. */
+  readonly ip: string
+  /** Reassurance for the account owner who signed in. */
+  readonly ifYou: string
+  /** Call to action when the owner did not sign in, followed by the secure-account button. */
+  readonly notYouSecure: string
+  /** Secure-account button label. */
+  readonly secureButton: string
+  /** Call to action without a secure-account URL, followed by the support button. */
+  readonly notYou: string
+  /** Support button label. */
+  readonly button: string
+  /** Call to action without a secure-account or support URL, with `{email}` as a link to the support address. */
+  readonly notYouEmail: string
+}
+
+/** Texts of the `twoFactorEnabled` template. */
+export interface TwoFactorEnabledMessages {
+  readonly subject: string
+  /** Inbox preview text. */
+  readonly preheader: string
+  readonly heading: string
+  /** Paragraph under the greeting. */
+  readonly intro: string
+  /** Time of the change, with `{date}`. */
+  readonly changedAt: string
+  /** IP address of the change, with `{ip}`. */
+  readonly ip: string
+  /** Reassurance for the account owner who made the change. */
+  readonly ifYou: string
+  /** Call to action when the owner did not make the change, followed by the support button. */
+  readonly notYou: string
+  /** Support button label. */
+  readonly button: string
+  /** Call to action without a support URL, with `{email}` as a link to the support address. */
+  readonly notYouEmail: string
+}
+
+/** Texts of the `twoFactorDisabled` template. */
+export interface TwoFactorDisabledMessages {
+  readonly subject: string
+  /** Inbox preview text. */
+  readonly preheader: string
+  readonly heading: string
+  /** Paragraph under the greeting. */
+  readonly intro: string
+  /** Time of the change, with `{date}`. */
+  readonly changedAt: string
+  /** IP address of the change, with `{ip}`. */
+  readonly ip: string
+  /** Reassurance for the account owner who made the change. */
+  readonly ifYou: string
+  /** Call to action when the owner did not make the change, followed by the support button. */
+  readonly notYou: string
+  /** Support button label. */
+  readonly button: string
+  /** Call to action without a support URL, with `{email}` as a link to the support address. */
+  readonly notYouEmail: string
+}
+
+/** Texts of the `accountLocked` template. */
+export interface AccountLockedMessages {
+  readonly subject: string
+  /** Inbox preview text. */
+  readonly preheader: string
+  readonly heading: string
+  /** Paragraph under the greeting. */
+  readonly intro: string
+  /** End of the lock, with `{date}`. */
+  readonly lockedUntil: string
+  /** IP address of the failed sign-in attempts, with `{ip}`. */
+  readonly ip: string
+  /** Paragraph above the unlock button. */
+  readonly unlock: string
+  /** Unlock button label. */
+  readonly unlockButton: string
+  /** Offer of help without an unlock URL, followed by the support button. */
+  readonly help: string
+  /** Support button label. */
+  readonly button: string
+  /** Offer of help without an unlock or support URL, with `{email}` as a link to the support address. */
+  readonly helpEmail: string
+  /** Advice for the account owner who did not try to sign in. */
+  readonly notYou: string
+}
+
 /**
  * Every text of the built-in templates, the blocks and the layout for one locale.
  *
@@ -224,6 +324,10 @@ export interface Messages {
   readonly otpCode: OtpCodeMessages
   readonly magicLink: MagicLinkMessages
   readonly welcome: WelcomeMessages
+  readonly newSignIn: NewSignInMessages
+  readonly twoFactorEnabled: TwoFactorEnabledMessages
+  readonly twoFactorDisabled: TwoFactorDisabledMessages
+  readonly accountLocked: AccountLockedMessages
 }
 
 type StringKeys<T> = { [K in keyof T]: T[K] extends string ? K : never }[keyof T] & string
