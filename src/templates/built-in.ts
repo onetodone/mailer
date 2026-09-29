@@ -1,4 +1,6 @@
+import { accountDeleted } from './account-deleted'
 import { accountLocked } from './account-locked'
+import { confirmAccountDeletion } from './confirm-account-deletion'
 import type { TemplateRegistry } from './define'
 import { emailChangeRequested } from './email-change-requested'
 import { emailChanged } from './email-changed'
@@ -27,6 +29,8 @@ export const builtInTemplates = {
   twoFactorEnabled,
   twoFactorDisabled,
   accountLocked,
+  confirmAccountDeletion,
+  accountDeleted,
 } satisfies TemplateRegistry
 
 export type BuiltInTemplates = typeof builtInTemplates

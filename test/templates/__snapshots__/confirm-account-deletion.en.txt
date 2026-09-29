@@ -1,0 +1,27 @@
+Subject: Confirm account deletion
+
+My App
+
+Confirm account deletion
+
+Hi Lizzie,
+
+We got a request to delete your My App account. Click the button to confirm.
+
+Once deleted, your account and your data can't be restored.
+
+Delete account: https://myapp.loc/account/delete?token=abc123
+
+If the button doesn't work, copy this link into your browser:
+https://myapp.loc/account/delete?token=abc123
+
+---
+
+The link expires in 1 hour.
+
+If you didn't ask for this, just ignore this email. Your account won't be deleted.
+
+--
+You received this email because you have an account at My App.
+Questions? Write to us at support@myapp.loc
+© 2026 My App. All rights reserved.

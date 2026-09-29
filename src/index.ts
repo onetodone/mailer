@@ -32,6 +32,8 @@ export type { NewSignInProps } from './templates/new-sign-in'
 export type { TwoFactorEnabledProps } from './templates/two-factor-enabled'
 export type { TwoFactorDisabledProps } from './templates/two-factor-disabled'
 export type { AccountLockedProps } from './templates/account-locked'
+export type { ConfirmAccountDeletionProps } from './templates/confirm-account-deletion'
+export type { AccountDeletedProps } from './templates/account-deleted'
 export type {
   Attachment,
   MailAddress,

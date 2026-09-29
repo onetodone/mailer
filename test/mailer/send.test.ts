@@ -20,6 +20,7 @@ const newEmail = 'lizzie.new@example.com'
 const signInUrl = 'https://myapp.loc/sign-in?token=abc123'
 const secureUrl = 'https://myapp.loc/security?token=abc123'
 const unlockUrl = 'https://myapp.loc/unlock?token=abc123'
+const confirmUrl = 'https://myapp.loc/account/delete?token=abc123'
 
 const orderShipped = defineTemplate({
   name: 'orderShipped',
@@ -181,6 +182,24 @@ describe('built-in templates through the memory transport', () => {
           props: { userName: userNames[locale], ip: '203.0.113.7', unlockUrl },
         }),
     ],
+    [
+      'confirm-account-deletion',
+      (mailer, locale) =>
+        mailer.send('confirmAccountDeletion', {
+          to,
+          locale,
+          props: { userName: userNames[locale], confirmUrl, expiresInMinutes: 60 },
+        }),
+    ],
+    [
+      'account-deleted',
+      (mailer, locale) =>
+        mailer.send('accountDeleted', {
+          to,
+          locale,
+          props: { userName: userNames[locale] },
+        }),
+    ],
   ]
 
   beforeAll(() => {
@@ -254,6 +273,8 @@ describe('custom templates', () => {
       | 'twoFactorEnabled'
       | 'twoFactorDisabled'
       | 'accountLocked'
+      | 'confirmAccountDeletion'
+      | 'accountDeleted'
       | 'orderShipped'
     >()
     const check = async () => {

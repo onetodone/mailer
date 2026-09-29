@@ -6,8 +6,10 @@ import { defaultLayout, defineLayout, type LayoutContext } from '../../src/core/
 import { resolveBranding } from '../../src/core/theme'
 import { MailerError } from '../../src/errors'
 import { buildMessages } from '../../src/i18n'
+import type { AccountDeletedProps } from '../../src/templates/account-deleted'
 import type { AccountLockedProps } from '../../src/templates/account-locked'
 import { builtInTemplates, type BuiltInTemplates } from '../../src/templates/built-in'
+import type { ConfirmAccountDeletionProps } from '../../src/templates/confirm-account-deletion'
 import { defineTemplate, type TemplateProps, type TemplateRegistry } from '../../src/templates/define'
 import type { EmailChangeRequestedProps } from '../../src/templates/email-change-requested'
 import type { EmailChangedProps } from '../../src/templates/email-changed'
@@ -174,6 +176,19 @@ describe('renderTemplate types', () => {
       readonly unlockUrl?: string | undefined
       readonly supportUrl?: string | undefined
     }>()
+    expectTypeOf<
+      TemplateProps<BuiltInTemplates['confirmAccountDeletion']>
+    >().toEqualTypeOf<ConfirmAccountDeletionProps>()
+    expectTypeOf<ConfirmAccountDeletionProps>().toEqualTypeOf<{
+      readonly userName?: string | undefined
+      readonly confirmUrl: string
+      readonly expiresInMinutes?: number | undefined
+    }>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['accountDeleted']>>().toEqualTypeOf<AccountDeletedProps>()
+    expectTypeOf<AccountDeletedProps>().toEqualTypeOf<{
+      readonly userName?: string | undefined
+      readonly supportUrl?: string | undefined
+    }>()
     expectTypeOf(renderTemplate<{ note: typeof note }, 'note'>)
       .parameter(2)
       .toEqualTypeOf<{ text: string; show: boolean }>()
@@ -185,7 +200,7 @@ describe('renderTemplate', () => {
     const error = await rejection(renderUnchecked(builtInTemplates, 'orderShipped', {}, options))
     expect(error.code).toBe('UNKNOWN_TEMPLATE')
     expect(error.message).toBe(
-      'Unknown template "orderShipped". Available templates: verifyEmail, resetPassword, passwordChanged, verifyEmailChange, emailChangeRequested, emailChanged, otpCode, magicLink, welcome, newSignIn, twoFactorEnabled, twoFactorDisabled, accountLocked.',
+      'Unknown template "orderShipped". Available templates: verifyEmail, resetPassword, passwordChanged, verifyEmailChange, emailChangeRequested, emailChanged, otpCode, magicLink, welcome, newSignIn, twoFactorEnabled, twoFactorDisabled, accountLocked, confirmAccountDeletion, accountDeleted.',
     )
     const inherited = await rejection(renderUnchecked(builtInTemplates, 'toString', {}, options))
     expect(inherited.code).toBe('UNKNOWN_TEMPLATE')

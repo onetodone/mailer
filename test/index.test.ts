@@ -2,10 +2,12 @@ import { describe, expect, expectTypeOf, it } from 'vitest'
 
 import * as mailer from '../src/index'
 import type {
+  AccountDeletedProps,
   AccountLockedProps,
   Attachment,
   AttachmentInfo,
   Branding,
+  ConfirmAccountDeletionProps,
   EmailChangedProps,
   EmailChangeRequestedProps,
   ImageOptions,
@@ -128,6 +130,8 @@ describe('main entry', () => {
     expectTypeOf<TwoFactorEnabledProps>().toHaveProperty('changedAt')
     expectTypeOf<TwoFactorDisabledProps>().toHaveProperty('changedAt')
     expectTypeOf<AccountLockedProps>().toHaveProperty('unlockUrl')
+    expectTypeOf<ConfirmAccountDeletionProps>().toHaveProperty('confirmUrl')
+    expectTypeOf<AccountDeletedProps>().toHaveProperty('supportUrl')
     expectTypeOf<{ pl: LocaleMessages }>().toExtend<MessagesOverrides>()
     expectTypeOf<'INVALID_OPTIONS'>().toExtend<MailerErrorCode>()
   })

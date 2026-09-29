@@ -1,9 +1,11 @@
 import {
   createMailer,
   defineTemplate,
+  type AccountDeletedProps,
   type AccountLockedProps,
   type Attachment,
   type Branding,
+  type ConfirmAccountDeletionProps,
   type EmailChangedProps,
   type EmailChangeRequestedProps,
   type Locale,
@@ -103,6 +105,8 @@ interface PropsByTemplate {
   twoFactorEnabled: TwoFactorEnabledProps
   twoFactorDisabled: TwoFactorDisabledProps
   accountLocked: AccountLockedProps
+  confirmAccountDeletion: ConfirmAccountDeletionProps
+  accountDeleted: AccountDeletedProps
   media: TemplateProps<typeof media>
 }
 
@@ -234,6 +238,17 @@ export const samples: readonly Sample[] = [
     },
   },
   { slug: 'account-locked-minimal', template: 'accountLocked', props: {} },
+  {
+    slug: 'confirm-account-deletion',
+    template: 'confirmAccountDeletion',
+    props: { userName: 'Lizzie', confirmUrl: 'https://example.com/account/delete?token=preview', expiresInMinutes: 60 },
+  },
+  {
+    slug: 'account-deleted',
+    template: 'accountDeleted',
+    props: { userName: 'Lizzie', supportUrl: 'https://example.com/support' },
+  },
+  { slug: 'account-deleted-minimal', template: 'accountDeleted', props: {} },
   {
     slug: 'media',
     template: 'media',
