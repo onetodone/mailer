@@ -65,6 +65,17 @@ describe('buildMessages', () => {
     expect(messages.pl?.common.greeting).toBe('Cześć {name},')
     expect(messages.pl?.verifyEmail).toEqual(en.verifyEmail)
   })
+
+  it('keeps the overrides of a custom locale that becomes built-in', () => {
+    const overrides = { xx: { verifyEmail: { subject: 'My subject' } } }
+    const custom = buildMessages(overrides, { en })
+    const builtIn = buildMessages(overrides, {
+      en,
+      xx: { verifyEmail: { subject: 'XX subject', heading: 'XX heading' } },
+    })
+    expect(custom.xx?.verifyEmail).toEqual({ ...en.verifyEmail, subject: 'My subject' })
+    expect(builtIn.xx?.verifyEmail).toEqual({ ...en.verifyEmail, subject: 'My subject', heading: 'XX heading' })
+  })
 })
 
 describe('withTemplateMessages', () => {
