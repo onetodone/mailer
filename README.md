@@ -20,7 +20,7 @@
 
 ## Features
 
-- Built-in templates for email verification, password reset and password change notices.
+- Built-in templates for email verification, password reset, email address changes and security notices.
 - One call to send an email. Template names autocomplete, and props are checked at compile time and validated at runtime.
 - Branding from configuration: logo, company name, colors, footer text and support address.
 - Texts in English and Belarusian. Override any text, or add a locale that falls back to English key by key.
@@ -101,11 +101,14 @@ const { smtpTransport } = require('@onetodone/mailer/smtp')
 
 ## Built-in templates
 
-| Template          | When to send it                                                 | Subject in English        |
-| ----------------- | --------------------------------------------------------------- | ------------------------- |
-| `verifyEmail`     | A user signed up and needs to confirm their email address       | Confirm your email        |
-| `resetPassword`   | A user asked to reset a forgotten password                      | Reset your password       |
-| `passwordChanged` | A password was changed, so the owner can act if it was not them | Your password was changed |
+| Template               | When to send it                                                                                                | Subject in English        |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `verifyEmail`          | A user signed up and needs to confirm their email address                                                      | Confirm your email        |
+| `resetPassword`        | A user asked to reset a forgotten password                                                                     | Reset your password       |
+| `passwordChanged`      | A password was changed, so the owner can act if it was not them                                                | Your password was changed |
+| `verifyEmailChange`    | A user asked to change their email; sent to the new address to confirm it                                      | Confirm your new email    |
+| `emailChangeRequested` | A user asked to change their email; sent to the current address, so the owner can cancel it if it was not them | Email change requested    |
+| `emailChanged`         | The email was changed; sent to the old address, so the owner can act if it was not them                        | Your email was changed    |
 
 Each email has an inbox preview text, a heading, a greeting and a short explanation. Where there is a link, it adds a button and the same link as plain text for readers whose button does not work. It ends with a note for recipients who did not ask for the email.
 
@@ -149,6 +152,63 @@ await mailer.send('passwordChanged', {
     ip: '203.0.113.7',
     supportUrl: 'https://example.com/support',
   },
+})
+```
+
+### `verifyEmailChange`
+
+Send it to the new address. The account keeps its current email until the link is opened.
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `verifyUrl` | `string` | yes | Absolute `http:` or `https:` link that confirms the new address. |
+| `userName` | `string` | no | Name for the greeting. Without it, or when it is empty, the greeting has no name. |
+| `expiresInMinutes` | `number` | no | How long the link works, in minutes. Without it, the email does not mention expiry. |
+
+### `emailChangeRequested`
+
+Send it to the current address when the change is requested, so the owner can stop a change they did not make.
+
+| Prop          | Type     | Required | Description                                                                                                                                                          |
+| ------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `newEmail`    | `string` | yes      | The address the account is moving to. Any non-empty text, so you can pass a masked address such as `l***@example.com`.                                               |
+| `userName`    | `string` | no       | Name for the greeting. Without it, or when it is empty, the greeting has no name.                                                                                    |
+| `requestedAt` | `Date`   | no       | When the change was requested.                                                                                                                                       |
+| `timeZone`    | `string` | no       | IANA time zone for `requestedAt`, such as `Europe/Berlin`. Default: the mailer's `timeZone`, which is UTC unless you set it.                                         |
+| `ip`          | `string` | no       | IP address the request came from.                                                                                                                                    |
+| `cancelUrl`   | `string` | no       | Absolute `http:` or `https:` link that cancels the change, shown as a button. Without it, the email points to support.                                               |
+| `supportUrl`  | `string` | no       | Absolute `http:` or `https:` link to your support page, shown as a button when there is no `cancelUrl`. Without either, the email points to `branding.supportEmail`. |
+
+### `emailChanged`
+
+Send it to the old address once the new one is confirmed. Every prop is optional, so `props` can be left out.
+
+| Prop         | Type     | Description                                                                                                                                            |
+| ------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `userName`   | `string` | Name for the greeting. Without it, or when it is empty, the greeting has no name.                                                                      |
+| `newEmail`   | `string` | The new address. Any non-empty text, so you can pass a masked address such as `l***@example.com`. Without it, the email does not name the new address. |
+| `changedAt`  | `Date`   | When the email was changed.                                                                                                                            |
+| `timeZone`   | `string` | IANA time zone for `changedAt`, such as `Europe/Berlin`. Default: the mailer's `timeZone`, which is UTC unless you set it.                             |
+| `ip`         | `string` | IP address the change came from.                                                                                                                       |
+| `supportUrl` | `string` | Absolute `http:` or `https:` link to your support page, shown as a button. Without it, the email points to `branding.supportEmail`.                    |
+
+An email change uses all three:
+
+```ts
+// When the user asks for the change
+await mailer.send('emailChangeRequested', {
+  to: 'lizzie@example.com',
+  props: { newEmail: 'lizzie.new@example.com', cancelUrl: 'https://example.com/email/cancel?token=abc123' },
+})
+await mailer.send('verifyEmailChange', {
+  to: 'lizzie.new@example.com',
+  props: { verifyUrl: 'https://example.com/email/verify?token=def456', expiresInMinutes: 1440 },
+})
+
+// Once the new address is confirmed
+await mailer.send('emailChanged', {
+  to: 'lizzie@example.com',
+  props: { newEmail: 'lizzie.new@example.com', changedAt: new Date() },
 })
 ```
 
@@ -414,14 +474,19 @@ const messages = {
 
 Text keys:
 
-| Section           | Keys                                                                                                         | Placeholders                                                        |
-| ----------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
-| `common`          | `greeting`, `greetingAnonymous`, `linkFallback`, `footerSupport`, `footerRights`, `minutes`, `hours`, `days` | `{name}` in `greeting`, `{count}` in the plural forms               |
-| `verifyEmail`     | `subject`, `preheader`, `heading`, `intro`, `button`, `expires`, `ignore`                                    | `{duration}` in `expires`                                           |
-| `resetPassword`   | `subject`, `preheader`, `heading`, `intro`, `button`, `expires`, `ignore`                                    | `{duration}` in `expires`                                           |
-| `passwordChanged` | `subject`, `preheader`, `heading`, `intro`, `changedAt`, `ip`, `ifYou`, `notYou`, `button`, `notYouEmail`    | `{date}` in `changedAt`, `{ip}` in `ip`, `{email}` in `notYouEmail` |
+| Section                | Keys                                                                                                                                        | Placeholders                                                                                               |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `common`               | `greeting`, `greetingAnonymous`, `linkFallback`, `footerSupport`, `footerRights`, `minutes`, `hours`, `days`                                | `{name}` in `greeting`, `{count}` in the plural forms                                                      |
+| `verifyEmail`          | `subject`, `preheader`, `heading`, `intro`, `button`, `expires`, `ignore`                                                                   | `{duration}` in `expires`                                                                                  |
+| `resetPassword`        | `subject`, `preheader`, `heading`, `intro`, `button`, `expires`, `ignore`                                                                   | `{duration}` in `expires`                                                                                  |
+| `passwordChanged`      | `subject`, `preheader`, `heading`, `intro`, `changedAt`, `ip`, `ifYou`, `notYou`, `button`, `notYouEmail`                                   | `{date}` in `changedAt`, `{ip}` in `ip`, `{email}` in `notYouEmail`                                        |
+| `verifyEmailChange`    | `subject`, `preheader`, `heading`, `intro`, `button`, `expires`, `ignore`                                                                   | `{duration}` in `expires`                                                                                  |
+| `emailChangeRequested` | `subject`, `preheader`, `heading`, `intro`, `requestedAt`, `ip`, `ifYou`, `notYouCancel`, `cancelButton`, `notYou`, `button`, `notYouEmail` | `{newEmail}` in `intro` and `ifYou`, `{date}` in `requestedAt`, `{ip}` in `ip`, `{email}` in `notYouEmail` |
+| `emailChanged`         | `subject`, `preheader`, `heading`, `intro`, `newEmail`, `changedAt`, `ip`, `newAddress`, `ifYou`, `notYou`, `button`, `notYouEmail`         | `{newEmail}` in `newEmail`, `{date}` in `changedAt`, `{ip}` in `ip`, `{email}` in `notYouEmail`            |
 
 The `Messages` type describes every key, so your editor shows what each text is for as you type.
+
+`Messages` is the full built-in dictionary, and it gains keys whenever built-in templates are added, in any release. A full dictionary typed as `Messages` is therefore not covered by semver. Check your own texts with `satisfies MessagesOverrides` (or type one locale as `LocaleMessages`); keys you leave out fall back to English.
 
 ### 3. Layout
 

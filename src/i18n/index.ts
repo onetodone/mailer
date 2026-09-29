@@ -89,12 +89,91 @@ export interface PasswordChangedMessages {
   readonly notYouEmail: string
 }
 
-/** Every text of the built-in templates, the blocks and the layout for one locale. */
+/** Texts of the `verifyEmailChange` template. */
+export interface VerifyEmailChangeMessages {
+  readonly subject: string
+  /** Inbox preview text. */
+  readonly preheader: string
+  readonly heading: string
+  /** Paragraph under the greeting. */
+  readonly intro: string
+  /** Button label. */
+  readonly button: string
+  /** Expiry note, with `{duration}` such as "24 hours". */
+  readonly expires: string
+  /** Note for recipients who did not ask to change their email. */
+  readonly ignore: string
+}
+
+/** Texts of the `emailChangeRequested` template. */
+export interface EmailChangeRequestedMessages {
+  readonly subject: string
+  /** Inbox preview text. */
+  readonly preheader: string
+  readonly heading: string
+  /** Paragraph under the greeting, with `{newEmail}`. */
+  readonly intro: string
+  /** Time of the request, with `{date}`. */
+  readonly requestedAt: string
+  /** IP address of the request, with `{ip}`. */
+  readonly ip: string
+  /** What the account owner who made the request does next, with `{newEmail}`. */
+  readonly ifYou: string
+  /** Call to action when the owner did not make the request, followed by the cancel button. */
+  readonly notYouCancel: string
+  /** Cancel button label. */
+  readonly cancelButton: string
+  /** Call to action without a cancel URL, followed by the support button. */
+  readonly notYou: string
+  /** Support button label. */
+  readonly button: string
+  /** Call to action without a cancel or support URL, with `{email}` as a link to the support address. */
+  readonly notYouEmail: string
+}
+
+/** Texts of the `emailChanged` template. */
+export interface EmailChangedMessages {
+  readonly subject: string
+  /** Inbox preview text. */
+  readonly preheader: string
+  readonly heading: string
+  /** Paragraph under the greeting. */
+  readonly intro: string
+  /** The new address, with `{newEmail}`. */
+  readonly newEmail: string
+  /** Time of the change, with `{date}`. */
+  readonly changedAt: string
+  /** IP address of the change, with `{ip}`. */
+  readonly ip: string
+  /** Where emails about the account go after the change. */
+  readonly newAddress: string
+  /** Reassurance for the account owner who made the change. */
+  readonly ifYou: string
+  /** Call to action when the owner did not make the change, followed by the support button. */
+  readonly notYou: string
+  /** Support button label. */
+  readonly button: string
+  /** Call to action without a support URL, with `{email}` as a link to the support address. */
+  readonly notYouEmail: string
+}
+
+/**
+ * Every text of the built-in templates, the blocks and the layout for one locale.
+ *
+ * This type describes the full built-in dictionary and gains keys whenever
+ * built-in templates are added, in any release, so a full dictionary typed as
+ * `Messages` is not covered by semver. Type your own texts with
+ * {@link MessagesOverrides} (or {@link LocaleMessages} for one locale); keys
+ * you leave out fall back to English.
+ */
 export interface Messages {
   readonly common: CommonMessages
   readonly verifyEmail: VerifyEmailMessages
   readonly resetPassword: ResetPasswordMessages
   readonly passwordChanged: PasswordChangedMessages
+  readonly verifyEmailChange: VerifyEmailChangeMessages
+  readonly emailChangeRequested: EmailChangeRequestedMessages
+  readonly emailChanged: EmailChangedMessages
 }
 
 type StringKeys<T> = { [K in keyof T]: T[K] extends string ? K : never }[keyof T] & string

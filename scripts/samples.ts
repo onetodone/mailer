@@ -1,10 +1,13 @@
 import type {
   Branding,
+  EmailChangedProps,
+  EmailChangeRequestedProps,
   Locale,
   MailAddress,
   Mailer,
   PasswordChangedProps,
   ResetPasswordProps,
+  VerifyEmailChangeProps,
   VerifyEmailProps,
 } from '@onetodone/mailer'
 
@@ -37,6 +40,9 @@ interface PropsByTemplate {
   verifyEmail: VerifyEmailProps
   resetPassword: ResetPasswordProps
   passwordChanged: PasswordChangedProps
+  verifyEmailChange: VerifyEmailChangeProps
+  emailChangeRequested: EmailChangeRequestedProps
+  emailChanged: EmailChangedProps
 }
 
 type TemplateName = Parameters<Mailer['render']>[0]
@@ -73,4 +79,39 @@ export const samples: readonly Sample[] = [
     },
   },
   { slug: 'password-changed-minimal', template: 'passwordChanged', props: {} },
+  {
+    slug: 'verify-email-change',
+    template: 'verifyEmailChange',
+    props: { userName: 'Lizzie', verifyUrl: 'https://example.com/email/verify?token=preview', expiresInMinutes: 1440 },
+  },
+  {
+    slug: 'email-change-requested',
+    template: 'emailChangeRequested',
+    props: {
+      userName: 'Lizzie',
+      newEmail: 'lizzie.new@example.com',
+      requestedAt: new Date(),
+      timeZone: 'Europe/Minsk',
+      ip: '203.0.113.42',
+      cancelUrl: 'https://example.com/email/cancel?token=preview',
+    },
+  },
+  {
+    slug: 'email-change-requested-minimal',
+    template: 'emailChangeRequested',
+    props: { newEmail: 'l***@example.com' },
+  },
+  {
+    slug: 'email-changed',
+    template: 'emailChanged',
+    props: {
+      userName: 'Lizzie',
+      newEmail: 'lizzie.new@example.com',
+      changedAt: new Date(),
+      timeZone: 'Europe/Minsk',
+      ip: '203.0.113.42',
+      supportUrl: 'https://example.com/support',
+    },
+  },
+  { slug: 'email-changed-minimal', template: 'emailChanged', props: {} },
 ]
