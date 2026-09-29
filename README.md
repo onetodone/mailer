@@ -653,6 +653,8 @@ The `Messages` type describes every key, so your editor shows what each text is 
 
 `Messages` is the full built-in dictionary, and it gains keys whenever built-in templates are added, in any release. A full dictionary typed as `Messages` is therefore not covered by semver. Check your own texts with `satisfies MessagesOverrides` (or type one locale as `LocaleMessages`); keys you leave out fall back to English.
 
+`Locale` lists the built-in locales and gains values whenever a built-in locale is added, in any release, so code that requires every `Locale` value (such as `Record<Locale, …>`) is not covered by semver. If you already use a locale through `messages` and it becomes built-in, your overrides still win; keys you did not override come from the built-in texts instead of English.
+
 ### 3. Layout
 
 The built-in layout centers the email in a 600px card. The logo or company name sits above the card, and the footer holds the footer text, the support address and a copyright line. To replace it, pass a layout from `defineLayout`:
