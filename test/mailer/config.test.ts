@@ -13,8 +13,19 @@ const ping = defineTemplate({
   render: ({ ui }) => ({ subject: 'Ping', body: [ui.paragraph('Pong')] }),
 })
 
+const invoice = defineTemplate({
+  name: 'invoice',
+  schema: z.object({}),
+  messages: { en: { subject: 'Invoice', intro: 'Your invoice is attached.' }, be: { subject: 'Рахунак' } },
+  render: ({ t }) => ({ subject: t('invoice.subject'), body: [] }),
+})
+
 function config(override: Record<string, unknown> = {}): Record<string, unknown> {
   return { transport: memoryTransport(), from, branding, ...override }
+}
+
+function withTexts(name: string, messages: unknown = { en: { subject: 'Hi' } }): Record<string, unknown> {
+  return { ...ping, name, messages }
 }
 
 describe('createMailer config', () => {
@@ -25,6 +36,10 @@ describe('createMailer config', () => {
       'Invalid mailer configuration: from must be an email address like "user@example.com" or "Name <user@example.com>", received "not an address".',
     )
     expect(transport.sent).toHaveLength(0)
+  })
+
+  it('rejects a config that is not an object', () => {
+    expect(configError(() => createUnchecked(null)).message).toBe('Invalid mailer configuration: must be an object.')
   })
 
   it('reports every problem at once', () => {
@@ -128,6 +143,64 @@ describe('createMailer config', () => {
       'templates.ping must be a template from defineTemplate, received object',
     ],
     ['templates that are not an object', { templates: [ping] }, 'templates must be an object'],
+    [
+      'template texts that are not an object',
+      { templates: { invoice: withTexts('invoice', 'Invoice') } },
+      'templates.invoice.messages must be an object',
+    ],
+    [
+      'template texts without English',
+      { templates: { invoice: withTexts('invoice', { be: { subject: 'Рахунак' } }) } },
+      'templates.invoice.messages.en is required',
+    ],
+    [
+      'a template text that is not a string',
+      { templates: { invoice: withTexts('invoice', { en: { subject: 42 } }) } },
+      'templates.invoice.messages.en.subject must be a string, received number',
+    ],
+    [
+      'a missing English template text',
+      { templates: { invoice: withTexts('invoice', { en: { subject: undefined } }) } },
+      'templates.invoice.messages.en.subject is required',
+    ],
+    [
+      'a template text that English does not have',
+      { templates: { invoice: withTexts('invoice', { en: { subject: 'Invoice' }, be: { title: 'Рахунак' } }) } },
+      'templates.invoice.messages.be has unknown key "title"',
+    ],
+    [
+      'an invalid locale tag in template texts',
+      { templates: { invoice: withTexts('invoice', { en: { subject: 'Invoice' }, en_US: { subject: 'Invoice' } }) } },
+      'templates.invoice.messages.en_US is not a BCP 47 language tag like "pl" or "pt-BR"',
+    ],
+    [
+      'template texts in a locale the mailer does not know',
+      { templates: { invoice: withTexts('invoice', { en: { subject: 'Invoice' }, pl: { subject: 'Faktura' } }) } },
+      'templates.invoice.messages.pl is not a locale of the mailer: use a built-in locale ("en", "be") or a key of messages',
+    ],
+    [
+      'template texts under the common section',
+      { templates: { common: withTexts('common') } },
+      'templates.common.name must not be "common" in a template with messages',
+    ],
+    [
+      'template texts under a dotted name',
+      { templates: { 'order.shipped': withTexts('order.shipped') } },
+      'templates.order.shipped.name must not contain "." in a template with messages',
+    ],
+    [
+      'an unknown key in the texts of a custom template',
+      { templates: { invoice }, messages: { be: { invoice: { title: 'Рахунак' } } } },
+      'messages.be.invoice has unknown key "title"',
+    ],
+    [
+      'a built-in key of a template replaced with its own texts',
+      {
+        templates: { resetPassword: withTexts('resetPassword', { en: { code: 'Code' } }) },
+        messages: { en: { resetPassword: { subject: 'Reset' } } },
+      },
+      'messages.en.resetPassword has unknown key "subject"',
+    ],
   ])('rejects %s', (_case, override, detail) => {
     const error = configError(() => createUnchecked(config(override)))
     expect(error.message).toBe(`Invalid mailer configuration: ${detail}.`)
@@ -160,6 +233,35 @@ describe('createMailer config', () => {
       messages: { 'pt-BR': { verifyEmail: { subject: 'Confirme seu email' } }, be: undefined },
     })
     expectTypeOf(mailer).toExtend<Mailer>()
+  })
+
+  it('reports problems in template texts and in their overrides with the others', () => {
+    const error = configError(() =>
+      createUnchecked(
+        config({
+          transport: {},
+          templates: { invoice, receipt: withTexts('receipt', { en: { subject: 42 } }) },
+          messages: { en: { invoice: { title: 'Invoice' } } },
+        }),
+      ),
+    )
+    expect(error.message).toBe(
+      'Invalid mailer configuration: transport must be an object with a send method, received object; ' +
+        'messages.en.invoice has unknown key "title"; ' +
+        'templates.receipt.messages.en.subject must be a string, received number.',
+    )
+  })
+
+  it('accepts template texts in a locale defined in messages', () => {
+    const receipt = defineTemplate({
+      name: 'receipt',
+      schema: z.object({}),
+      messages: { en: { subject: 'Receipt' }, pl: { subject: 'Paragon' } },
+      render: ({ t }) => ({ subject: t('receipt.subject'), body: [] }),
+    })
+    expect(() =>
+      createMailer({ transport: memoryTransport(), from, branding, templates: { receipt }, messages: { pl: {} } }),
+    ).not.toThrow()
   })
 
   it('accepts templates whose schema is a function, as in arktype', () => {
@@ -202,6 +304,51 @@ describe('createMailer config', () => {
         branding,
         // @ts-expect-error: a template name must match its key
         templates: { orderShipped: ping },
+      })
+    }
+    expect(check).toBeTypeOf('function')
+  })
+
+  it('types the overrides of template texts', () => {
+    const resetPassword = defineTemplate({
+      name: 'resetPassword',
+      schema: z.object({}),
+      messages: { en: { code: 'Your code' } },
+      render: ({ t }) => ({ subject: t('resetPassword.code'), body: [] }),
+    })
+    const check = () => {
+      createMailer({
+        transport: memoryTransport(),
+        from,
+        branding,
+        templates: { invoice, resetPassword },
+        messages: {
+          be: { invoice: { intro: 'Рахунак у ўкладанні.' }, resetPassword: { code: 'Ваш код' } },
+          en: { verifyEmail: { subject: 'Confirm it' } },
+        },
+      })
+      createMailer({
+        transport: memoryTransport(),
+        from,
+        branding,
+        templates: { invoice },
+        // @ts-expect-error: invoice has no title text
+        messages: { en: { invoice: { title: 'Invoice' } } },
+      })
+      createMailer({
+        transport: memoryTransport(),
+        from,
+        branding,
+        templates: { resetPassword },
+        // @ts-expect-error: the replacement has its own texts
+        messages: { en: { resetPassword: { subject: 'Reset' } } },
+      })
+      createMailer({
+        transport: memoryTransport(),
+        from,
+        branding,
+        // @ts-expect-error: invoice is not registered
+        messages: { en: { invoice: { subject: 'Invoice' } } },
       })
     }
     expect(check).toBeTypeOf('function')

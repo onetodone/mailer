@@ -16,9 +16,10 @@ import {
 } from './config'
 import { defaultLayout } from './core/layout'
 import { MailerError, parseConfig, parseOptions } from './errors'
-import { buildMessages, type Locale, type LocaleMessages, type MessagesOverrides } from './i18n'
+import { buildMessages, dictionaries, type Locale, type LocaleMessages, type MessagesOverrides } from './i18n'
 import { builtInTemplates, type BuiltInTemplates } from './templates/built-in'
-import type { Template, TemplateProps, TemplateRegistry } from './templates/define'
+import type { AnyTemplate, Template, TemplateProps, TemplateRegistry } from './templates/define'
+import { templateSections, withTemplateMessages } from './templates/messages'
 import { renderTemplate, type RenderedEmail } from './templates/render'
 import type { Attachment, MailAddresses, OutgoingMessage, SendResult } from './transports/types'
 import { attachments, describeInput, headers, isRecord, mailAddresses, objectError } from './validators'
@@ -32,7 +33,7 @@ export type WithBuiltIns<Custom> = {
       : never
 }
 
-type PropsOf<T> = T extends Template ? TemplateProps<T> : never
+type PropsOf<T> = T extends AnyTemplate ? TemplateProps<T> : never
 
 // True when an empty object is valid props, so `props` can be left out.
 type OptionalProps<T> = Record<PropertyKey, never> extends PropsOf<T> ? true : false
@@ -176,12 +177,12 @@ async function runHook<Event>(
  */
 export function createMailer<
   Templates extends CustomTemplates<Templates> = BuiltInTemplates,
-  Overrides extends MessagesOverrides = Partial<Record<Locale, LocaleMessages>>,
+  Overrides extends MessagesOverrides<Templates> = Partial<Record<Locale, LocaleMessages<Templates>>>,
 >(config: MailerConfig<Templates, Overrides>): Mailer<WithBuiltIns<Templates>, Locale | (keyof Overrides & string)> {
-  const settings = parseConfig(configSchema, config)
+  const settings = parseConfig(configSchema(templateSections(isRecord(config) ? config.templates : undefined)), config)
   const { transport, from, branding, timeZone, onSent, onError } = settings
   const templates: TemplateRegistry = { ...builtInTemplates, ...settings.templates }
-  const messages = buildMessages(settings.messages)
+  const messages = buildMessages(settings.messages, withTemplateMessages(dictionaries, settings.templates))
   const defaultLocale = settings.locale ?? 'en'
   const layout = settings.layout ?? defaultLayout
 

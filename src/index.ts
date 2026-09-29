@@ -18,6 +18,7 @@ export {
   type TemplateProps,
   type TemplateRenderContext,
 } from './templates/define'
+export type { TemplateMessages, TemplateTexts } from './templates/messages'
 export type { RenderedEmail } from './templates/render'
 export type { VerifyEmailProps } from './templates/verify-email'
 export type { ResetPasswordProps } from './templates/reset-password'
