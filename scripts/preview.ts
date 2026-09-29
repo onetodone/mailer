@@ -1,28 +1,41 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
-import { createMailer, html, memoryTransport, type SafeHtml } from '@onetodone/mailer'
+import { html, memoryTransport, type SafeHtml } from '@onetodone/mailer'
 
-import { branding, from, locales, samples } from './samples.ts'
+import { createSampleMailer, locales, samples } from './samples.ts'
 
 const outDir = join(import.meta.dirname, '..', '.preview')
-const mailer = createMailer({ transport: memoryTransport(), from, branding })
+const mailer = createSampleMailer(memoryTransport())
 
 await rm(outDir, { recursive: true, force: true })
 await mkdir(outDir)
 
 const rows: SafeHtml[] = []
 for (const sample of samples) {
+  // Browsers cannot resolve cid: references, so inline images point to the written files instead.
+  const files = (sample.attachments ?? []).map((attachment) => ({
+    ...attachment,
+    href: `${sample.slug}/${encodeURIComponent(attachment.filename)}`,
+  }))
+  if (files.length > 0) await mkdir(join(outDir, sample.slug))
+  for (const file of files) await writeFile(join(outDir, sample.slug, file.filename), file.content)
+
   for (const locale of locales) {
     const email = await mailer.render(sample.template, { locale, props: sample.props })
-    const file = `${sample.slug}.${locale}`
-    await writeFile(join(outDir, `${file}.html`), email.html)
-    await writeFile(join(outDir, `${file}.txt`), `Subject: ${email.subject}\n\n${email.text}`)
+    const name = `${sample.slug}.${locale}`
+    const page = files.reduce(
+      (markup, file) => (file.cid === undefined ? markup : markup.replaceAll(`"cid:${file.cid}"`, `"${file.href}"`)),
+      email.html,
+    )
+    await writeFile(join(outDir, `${name}.html`), page)
+    await writeFile(join(outDir, `${name}.txt`), `Subject: ${email.subject}\n\n${email.text}`)
+    const links = files.map((file) => html` · <a href="${file.href}">${file.filename}</a>`)
     rows.push(html`<tr>
 <td>${sample.slug}</td>
 <td>${locale}</td>
 <td>${email.subject}</td>
-<td><a href="${file}.html">HTML</a> · <a href="${file}.txt">Text</a></td>
+<td><a href="${name}.html">HTML</a> · <a href="${name}.txt">Text</a>${links}</td>
 </tr>`)
   }
 }

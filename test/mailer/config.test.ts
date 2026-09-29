@@ -89,8 +89,8 @@ describe('createMailer config', () => {
     ],
     [
       'an unknown message section',
-      { messages: { en: { welcome: { subject: 'Hi' } } } },
-      'messages.en has unknown key "welcome"',
+      { messages: { en: { orderShipped: { subject: 'Hi' } } } },
+      'messages.en has unknown key "orderShipped"',
     ],
     [
       'a message that is not a string',

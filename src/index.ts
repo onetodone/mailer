@@ -25,6 +25,9 @@ export type { PasswordChangedProps } from './templates/password-changed'
 export type { VerifyEmailChangeProps } from './templates/verify-email-change'
 export type { EmailChangeRequestedProps } from './templates/email-change-requested'
 export type { EmailChangedProps } from './templates/email-changed'
+export type { OtpCodeProps } from './templates/otp-code'
+export type { MagicLinkProps } from './templates/magic-link'
+export type { WelcomeProps } from './templates/welcome'
 export type {
   Attachment,
   MailAddress,

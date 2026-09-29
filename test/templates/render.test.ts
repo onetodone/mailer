@@ -10,12 +10,15 @@ import { builtInTemplates, type BuiltInTemplates } from '../../src/templates/bui
 import { defineTemplate, type TemplateProps, type TemplateRegistry } from '../../src/templates/define'
 import type { EmailChangeRequestedProps } from '../../src/templates/email-change-requested'
 import type { EmailChangedProps } from '../../src/templates/email-changed'
+import type { MagicLinkProps } from '../../src/templates/magic-link'
+import type { OtpCodeProps } from '../../src/templates/otp-code'
 import type { PasswordChangedProps } from '../../src/templates/password-changed'
 import { renderTemplate, type RenderedEmail, type RenderTemplateOptions } from '../../src/templates/render'
 import type { ResetPasswordProps } from '../../src/templates/reset-password'
 import type { StandardSchemaV1 } from '../../src/templates/standard-schema'
 import type { VerifyEmailProps } from '../../src/templates/verify-email'
 import type { VerifyEmailChangeProps } from '../../src/templates/verify-email-change'
+import type { WelcomeProps } from '../../src/templates/welcome'
 
 const branding = resolveBranding({
   companyName: 'My App',
@@ -67,7 +70,7 @@ describe('renderTemplate types', () => {
   it('rejects unknown names and wrong props at compile time', () => {
     const check = () => {
       // @ts-expect-error: unknown template name
-      void renderTemplate(builtInTemplates, 'welcome', {}, options)
+      void renderTemplate(builtInTemplates, 'orderShipped', {}, options)
       // @ts-expect-error: verifyUrl is required
       void renderTemplate(builtInTemplates, 'verifyEmail', { userName: 'Lizzie' }, options)
       // @ts-expect-error: expiresInMinutes is a number
@@ -126,6 +129,23 @@ describe('renderTemplate types', () => {
       readonly ip?: string | undefined
       readonly supportUrl?: string | undefined
     }>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['otpCode']>>().toEqualTypeOf<OtpCodeProps>()
+    expectTypeOf<OtpCodeProps>().toEqualTypeOf<{
+      readonly userName?: string | undefined
+      readonly code: string
+      readonly expiresInMinutes?: number | undefined
+    }>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['magicLink']>>().toEqualTypeOf<MagicLinkProps>()
+    expectTypeOf<MagicLinkProps>().toEqualTypeOf<{
+      readonly userName?: string | undefined
+      readonly signInUrl: string
+      readonly expiresInMinutes?: number | undefined
+    }>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['welcome']>>().toEqualTypeOf<WelcomeProps>()
+    expectTypeOf<WelcomeProps>().toEqualTypeOf<{
+      readonly userName?: string | undefined
+      readonly ctaUrl?: string | undefined
+    }>()
     expectTypeOf(renderTemplate<{ note: typeof note }, 'note'>)
       .parameter(2)
       .toEqualTypeOf<{ text: string; show: boolean }>()
@@ -137,7 +157,7 @@ describe('renderTemplate', () => {
     const error = await rejection(renderUnchecked(builtInTemplates, 'orderShipped', {}, options))
     expect(error.code).toBe('UNKNOWN_TEMPLATE')
     expect(error.message).toBe(
-      'Unknown template "orderShipped". Available templates: verifyEmail, resetPassword, passwordChanged, verifyEmailChange, emailChangeRequested, emailChanged.',
+      'Unknown template "orderShipped". Available templates: verifyEmail, resetPassword, passwordChanged, verifyEmailChange, emailChangeRequested, emailChanged, otpCode, magicLink, welcome.',
     )
     const inherited = await rejection(renderUnchecked(builtInTemplates, 'toString', {}, options))
     expect(inherited.code).toBe('UNKNOWN_TEMPLATE')

@@ -17,6 +17,7 @@ const resetUrl = 'https://myapp.loc/reset?token=abc123'
 const supportUrl = 'https://myapp.loc/support'
 const cancelUrl = 'https://myapp.loc/email/cancel?token=abc123'
 const newEmail = 'lizzie.new@example.com'
+const signInUrl = 'https://myapp.loc/sign-in?token=abc123'
 
 const orderShipped = defineTemplate({
   name: 'orderShipped',
@@ -109,6 +110,33 @@ describe('built-in templates through the memory transport', () => {
           props: { userName: userNames[locale], newEmail, ip: '203.0.113.7', supportUrl },
         }),
     ],
+    [
+      'otp-code',
+      (mailer, locale) =>
+        mailer.send('otpCode', {
+          to,
+          locale,
+          props: { userName: userNames[locale], code: 'K7Q2M9XW', expiresInMinutes: 10 },
+        }),
+    ],
+    [
+      'magic-link',
+      (mailer, locale) =>
+        mailer.send('magicLink', {
+          to,
+          locale,
+          props: { userName: userNames[locale], signInUrl, expiresInMinutes: 15 },
+        }),
+    ],
+    [
+      'welcome',
+      (mailer, locale) =>
+        mailer.send('welcome', {
+          to,
+          locale,
+          props: { userName: userNames[locale] },
+        }),
+    ],
   ]
 
   beforeAll(() => {
@@ -175,6 +203,9 @@ describe('custom templates', () => {
       | 'verifyEmailChange'
       | 'emailChangeRequested'
       | 'emailChanged'
+      | 'otpCode'
+      | 'magicLink'
+      | 'welcome'
       | 'orderShipped'
     >()
     const check = async () => {
@@ -377,7 +408,7 @@ describe('send', () => {
 
   it('rejects unknown templates', async () => {
     const { transport, mailer } = setup()
-    const error = await mailerRejection(mailer.send('welcome' as never, { to } as never))
+    const error = await mailerRejection(mailer.send('orderShipped' as never, { to } as never))
     expect(error.code).toBe('UNKNOWN_TEMPLATE')
     expect(transport.sent).toHaveLength(0)
   })
