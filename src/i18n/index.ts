@@ -304,6 +304,42 @@ export interface AccountLockedMessages {
   readonly notYou: string
 }
 
+/** Texts of the `confirmAccountDeletion` template. */
+export interface ConfirmAccountDeletionMessages {
+  readonly subject: string
+  /** Inbox preview text. */
+  readonly preheader: string
+  readonly heading: string
+  /** Paragraph under the greeting. */
+  readonly intro: string
+  /** What deletion means for the account and its data, above the button. */
+  readonly warning: string
+  /** Button label. */
+  readonly button: string
+  /** Expiry note, with `{duration}` such as "1 hour". */
+  readonly expires: string
+  /** Note for recipients who did not ask to delete their account. */
+  readonly ignore: string
+}
+
+/** Texts of the `accountDeleted` template. */
+export interface AccountDeletedMessages {
+  readonly subject: string
+  /** Inbox preview text. */
+  readonly preheader: string
+  readonly heading: string
+  /** Paragraph under the greeting. */
+  readonly intro: string
+  /** Goodbye for the account owner who asked for the deletion. */
+  readonly farewell: string
+  /** Call to action when the owner did not ask for the deletion, followed by the support button. */
+  readonly notYou: string
+  /** Support button label. */
+  readonly button: string
+  /** Call to action without a support URL, with `{email}` as a link to the support address. */
+  readonly notYouEmail: string
+}
+
 /**
  * Every text of the built-in templates, the blocks and the layout for one locale.
  *
@@ -328,6 +364,8 @@ export interface Messages {
   readonly twoFactorEnabled: TwoFactorEnabledMessages
   readonly twoFactorDisabled: TwoFactorDisabledMessages
   readonly accountLocked: AccountLockedMessages
+  readonly confirmAccountDeletion: ConfirmAccountDeletionMessages
+  readonly accountDeleted: AccountDeletedMessages
 }
 
 type StringKeys<T> = { [K in keyof T]: T[K] extends string ? K : never }[keyof T] & string

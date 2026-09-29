@@ -163,4 +163,24 @@ export const en: Messages = {
     notYou:
       "If it wasn't you, someone may be trying to guess your password. Choose a new one once you can sign in again.",
   },
+  confirmAccountDeletion: {
+    subject: 'Confirm account deletion',
+    preheader: 'Confirm that you want to delete your {companyName} account.',
+    heading: 'Confirm account deletion',
+    intro: 'We got a request to delete your {companyName} account. Click the button to confirm.',
+    warning: "Once deleted, your account and your data can't be restored.",
+    button: 'Delete account',
+    expires: 'The link expires in {duration}.',
+    ignore: "If you didn't ask for this, just ignore this email. Your account won't be deleted.",
+  },
+  accountDeleted: {
+    subject: 'Your account was deleted',
+    preheader: 'Your {companyName} account was deleted.',
+    heading: 'Your account was deleted',
+    intro: 'Your {companyName} account was deleted, as you asked.',
+    farewell: 'Thanks for using {companyName}. If you change your mind, you can sign up again at any time.',
+    notYou: "If it wasn't you, contact support right away.",
+    button: 'Contact support',
+    notYouEmail: "If it wasn't you, write to us right away at {email}.",
+  },
 }

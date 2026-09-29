@@ -20,7 +20,7 @@
 
 ## Features
 
-- Built-in templates for email verification, welcome emails, one-time codes, sign-in links, password reset, email address changes and security notices.
+- Built-in templates for email verification, welcome emails, one-time codes, sign-in links, password reset, email address changes, security notices and account deletion.
 - One call to send an email. Template names autocomplete, and props are checked at compile time and validated at runtime.
 - Branding from configuration: logo, company name, colors, footer text and support address.
 - Texts in English and Belarusian. Override any text, or add a locale that falls back to English key by key.
@@ -101,21 +101,23 @@ const { smtpTransport } = require('@onetodone/mailer/smtp')
 
 ## Built-in templates
 
-| Template               | When to send it                                                                                                | Subject in English                       |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| `verifyEmail`          | A user signed up and needs to confirm their email address                                                      | Confirm your email                       |
-| `resetPassword`        | A user asked to reset a forgotten password                                                                     | Reset your password                      |
-| `passwordChanged`      | A password was changed, so the owner can act if it was not them                                                | Your password was changed                |
-| `verifyEmailChange`    | A user asked to change their email; sent to the new address to confirm it                                      | Confirm your new email                   |
-| `emailChangeRequested` | A user asked to change their email; sent to the current address, so the owner can cancel it if it was not them | Email change requested                   |
-| `emailChanged`         | The email was changed; sent to the old address, so the owner can act if it was not them                        | Your email was changed                   |
-| `otpCode`              | A user needs a one-time code, such as for sign-in, two-step verification or confirming an action               | Your verification code                   |
-| `magicLink`            | A user signs in with a link instead of a password                                                              | Your sign-in link                        |
-| `welcome`              | A new account is ready                                                                                         | Welcome to {companyName}                 |
-| `newSignIn`            | Someone signed in to an account, such as from a new device, so the owner can act if it was not them            | New sign-in to your account              |
-| `twoFactorEnabled`     | Two-factor authentication was turned on, so the owner can act if it was not them                               | Two-factor authentication was turned on  |
-| `twoFactorDisabled`    | Two-factor authentication was turned off, so the owner can act if it was not them                              | Two-factor authentication was turned off |
-| `accountLocked`        | An account was locked after too many failed sign-in attempts                                                   | Your account is locked                   |
+| Template                 | When to send it                                                                                                | Subject in English                       |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| `verifyEmail`            | A user signed up and needs to confirm their email address                                                      | Confirm your email                       |
+| `resetPassword`          | A user asked to reset a forgotten password                                                                     | Reset your password                      |
+| `passwordChanged`        | A password was changed, so the owner can act if it was not them                                                | Your password was changed                |
+| `verifyEmailChange`      | A user asked to change their email; sent to the new address to confirm it                                      | Confirm your new email                   |
+| `emailChangeRequested`   | A user asked to change their email; sent to the current address, so the owner can cancel it if it was not them | Email change requested                   |
+| `emailChanged`           | The email was changed; sent to the old address, so the owner can act if it was not them                        | Your email was changed                   |
+| `otpCode`                | A user needs a one-time code, such as for sign-in, two-step verification or confirming an action               | Your verification code                   |
+| `magicLink`              | A user signs in with a link instead of a password                                                              | Your sign-in link                        |
+| `welcome`                | A new account is ready                                                                                         | Welcome to {companyName}                 |
+| `newSignIn`              | Someone signed in to an account, such as from a new device, so the owner can act if it was not them            | New sign-in to your account              |
+| `twoFactorEnabled`       | Two-factor authentication was turned on, so the owner can act if it was not them                               | Two-factor authentication was turned on  |
+| `twoFactorDisabled`      | Two-factor authentication was turned off, so the owner can act if it was not them                              | Two-factor authentication was turned off |
+| `accountLocked`          | An account was locked after too many failed sign-in attempts                                                   | Your account is locked                   |
+| `confirmAccountDeletion` | A user asked to delete their account and needs to confirm it                                                   | Confirm account deletion                 |
+| `accountDeleted`         | An account was deleted, so the owner can act if it was not them                                                | Your account was deleted                 |
 
 Each email has an inbox preview text, a heading, a greeting and a short explanation. Where there is a link, it adds a button and the same link as plain text for readers whose button does not work. Every email except `welcome` ends with a note for recipients who did not ask for it.
 
@@ -331,6 +333,40 @@ await mailer.send('accountLocked', {
 ```
 
 The email ends with advice for owners who did not try to sign in: someone may be guessing the password, so choose a new one.
+
+### `confirmAccountDeletion`
+
+Send it when a user asks to delete their account, and delete the account only once the link is opened.
+
+| Prop               | Type     | Required | Description                                                                         |
+| ------------------ | -------- | -------- | ----------------------------------------------------------------------------------- |
+| `confirmUrl`       | `string` | yes      | Absolute `http:` or `https:` link that confirms the deletion.                       |
+| `userName`         | `string` | no       | Name for the greeting. Without it, or when it is empty, the greeting has no name.   |
+| `expiresInMinutes` | `number` | no       | How long the link works, in minutes. Without it, the email does not mention expiry. |
+
+### `accountDeleted`
+
+Send it once the account is deleted. Every prop is optional, so `props` can be left out.
+
+| Prop         | Type     | Description                                                                                                                         |
+| ------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `userName`   | `string` | Name for the greeting. Without it, or when it is empty, the greeting has no name.                                                   |
+| `supportUrl` | `string` | Absolute `http:` or `https:` link to your support page, shown as a button. Without it, the email points to `branding.supportEmail`. |
+
+An account deletion uses both:
+
+```ts
+// When the user asks to delete the account
+await mailer.send('confirmAccountDeletion', {
+  to: 'lizzie@example.com',
+  props: { confirmUrl: 'https://example.com/account/delete?token=abc123', expiresInMinutes: 60 },
+})
+
+// Once the account is deleted
+await mailer.send('accountDeleted', { to: 'lizzie@example.com', props: { userName: 'Lizzie' } })
+```
+
+`confirmAccountDeletion` warns that a deleted account and its data can't be restored, and `accountDeleted` says the owner can sign up again. If your app keeps deleted accounts for a grace period, change `confirmAccountDeletion.warning` and `accountDeleted.farewell` through [`messages`](#2-texts-and-locales). Every email shows `branding.footerText`, so word it to fit a deleted account too.
 
 Durations are written in whole days (from 2 days on), hours or minutes, with the plural rules of the locale: `30` gives "30 minutes", `60` gives "1 hour", `1440` gives "24 hours" and `2880` gives "2 days". Dates include the time zone name, such as "May 4, 2026 at 9:30 AM UTC".
 
@@ -594,22 +630,24 @@ const messages = {
 
 Text keys:
 
-| Section                | Keys                                                                                                                                                             | Placeholders                                                                                                             |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `common`               | `greeting`, `greetingAnonymous`, `linkFallback`, `footerSupport`, `footerRights`, `minutes`, `hours`, `days`                                                     | `{name}` in `greeting`, `{count}` in the plural forms                                                                    |
-| `verifyEmail`          | `subject`, `preheader`, `heading`, `intro`, `button`, `expires`, `ignore`                                                                                        | `{duration}` in `expires`                                                                                                |
-| `resetPassword`        | `subject`, `preheader`, `heading`, `intro`, `button`, `expires`, `ignore`                                                                                        | `{duration}` in `expires`                                                                                                |
-| `passwordChanged`      | `subject`, `preheader`, `heading`, `intro`, `changedAt`, `ip`, `ifYou`, `notYou`, `button`, `notYouEmail`                                                        | `{date}` in `changedAt`, `{ip}` in `ip`, `{email}` in `notYouEmail`                                                      |
-| `verifyEmailChange`    | `subject`, `preheader`, `heading`, `intro`, `button`, `expires`, `ignore`                                                                                        | `{duration}` in `expires`                                                                                                |
-| `emailChangeRequested` | `subject`, `preheader`, `heading`, `intro`, `requestedAt`, `ip`, `ifYou`, `notYouCancel`, `cancelButton`, `notYou`, `button`, `notYouEmail`                      | `{newEmail}` in `intro` and `ifYou`, `{date}` in `requestedAt`, `{ip}` in `ip`, `{email}` in `notYouEmail`               |
-| `emailChanged`         | `subject`, `preheader`, `heading`, `intro`, `newEmail`, `changedAt`, `ip`, `newAddress`, `ifYou`, `notYou`, `button`, `notYouEmail`                              | `{newEmail}` in `newEmail`, `{date}` in `changedAt`, `{ip}` in `ip`, `{email}` in `notYouEmail`                          |
-| `otpCode`              | `subject`, `preheader`, `heading`, `intro`, `expires`, `doNotShare`, `ignore`                                                                                    | `{code}` in `subject` and `preheader`, `{duration}` in `expires`                                                         |
-| `magicLink`            | `subject`, `preheader`, `heading`, `intro`, `button`, `expires`, `doNotShare`, `ignore`                                                                          | `{duration}` in `expires`                                                                                                |
-| `welcome`              | `subject`, `preheader`, `heading`, `intro`, `button`                                                                                                             |                                                                                                                          |
-| `newSignIn`            | `subject`, `preheader`, `heading`, `intro`, `signedInAt`, `device`, `location`, `ip`, `ifYou`, `notYouSecure`, `secureButton`, `notYou`, `button`, `notYouEmail` | `{date}` in `signedInAt`, `{device}` in `device`, `{location}` in `location`, `{ip}` in `ip`, `{email}` in `notYouEmail` |
-| `twoFactorEnabled`     | `subject`, `preheader`, `heading`, `intro`, `changedAt`, `ip`, `ifYou`, `notYou`, `button`, `notYouEmail`                                                        | `{date}` in `changedAt`, `{ip}` in `ip`, `{email}` in `notYouEmail`                                                      |
-| `twoFactorDisabled`    | `subject`, `preheader`, `heading`, `intro`, `changedAt`, `ip`, `ifYou`, `notYou`, `button`, `notYouEmail`                                                        | `{date}` in `changedAt`, `{ip}` in `ip`, `{email}` in `notYouEmail`                                                      |
-| `accountLocked`        | `subject`, `preheader`, `heading`, `intro`, `lockedUntil`, `ip`, `unlock`, `unlockButton`, `help`, `button`, `helpEmail`, `notYou`                               | `{date}` in `lockedUntil`, `{ip}` in `ip`, `{email}` in `helpEmail`                                                      |
+| Section                  | Keys                                                                                                                                                             | Placeholders                                                                                                             |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `common`                 | `greeting`, `greetingAnonymous`, `linkFallback`, `footerSupport`, `footerRights`, `minutes`, `hours`, `days`                                                     | `{name}` in `greeting`, `{count}` in the plural forms                                                                    |
+| `verifyEmail`            | `subject`, `preheader`, `heading`, `intro`, `button`, `expires`, `ignore`                                                                                        | `{duration}` in `expires`                                                                                                |
+| `resetPassword`          | `subject`, `preheader`, `heading`, `intro`, `button`, `expires`, `ignore`                                                                                        | `{duration}` in `expires`                                                                                                |
+| `passwordChanged`        | `subject`, `preheader`, `heading`, `intro`, `changedAt`, `ip`, `ifYou`, `notYou`, `button`, `notYouEmail`                                                        | `{date}` in `changedAt`, `{ip}` in `ip`, `{email}` in `notYouEmail`                                                      |
+| `verifyEmailChange`      | `subject`, `preheader`, `heading`, `intro`, `button`, `expires`, `ignore`                                                                                        | `{duration}` in `expires`                                                                                                |
+| `emailChangeRequested`   | `subject`, `preheader`, `heading`, `intro`, `requestedAt`, `ip`, `ifYou`, `notYouCancel`, `cancelButton`, `notYou`, `button`, `notYouEmail`                      | `{newEmail}` in `intro` and `ifYou`, `{date}` in `requestedAt`, `{ip}` in `ip`, `{email}` in `notYouEmail`               |
+| `emailChanged`           | `subject`, `preheader`, `heading`, `intro`, `newEmail`, `changedAt`, `ip`, `newAddress`, `ifYou`, `notYou`, `button`, `notYouEmail`                              | `{newEmail}` in `newEmail`, `{date}` in `changedAt`, `{ip}` in `ip`, `{email}` in `notYouEmail`                          |
+| `otpCode`                | `subject`, `preheader`, `heading`, `intro`, `expires`, `doNotShare`, `ignore`                                                                                    | `{code}` in `subject` and `preheader`, `{duration}` in `expires`                                                         |
+| `magicLink`              | `subject`, `preheader`, `heading`, `intro`, `button`, `expires`, `doNotShare`, `ignore`                                                                          | `{duration}` in `expires`                                                                                                |
+| `welcome`                | `subject`, `preheader`, `heading`, `intro`, `button`                                                                                                             |                                                                                                                          |
+| `newSignIn`              | `subject`, `preheader`, `heading`, `intro`, `signedInAt`, `device`, `location`, `ip`, `ifYou`, `notYouSecure`, `secureButton`, `notYou`, `button`, `notYouEmail` | `{date}` in `signedInAt`, `{device}` in `device`, `{location}` in `location`, `{ip}` in `ip`, `{email}` in `notYouEmail` |
+| `twoFactorEnabled`       | `subject`, `preheader`, `heading`, `intro`, `changedAt`, `ip`, `ifYou`, `notYou`, `button`, `notYouEmail`                                                        | `{date}` in `changedAt`, `{ip}` in `ip`, `{email}` in `notYouEmail`                                                      |
+| `twoFactorDisabled`      | `subject`, `preheader`, `heading`, `intro`, `changedAt`, `ip`, `ifYou`, `notYou`, `button`, `notYouEmail`                                                        | `{date}` in `changedAt`, `{ip}` in `ip`, `{email}` in `notYouEmail`                                                      |
+| `accountLocked`          | `subject`, `preheader`, `heading`, `intro`, `lockedUntil`, `ip`, `unlock`, `unlockButton`, `help`, `button`, `helpEmail`, `notYou`                               | `{date}` in `lockedUntil`, `{ip}` in `ip`, `{email}` in `helpEmail`                                                      |
+| `confirmAccountDeletion` | `subject`, `preheader`, `heading`, `intro`, `warning`, `button`, `expires`, `ignore`                                                                             | `{duration}` in `expires`                                                                                                |
+| `accountDeleted`         | `subject`, `preheader`, `heading`, `intro`, `farewell`, `notYou`, `button`, `notYouEmail`                                                                        | `{email}` in `notYouEmail`                                                                                               |
 
 The `Messages` type describes every key, so your editor shows what each text is for as you type.
 

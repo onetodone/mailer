@@ -27,6 +27,7 @@ const signInUrl = 'https://myapp.loc/sign-in?token=abc123'
 const code = 'K7Q2M9XW'
 const secureUrl = 'https://myapp.loc/security?token=abc123'
 const unlockUrl = 'https://myapp.loc/unlock?token=abc123'
+const confirmUrl = 'https://myapp.loc/account/delete?token=abc123'
 
 function options(locale: Locale = 'en', extra: Partial<RenderTemplateOptions> = {}): RenderTemplateOptions {
   return { branding, layout: defaultLayout, locale, messages: messages[locale], ...extra }
@@ -171,6 +172,21 @@ const snapshotCases: [file: string, render: (locale: Locale) => Promise<Rendered
         { userName: userNames[locale] ?? 'Lizzie', ip: '203.0.113.7', unlockUrl },
         options(locale),
       ),
+  ],
+  [
+    'confirm-account-deletion',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'confirmAccountDeletion',
+        { userName: userNames[locale] ?? 'Lizzie', confirmUrl, expiresInMinutes: 60 },
+        options(locale),
+      ),
+  ],
+  [
+    'account-deleted',
+    (locale) =>
+      renderTemplate(builtInTemplates, 'accountDeleted', { userName: userNames[locale] ?? 'Lizzie' }, options(locale)),
   ],
 ]
 
@@ -734,6 +750,84 @@ describe('accountLocked', () => {
     expect(error).toMatchObject({
       code: 'INVALID_PROPS',
       message: `Invalid props for template "accountLocked": ${detail}.`,
+    })
+  })
+})
+
+describe('confirmAccountDeletion', () => {
+  it('warns before the button and links it to the confirm URL', async () => {
+    const email = await renderTemplate(builtInTemplates, 'confirmAccountDeletion', { confirmUrl }, options())
+    expect(email.subject).toBe('Confirm account deletion')
+    expect(email.html.match(/href="https:\/\/myapp\.loc\/account\/delete\?token=abc123"/g)).toHaveLength(3)
+    expect(email.text).toContain(
+      `Click the button to confirm.\n\nOnce deleted, your account and your data can't be restored.\n\nDelete account: ${confirmUrl}`,
+    )
+    expect(email.text).toContain("If you didn't ask for this, just ignore this email. Your account won't be deleted.")
+  })
+
+  it('mentions expiry only with expiresInMinutes', async () => {
+    const without = await renderTemplate(builtInTemplates, 'confirmAccountDeletion', { confirmUrl }, options())
+    expect(without.text).not.toContain('expires')
+    const withExpiry = await renderTemplate(
+      builtInTemplates,
+      'confirmAccountDeletion',
+      { confirmUrl, expiresInMinutes: 60 },
+      options('be'),
+    )
+    expect(withExpiry.text).toContain('Спасылка дзейнічае 1 гадзіну.')
+  })
+
+  it.each<[string, Record<string, unknown>, string]>([
+    ['a missing confirm URL', {}, 'confirmUrl: is required'],
+    ['a relative confirm URL', { confirmUrl: '/delete' }, 'confirmUrl: must be an absolute http: or https: URL'],
+    ['a zero expiry', { confirmUrl, expiresInMinutes: 0 }, 'expiresInMinutes: must be a positive integer'],
+  ])('rejects %s', async (_case, props, detail) => {
+    const error: unknown = await renderTemplate(
+      builtInTemplates,
+      'confirmAccountDeletion',
+      props as never,
+      options(),
+    ).then(
+      () => undefined,
+      (reason: unknown) => reason,
+    )
+    expect(error).toBeInstanceOf(MailerError)
+    expect(error).toMatchObject({
+      code: 'INVALID_PROPS',
+      message: `Invalid props for template "confirmAccountDeletion": ${detail}.`,
+    })
+  })
+})
+
+describe('accountDeleted', () => {
+  it('renders without props', async () => {
+    const email = await renderTemplate(builtInTemplates, 'accountDeleted', {}, options())
+    expect(email.subject).toBe('Your account was deleted')
+    expect(email.text).toContain(
+      '\n\nHi there,\n\nYour My App account was deleted, as you asked.\n\nThanks for using My App.',
+    )
+    expect(email.html).toContain('<a href="mailto:support@myapp.loc"')
+    expect(email.text).toContain("If it wasn't you, write to us right away at support@myapp.loc.")
+  })
+
+  it('links the support button to the support URL', async () => {
+    const email = await renderTemplate(builtInTemplates, 'accountDeleted', { supportUrl }, options('be'))
+    expect(email.text).toContain(`Звярнуцца ў падтрымку: ${supportUrl}`)
+    expect(email.text).not.toContain('адразу напішыце нам')
+  })
+
+  it.each<[string, Record<string, unknown>, string]>([
+    ['a relative support URL', { supportUrl: '/help' }, 'supportUrl: must be an absolute http: or https: URL'],
+    ['an unknown prop', { deletedAt: new Date() }, 'has unknown key "deletedAt"'],
+  ])('rejects %s', async (_case, props, detail) => {
+    const error: unknown = await renderTemplate(builtInTemplates, 'accountDeleted', props, options()).then(
+      () => undefined,
+      (reason: unknown) => reason,
+    )
+    expect(error).toBeInstanceOf(MailerError)
+    expect(error).toMatchObject({
+      code: 'INVALID_PROPS',
+      message: `Invalid props for template "accountDeleted": ${detail}.`,
     })
   })
 })
