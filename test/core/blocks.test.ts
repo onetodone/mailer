@@ -17,6 +17,7 @@ const everyBlock: [name: keyof Ui, render: (ui: Ui) => Block][] = [
   ['button', (ui) => ui.button('Confirm email', url)],
   ['linkFallback', (ui) => ui.linkFallback(url)],
   ['code', (ui) => ui.code('123456')],
+  ['image', (ui) => ui.image('https://myapp.loc/chart.png', { alt: 'Sales chart' })],
   ['note', (ui) => ui.note("If this wasn't you, ignore this email.")],
   ['divider', (ui) => ui.divider()],
   ['spacer', (ui) => ui.spacer()],
@@ -144,6 +145,112 @@ describe('code', () => {
     const block = ui.code('482913')
     expect(block.html.value).toMatch(/font-family:ui-monospace[^"]*font-size:28px[^"]*">482913<\/td>/)
     expect(block.text).toBe('482913')
+  })
+})
+
+describe('image', () => {
+  const imageSize = (block: Block) => {
+    const tag = /<img [^>]*>/.exec(block.html.value)?.[0] ?? ''
+    return {
+      width: /\swidth="(\d+)"/.exec(tag)?.[1],
+      height: /\sheight="(\d+)"/.exec(tag)?.[1],
+      styleWidth: /[";]width:(\d+)px;/.exec(tag)?.[1],
+    }
+  }
+
+  it('renders an email-safe image from an http(s) URL', () => {
+    const block = ui.image('https://myapp.loc/chart.png?v=2&size=large', { alt: 'Sales in May', width: 300 })
+    expect(block.html.value).toContain(
+      '<img src="https://myapp.loc/chart.png?v=2&amp;size=large" width="300" alt="Sales in May" style="display:block;width:300px;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;',
+    )
+    expect(block.html.value).toContain(`color:${theme.mutedText};">`)
+    expect(block.html.value).toMatch(/^<table role="presentation"/)
+    expect(block.text).toBe('Sales in May')
+  })
+
+  it('shows an attachment through a cid: reference', () => {
+    expect(ui.image('cid:qr-code@myapp.loc', { alt: 'QR code' }).html.value).toContain(
+      '<img src="cid:qr-code@myapp.loc" ',
+    )
+    expect(ui.image(' CID:qr_1.png ', { alt: 'QR code' }).html.value).toContain('<img src="cid:qr_1.png" ')
+    expect(ui.image(new URL('cid:qr'), { alt: 'QR code' }).html.value).toContain('<img src="cid:qr" ')
+  })
+
+  it('normalizes URLs like safeUrl', () => {
+    expect(ui.image(new URL('HTTPS://MyApp.loc/a b.png'), { alt: '' }).html.value).toContain(
+      'src="https://myapp.loc/a%20b.png"',
+    )
+  })
+
+  it('escapes the alt text', () => {
+    const block = ui.image('cid:x', { alt: '" onerror="alert(1)' })
+    expect(block.html.value).toContain(' alt="&quot; onerror=&quot;alert(1)" ')
+    expect(block.text).toBe('" onerror="alert(1)')
+  })
+
+  it('keeps an empty alt for decorative images and adds nothing to the text', () => {
+    const block = ui.image('cid:divider', { alt: '' })
+    expect(block.html.value).toContain(' alt="" ')
+    expect(block.text).toBe('')
+  })
+
+  it('defaults to the full content width without a height', () => {
+    expect(imageSize(ui.image('cid:banner', { alt: 'Banner' }))).toEqual({
+      width: '534',
+      height: undefined,
+      styleWidth: '534',
+    })
+  })
+
+  it('sets the height attribute when given', () => {
+    expect(imageSize(ui.image('cid:qr', { alt: 'QR code', width: 200, height: 200 }))).toEqual({
+      width: '200',
+      height: '200',
+      styleWidth: '200',
+    })
+  })
+
+  it('caps the width at the content width and scales the height with it', () => {
+    expect(imageSize(ui.image('cid:wide', { alt: 'Wide', width: 1068, height: 400 }))).toEqual({
+      width: '534',
+      height: '200',
+      styleWidth: '534',
+    })
+  })
+
+  it.each([
+    [
+      { width: 199.6, height: 99.5 },
+      { width: '200', height: '100' },
+    ],
+    [{ width: 0 }, { width: '534', height: undefined }],
+    [
+      { width: Number.NaN, height: -1 },
+      { width: '534', height: undefined },
+    ],
+    [{ width: Number.POSITIVE_INFINITY }, { width: '534', height: undefined }],
+  ])('sanitizes the size %j', (size, expected) => {
+    expect(imageSize(ui.image('cid:x', { alt: 'x', ...size }))).toMatchObject(expected)
+  })
+
+  it.each([
+    'javascript:alert(1)',
+    'data:image/png;base64,iVBORw0KGgo=',
+    '/images/logo.png',
+    'cid:',
+    'cid:logo<script>',
+    'cid:logo"onerror=alert(1)',
+    'cid:%6Cogo',
+  ])('rejects the source %j', (src) => {
+    const error = catchError(() => ui.image(src, { alt: 'x' }))
+    expect(error).toBeInstanceOf(MailerError)
+    expect(error).toMatchObject({ code: 'UNSAFE_URL' })
+  })
+
+  it('explains what a cid: reference may contain', () => {
+    expect(catchError(() => ui.image('cid:a b', { alt: 'x' })).message).toBe(
+      'Invalid image source: a cid: reference must use only ASCII letters, digits, ".", "_", "-" and "@".',
+    )
   })
 })
 

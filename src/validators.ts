@@ -1,7 +1,8 @@
 import { z } from 'zod'
 
+import { contentIdRule, isContentId } from './core/content-id'
 import { safeUrl } from './core/html'
-import type { MailAddress, MailAddresses } from './transports/types'
+import type { Attachment, MailAddress, MailAddresses } from './transports/types'
 
 // Messages are phrased as predicates ("must be …", "is required") so they read
 // naturally after a field path such as `branding.theme.primary`.
@@ -183,6 +184,56 @@ export const headers = z.custom<Readonly<Record<string, string>>>().superRefine(
     else if (lineBreak.test(headerValue)) report('must not contain line breaks', [name])
   }
 })
+
+// CR and LF would split a MIME header; no other control character belongs in
+// a file name or a content type either.
+const controlCharacter = /\p{Cc}/u
+
+const headerText = z.string({ error: expected('a string') }).refine((value) => !controlCharacter.test(value), {
+  error: 'must not contain line breaks or other control characters',
+  abort: true,
+})
+
+const mimeType = /^[\w!#$&^.+-]+\/[\w!#$&^.+-]+(?:\s*;.*)?$/
+
+const attachment = z.strictObject(
+  {
+    filename: headerText.refine((value) => value.trim() !== '', { error: 'must not be empty' }),
+    content: z.custom<Uint8Array | string>((value) => typeof value === 'string' || value instanceof Uint8Array, {
+      error: expected('a string, a Buffer or a Uint8Array'),
+    }),
+    contentType: headerText
+      .regex(mimeType, {
+        error: (issue) => `must be a MIME type like "application/pdf", received ${describeInput(issue.input)}`,
+      })
+      .optional(),
+    cid: z
+      .string({ error: expected('a string') })
+      .refine(isContentId, {
+        error: (issue) => `must use only ${contentIdRule}, received ${describeInput(issue.input)}`,
+      })
+      .optional(),
+  },
+  { error: objectError },
+)
+
+export const attachments: z.ZodType<Attachment[], readonly Attachment[]> = z
+  .array(attachment, { error: expected('an array of attachments') })
+  .superRefine((list, ctx) => {
+    const seen = new Set<string>()
+    list.forEach(({ cid }, index) => {
+      if (cid === undefined) return
+      if (seen.has(cid)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: [index, 'cid'],
+          message: `must be unique, received ${JSON.stringify(cid)} again`,
+          input: cid,
+        })
+      }
+      seen.add(cid)
+    })
+  })
 
 export function isLocaleTag(value: string): boolean {
   try {

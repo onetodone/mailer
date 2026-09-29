@@ -5,13 +5,15 @@ import type { z } from 'zod'
  *
  * - `INVALID_CONFIG`: branding, theme or another setting failed validation.
  * - `INVALID_OPTIONS`: the options passed to `send` or `render` failed
- *   validation, such as an address, a header or the locale.
+ *   validation, such as an address, a header, an attachment or the locale,
+ *   or the HTML references a `cid:` that no attachment has.
  * - `INVALID_PROPS`: template props failed schema validation. `cause` holds the
  *   Standard Schema issues.
  * - `TRANSPORT_FAILED`: the transport could not deliver the email. `cause`
  *   holds the transport's error.
  * - `UNKNOWN_TEMPLATE`: no template is registered under the requested name.
- * - `UNSAFE_URL`: a URL is not an absolute `http:` or `https:` link.
+ * - `UNSAFE_URL`: a URL is not an absolute `http:` or `https:` link, or an
+ *   image source is neither such a link nor a valid `cid:` reference.
  */
 export type MailerErrorCode =
   'INVALID_CONFIG' | 'INVALID_OPTIONS' | 'INVALID_PROPS' | 'TRANSPORT_FAILED' | 'UNKNOWN_TEMPLATE' | 'UNSAFE_URL'

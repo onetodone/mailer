@@ -26,8 +26,9 @@
 - Texts in English and Belarusian. Override any text, or add a locale that falls back to English key by key.
 - Custom layouts and templates with the same typed API. Props are validated with any [Standard Schema](https://standardschema.dev) library, such as zod, valibot or arktype.
 - Table-based HTML with inline styles and an Outlook button fallback, plus a plain-text version of every email.
+- Attachments, such as invoices, and inline images through `cid:` for pictures without a public URL, such as QR codes.
 - SMTP delivery through nodemailer, memory and console transports for tests and development, or a transport of your own.
-- Safe defaults: interpolated values are escaped, links must be `http:` or `https:`, header injection is rejected, and hook events never contain the email body.
+- Safe defaults: interpolated values are escaped, links must be `http:` or `https:`, header injection is rejected, and hook events never contain the email body or attachment content.
 
 ## Requirements
 
@@ -166,6 +167,7 @@ Props are checked twice. TypeScript reports missing, unknown or mistyped props, 
 | `bcc`     | Blind carbon-copy recipients.                                                |
 | `replyTo` | Where replies go. Replaces the mailer's `replyTo` for this email.            |
 | `headers` | Extra message headers, such as `{ 'X-Entity-Ref-ID': 'order-1042' }`.        |
+| `attachments` | Files to attach and inline images. See [attachments](#attachments-and-inline-images). |
 | `locale`  | Locale of this email. Default: the mailer's `locale`.                        |
 | `props`   | Template props. Can be left out when every prop of the template is optional. |
 
@@ -186,7 +188,70 @@ The options are validated before anything is sent. These throw a `MailerError` w
 - a malformed address;
 - a line break in an address, a display name or a header value;
 - a header name with spaces, a colon or non-ASCII characters;
+- an attachment without `filename` or `content`, a line break or another control character in a file name or content type, a content type that is not a MIME type, or an invalid or repeated `cid`;
+- a `cid:` reference in the HTML without an attachment of that `cid`;
 - an unknown locale or option.
+
+### Attachments and inline images
+
+Pass files in `attachments`, such as an invoice your application generated. `orderShipped` is the custom template from [templates](#4-templates):
+
+```ts
+import { readFile } from 'node:fs/promises'
+
+await mailer.send('orderShipped', {
+  to: 'lizzie@example.com',
+  props: { orderId: '1042', trackUrl: 'https://example.com/orders/1042/tracking' },
+  attachments: [
+    { filename: 'invoice-1042.pdf', content: await readFile('invoices/1042.pdf') },
+    { filename: 'items.csv', content: 'sku,quantity\nA-17,2\n' },
+  ],
+})
+```
+
+| Field         | Description                                                                                                                                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `filename`    | Required. File name the recipient sees.                                                                                                                                                                      |
+| `content`     | Required. The file as a `Buffer` or `Uint8Array`, or text, which is sent as UTF-8.                                                                                                                           |
+| `contentType` | MIME type, such as `application/pdf`. Default: guessed from the extension of `filename` (PDF, office documents, CSV, text, calendar, common images), or `application/octet-stream`. A guessed text type of text content gets `; charset=utf-8`. |
+| `cid`         | Content-ID that makes the file an inline image, see below.                                                                                                                                                   |
+
+There is no `path` option: read files yourself, so every transport receives the same data.
+
+To show an image inside the email, such as a QR code generated for this recipient, attach it with a `cid` and reference it as `cid:<cid>`, for example with `ui.image` in a [custom template](#4-templates). Here `qrCodePng` is the image as a `Buffer`, such as the output of a QR code library:
+
+```ts
+import { createMailer, defineTemplate } from '@onetodone/mailer'
+import { z } from 'zod'
+
+const ticket = defineTemplate({
+  name: 'ticket',
+  schema: z.object({ eventName: z.string() }),
+  render: ({ props, ui }) => ({
+    subject: `Your ticket for ${props.eventName}`,
+    body: [
+      ui.heading(props.eventName),
+      ui.paragraph('Show this code at the entrance:'),
+      ui.image('cid:ticket-qr', { alt: 'Ticket QR code', width: 200, height: 200 }),
+    ],
+  }),
+})
+
+const mailer = createMailer({ transport, from, branding, templates: { ticket } })
+
+await mailer.send('ticket', {
+  to: 'lizzie@example.com',
+  props: { eventName: 'Spring Meetup' },
+  attachments: [{ filename: 'ticket.png', content: qrCodePng, cid: 'ticket-qr' }],
+})
+```
+
+- A `cid` consists of ASCII letters, digits, `.`, `_`, `-` and `@`, and is unique within one email. References are case-sensitive.
+- After rendering, `send` checks the whole HTML, layout included: every `cid:` reference needs an attachment with that `cid`. Otherwise `send` throws `INVALID_OPTIONS` naming the missing cid, and nothing is sent.
+- An attachment whose `cid` the HTML never references is sent as a regular attachment.
+- An image with a public URL needs no attachment: `ui.image('https://example.com/banner.png', { alt: 'Spring sale' })`.
+- Use PNG, JPEG or GIF for images in emails: Gmail and Outlook do not show SVG.
+- `render` takes no attachments and does not check `cid:` references.
 
 ### Rendering without sending
 
@@ -463,6 +528,7 @@ It returns the `subject`, an optional `preheader` (the inbox preview text) and t
 | `ui.button(label, url)`       | A button that also renders in Outlook for Windows.                                      |
 | `ui.linkFallback(url)`        | The link as text under a "copy this link" line, for readers whose button does not work. |
 | `ui.code(value)`              | A large monospace code, such as a one-time password.                                    |
+| `ui.image(src, { alt, width, height })` | An image from an `http:` or `https:` URL, or an [inline image](#attachments-and-inline-images) through `cid:`. `width` defaults to 534 px, the width of the content, and the image shrinks on narrow screens. The plain-text version shows `alt`. |
 | `ui.note(text)`               | Smaller muted text, such as "If this wasn't you, ignore this email."                    |
 | `ui.divider()`                | A horizontal rule.                                                                      |
 | `ui.spacer(size)`             | Vertical space in pixels. Default `16`.                                                 |
@@ -479,7 +545,7 @@ ui.paragraph(html`Read the <a href="${safeUrl(props.guideUrl)}">setup guide</a> 
 The plain-text version of that paragraph shows the link as `setup guide (https://…)`.
 
 - `safeUrl(url)` returns the normalized URL. It throws `UNSAFE_URL` for anything but an absolute `http:` or `https:` URL, such as `javascript:` or a relative path.
-- `ui.button` and `ui.linkFallback` check their URL the same way. Validate links in the schema, as `trackUrl` above does, to report bad links as `INVALID_PROPS` before rendering.
+- `ui.button`, `ui.linkFallback` and `ui.image` check their URL the same way; `ui.image` also accepts a `cid:` reference. Validate links in the schema, as `trackUrl` above does, to report bad links as `INVALID_PROPS` before rendering.
 - `raw(markup)` inserts trusted markup without escaping. Never pass user input to `raw` or `ui.raw`.
 
 #### Replacing a built-in template
@@ -581,11 +647,13 @@ const transport = smtpTransport(
 )
 ```
 
+Attachments with a `cid` go out as inline images next to the HTML, the others as regular attachments.
+
 A failed delivery rejects with `TRANSPORT_FAILED`, with nodemailer's error as `cause`. When the server accepts some recipients and rejects others, `send` resolves and lists them in `accepted` and `rejected`. `mailer.close()` closes the connections, including those of a transporter you passed in.
 
 ### Console
 
-`consoleTransport()` prints each email instead of sending it: the addresses, the subject and the plain-text version. Pass `log` to write somewhere other than `console.log`. The text contains links with tokens, so use it in development only.
+`consoleTransport()` prints each email instead of sending it: the addresses, the subject, the name, type and size of each attachment, and the plain-text version. Pass `log` to write somewhere other than `console.log`. The text contains links with tokens, so use it in development only.
 
 ```ts
 import { consoleTransport } from '@onetodone/mailer'
@@ -613,7 +681,13 @@ const apiTransport: MailTransport = {
     const response = await fetch('https://mail-api.example.com/v1/send', {
       method: 'POST',
       headers: { authorization: `Bearer ${process.env.MAIL_API_KEY}`, 'content-type': 'application/json' },
-      body: JSON.stringify(message),
+      body: JSON.stringify({
+        ...message,
+        attachments: message.attachments?.map(({ content, ...attachment }) => ({
+          ...attachment,
+          content: Buffer.from(content).toString('base64'),
+        })),
+      }),
     })
     if (!response.ok) throw new Error(`Mail API responded with ${response.status}`)
     const { id } = (await response.json()) as { id: string }
@@ -622,7 +696,9 @@ const apiTransport: MailTransport = {
 }
 ```
 
-`message` has `from`, `to`, `cc`, `bcc`, `replyTo`, `subject`, `html`, `text` and `headers`. Addresses keep the form the caller used: a string or a `{ name, address }` object, one or a list. Errors that are not a `MailerError` are wrapped in `TRANSPORT_FAILED`, with the original error as `cause`. Add an optional `close()` method if the transport holds connections.
+`message` has `from`, `to`, `cc`, `bcc`, `replyTo`, `subject`, `html`, `text`, `headers` and `attachments`. Addresses keep the form the caller used: a string or a `{ name, address }` object, one or a list. Errors that are not a `MailerError` are wrapped in `TRANSPORT_FAILED`, with the original error as `cause`. Add an optional `close()` method if the transport holds connections.
+
+Each attachment has `filename`, `content` (a `Uint8Array` or a string to send as UTF-8), `contentType`, which is always set, and `cid` on inline images only. A transport must deliver every attachment or throw, never drop one silently. Send attachments with a `cid` inline under that Content-ID, and the others as regular attachments.
 
 ## Testing
 
@@ -650,7 +726,7 @@ it('sends a verification link after sign-up', async () => {
 })
 ```
 
-Each entry in `sent` is the message the transport received: the addresses as passed, `subject`, `html`, `text` and `headers`. Hand the mailer to your code the way you pass other dependencies, so tests can use one built on `memoryTransport`.
+Each entry in `sent` is the message the transport received: the addresses as passed, `subject`, `html`, `text`, `headers` and `attachments`, with `contentType` filled in. Hand the mailer to your code the way you pass other dependencies, so tests can use one built on `memoryTransport`.
 
 To check what an email says without sending it, use `render`:
 
@@ -693,10 +769,11 @@ const mailer = createMailer({
   })
   ```
 
-- Events carry `template`, `locale`, `from`, `to`, `cc`, `bcc`, `replyTo`, `headers` and `durationMs`, the time from the `send` call to its outcome.
+- Events carry `template`, `locale`, `from`, `to`, `cc`, `bcc`, `replyTo`, `headers`, `attachments` and `durationMs`, the time from the `send` call to its outcome.
+- `attachments` lists the `filename`, `contentType` and `size` in bytes of each file, never its content. It is left out when the options fail validation.
 - `onSent` also gets `subject` and the transport's `result`.
 - `onError` gets `subject` (or `undefined` when sending failed before rendering) and the `error`. It fires for invalid options and props too.
-- Events never contain the HTML, the plain text or the props. Links in emails usually carry tokens, so this keeps events safe to log as they are.
+- Events never contain the HTML, the plain text, the props or attachment content. Links in emails usually carry tokens, so this keeps events safe to log as they are.
 - Hooks run for `send` only, not for `render`.
 
 ## Errors
@@ -706,11 +783,11 @@ The package throws `MailerError`, which has a `code` to branch on:
 | Code               | Thrown when                                                                                              | `cause`               |
 | ------------------ | -------------------------------------------------------------------------------------------------------- | --------------------- |
 | `INVALID_CONFIG`   | `createMailer` or `smtpTransport` gets invalid settings.                                                 | The validation error  |
-| `INVALID_OPTIONS`  | `send` or `render` gets an invalid address, header, locale or option.                                    | The validation error  |
+| `INVALID_OPTIONS`  | `send` or `render` gets an invalid address, header, attachment, locale or option, or the HTML references a `cid:` without an attachment. | The validation error, if any |
 | `INVALID_PROPS`    | Template props fail the template's schema.                                                               | The schema's issues   |
 | `UNKNOWN_TEMPLATE` | No template is registered under the requested name.                                                      |                       |
 | `TRANSPORT_FAILED` | The transport could not deliver the email.                                                               | The transport's error |
-| `UNSAFE_URL`       | `safeUrl`, `ui.button` or `ui.linkFallback` gets a link that is not an absolute `http:` or `https:` URL. |                       |
+| `UNSAFE_URL`       | `safeUrl`, `ui.button`, `ui.linkFallback` or `ui.image` gets a link that is not an absolute `http:` or `https:` URL, or `ui.image` gets an invalid `cid:` reference. |                       |
 
 - Messages name the setting or prop and the problem. They never include link values, because links usually carry tokens.
 - Errors thrown by your own template or layout code pass through unchanged, as does a `MailerError` thrown by your own transport.
@@ -734,8 +811,8 @@ try {
 
 - Every value inserted into email HTML is escaped: in built-in templates, in `ui` blocks and in the `html` tag. `raw` and `ui.raw` are the only ways to insert unescaped markup, so never pass user input to them.
 - Links in buttons, fallback links and built-in props must be absolute `http:` or `https:` URLs. `javascript:`, `data:` and relative links are rejected.
-- Line breaks are rejected in addresses, display names and header values, which blocks header injection whatever the transport.
-- Hook events leave out the email body and the props, and error messages never repeat link values, so both are safe to log.
+- Line breaks are rejected in addresses, display names and header values, and all control characters in attachment file names and content types, which blocks header injection whatever the transport.
+- Hook events leave out the email body, the props and attachment content, and error messages never repeat link values or attachment content, so both are safe to log.
 - `consoleTransport` prints links with tokens. Use it in development only.
 - For deliverability, send from a domain with SPF, DKIM and DMARC set up. Every email includes a plain-text version.
 

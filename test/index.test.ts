@@ -2,7 +2,10 @@ import { describe, expect, expectTypeOf, it } from 'vitest'
 
 import * as mailer from '../src/index'
 import type {
+  Attachment,
+  AttachmentInfo,
   Branding,
+  ImageOptions,
   LayoutContext,
   Locale,
   LocaleMessages,
@@ -18,6 +21,7 @@ import type {
   MemoryTransport,
   MessageKey,
   MessagesOverrides,
+  OutgoingAttachment,
   OutgoingMessage,
   PasswordChangedProps,
   RenderedEmail,
@@ -62,6 +66,7 @@ describe('main entry', () => {
     expectTypeOf<'common.minutes'>().not.toExtend<MessageKey>()
     expectTypeOf<TemplateRenderContext<{ id: string }>['t']>().toEqualTypeOf<Translate>()
     expectTypeOf<'INVALID_PROPS' | 'UNKNOWN_TEMPLATE'>().toExtend<MailerErrorCode>()
+    expectTypeOf<TemplateRenderContext<unknown>['ui']['image']>().parameter(1).toEqualTypeOf<ImageOptions>()
     const template = mailer.defineTemplate({
       name: 'ping',
       schema: { '~standard': { version: 1, vendor: 'test', validate: () => ({ value: { id: 'x' } }) } },
@@ -81,6 +86,8 @@ describe('main entry', () => {
     expectTypeOf<MemoryTransport>().toExtend<MailTransport>()
     expectTypeOf(mailer.consoleTransport()).toEqualTypeOf<MailTransport>()
     expectTypeOf<'TRANSPORT_FAILED'>().toExtend<MailerErrorCode>()
+    expectTypeOf<NonNullable<OutgoingMessage['attachments']>[number]>().toEqualTypeOf<OutgoingAttachment>()
+    expectTypeOf<OutgoingAttachment['contentType']>().toEqualTypeOf<string>()
   })
 
   it('exposes types for the mailer', () => {
@@ -95,6 +102,8 @@ describe('main entry', () => {
     expectTypeOf<MailSentEvent>().toExtend<MailEvent>()
     expectTypeOf<MailErrorEvent['error']>().toEqualTypeOf<unknown>()
     expectTypeOf<SendOptions>().toHaveProperty('to')
+    expectTypeOf<NonNullable<SendOptions['attachments']>[number]>().toEqualTypeOf<Attachment>()
+    expectTypeOf<NonNullable<MailEvent['attachments']>[number]>().toEqualTypeOf<AttachmentInfo>()
     expectTypeOf<RenderOptions>().toHaveProperty('locale')
     expectTypeOf<VerifyEmailProps>().toHaveProperty('verifyUrl')
     expectTypeOf<ResetPasswordProps>().toHaveProperty('resetUrl')

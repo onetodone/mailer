@@ -2,7 +2,7 @@ import { createTransport } from 'nodemailer'
 import { z } from 'zod'
 
 import { MailerError, parseConfig } from '../errors'
-import type { MailAddress, MailAddresses, MailTransport } from '../transports/types'
+import type { MailAddress, MailAddresses, MailTransport, OutgoingAttachment } from '../transports/types'
 import { expected, flag, nonEmptyText, objectError, port, positiveInteger } from '../validators'
 
 /** SMTP connection settings for {@link smtpTransport}. */
@@ -74,6 +74,15 @@ const smtpOptionsSchema: z.ZodType<SmtpTransportOptions, SmtpTransportOptions> =
 /** An address in the form nodemailer accepts. */
 type NodemailerAddress = string | { name: string; address: string }
 
+/** An attachment in the form nodemailer accepts. */
+interface NodemailerAttachment {
+  filename: string
+  content: string | Buffer
+  contentType: string
+  contentDisposition: 'attachment' | 'inline'
+  cid?: string
+}
+
 /**
  * The part of a nodemailer transporter that {@link smtpTransport} uses. The
  * result of any `nodemailer.createTransport(...)` call fits.
@@ -90,6 +99,7 @@ export interface NodemailerTransporter {
     html: string
     text: string
     headers?: Record<string, string> | undefined
+    attachments?: NodemailerAttachment[] | undefined
   }): Promise<{
     messageId: string
     accepted?: readonly (string | { address: string })[] | undefined
@@ -119,6 +129,14 @@ function toNodemailerAddresses(addresses: MailAddresses | undefined): Nodemailer
   return addresses === undefined ? undefined : [addresses].flat().map(toNodemailerAddress)
 }
 
+function toNodemailerAttachment({ filename, content, contentType, cid }: OutgoingAttachment): NodemailerAttachment {
+  const data =
+    typeof content === 'string' ? content : Buffer.from(content.buffer, content.byteOffset, content.byteLength)
+  return cid === undefined
+    ? { filename, content: data, contentType, contentDisposition: 'attachment' }
+    : { filename, content: data, contentType, contentDisposition: 'inline', cid }
+}
+
 function toAddressStrings(
   addresses: readonly (string | { address: string })[] | undefined,
 ): readonly string[] | undefined {
@@ -139,6 +157,9 @@ function describeFailure(error: unknown): string {
  * be installed next to this package. Pass connection settings, or a
  * transporter from `nodemailer.createTransport()` for anything the settings
  * do not cover, such as DKIM signing or OAuth2.
+ *
+ * Attachments with a `cid` go out inline, next to the HTML; the others as
+ * regular attachments.
  *
  * Send failures reject with a {@link MailerError} with code `TRANSPORT_FAILED`
  * and nodemailer's error as `cause`. When the server accepts some recipients
@@ -178,6 +199,7 @@ export function smtpTransport(options: SmtpTransportOptions | NodemailerTranspor
           html: message.html,
           text: message.text,
           headers: message.headers === undefined ? undefined : { ...message.headers },
+          attachments: message.attachments?.map(toNodemailerAttachment),
         })
         return {
           messageId: info.messageId,

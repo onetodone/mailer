@@ -1,3 +1,5 @@
+import { MailerError } from '../errors'
+import { contentIdRule, isContentId } from './content-id'
 import { html, raw as rawHtml, safeUrl, toPlainText, type SafeHtml } from './html'
 import type { Theme } from './theme'
 
@@ -19,6 +21,22 @@ export interface UiMessages {
 export interface HeadingOptions {
   /** Heading level. Default `1`. */
   readonly level?: 1 | 2 | 3 | undefined
+}
+
+/** Options for {@link Ui.image}. */
+export interface ImageOptions {
+  /**
+   * Text for screen readers and for clients that block images; the
+   * plain-text version shows it too. Use `''` for a purely decorative image.
+   */
+  readonly alt: string
+  /** Width in pixels, at most 534 (the width of the content). Default `534`. */
+  readonly width?: number | undefined
+  /**
+   * Height in pixels, in the image's aspect ratio to `width`. Reserves space
+   * while images are blocked; Outlook on Windows uses it as the height.
+   */
+  readonly height?: number | undefined
 }
 
 /**
@@ -46,6 +64,15 @@ export interface Ui {
   readonly linkFallback: (url: string | URL) => Block
   /** A large monospace code, such as a one-time password. */
   readonly code: (value: string) => Block
+  /**
+   * An image from an absolute http(s) URL, or an attachment shown inline
+   * through `cid:<cid>`. It shrinks to fit narrow screens. The plain-text
+   * version shows the alt text.
+   *
+   * @throws {MailerError} With code `UNSAFE_URL` unless `src` is an absolute
+   * http(s) URL or a `cid:` reference with a valid Content-ID.
+   */
+  readonly image: (src: string | URL, options: ImageOptions) => Block
   /** Muted secondary text, such as "If this wasn't you, ignore this email." */
   readonly note: (content: string | SafeHtml) => Block
   /** A horizontal rule. */
@@ -67,6 +94,29 @@ const contentWidth = 534
 // VML shapes need a fixed width, so it is estimated from the label length.
 function buttonWidth(label: string): number {
   return Math.min(contentWidth, Math.max(160, label.length * 10 + 56))
+}
+
+function imageSource(src: string | URL): string {
+  const value = String(src).trim()
+  if (!/^cid:/i.test(value)) return safeUrl(src)
+  const id = value.slice('cid:'.length)
+  if (!isContentId(id)) {
+    throw new MailerError('UNSAFE_URL', `Invalid image source: a cid: reference must use only ${contentIdRule}.`)
+  }
+  return `cid:${id}`
+}
+
+function validSize(value: number | undefined): number | undefined {
+  return value !== undefined && Number.isFinite(value) && value >= 1 ? Math.round(value) : undefined
+}
+
+// Outlook on Windows ignores max-width, so a wider image would stretch the
+// card. When the width is capped, the height shrinks by the same ratio.
+function imageSize(options: ImageOptions): { width: number; height: number | undefined } {
+  const requested = validSize(options.width) ?? contentWidth
+  const width = Math.min(requested, contentWidth)
+  const height = validSize(options.height)
+  return { width, height: height === undefined ? undefined : Math.max(1, Math.round((height * width) / requested)) }
 }
 
 function inline(content: string | SafeHtml): Block {
@@ -126,6 +176,18 @@ export function createUi({ theme, messages }: { theme: Theme; messages: UiMessag
       ),
       text: value,
     }),
+
+    image: (src, options) => {
+      const source = imageSource(src)
+      const { width, height } = imageSize(options)
+      const heightAttribute = height === undefined ? '' : html` height="${height}"`
+      return {
+        html: spaced(
+          html`<img src="${source}" width="${width}"${heightAttribute} alt="${options.alt}" style="display:block;width:${width}px;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;font-family:${fontFamily};font-size:14px;line-height:20px;color:${theme.mutedText};">`,
+        ),
+        text: options.alt,
+      }
+    },
 
     note: (text) => {
       const content = inline(text)
