@@ -65,6 +65,35 @@ describe('consoleTransport', () => {
     ])
   })
 
+  it('lists the attachments after the subject', async () => {
+    const { entries, transport } = capture()
+
+    await transport.send({
+      ...message,
+      attachments: [
+        { filename: 'note.txt', content: 'Ліза', contentType: 'text/plain; charset=utf-8' },
+        { filename: 'invoice.pdf', content: new Uint8Array(12_646), contentType: 'application/pdf' },
+        { filename: 'qr.png', content: new Uint8Array(1024), contentType: 'image/png', cid: 'qr@myapp.loc' },
+        { filename: 'video.mp4', content: new Uint8Array(3 * 1024 * 1024 + 300_000), contentType: 'video/mp4' },
+      ],
+    })
+
+    expect(entries[0]?.split('\n').slice(3, 6)).toEqual([
+      'Subject: Confirm your email',
+      'Attachments: note.txt (text/plain; charset=utf-8, 8 B), invoice.pdf (application/pdf, 12.3 KB), qr.png (image/png, 1.0 KB, inline cid:qr@myapp.loc), video.mp4 (video/mp4, 3.3 MB)',
+      '',
+    ])
+    expect(entries[0]).not.toContain('Ліза')
+  })
+
+  it('prints no attachments line for an empty list', async () => {
+    const { entries, transport } = capture()
+
+    await transport.send({ ...message, attachments: [] })
+
+    expect(entries[0]).not.toContain('Attachments:')
+  })
+
   it('leaves out the HTML version', async () => {
     const { entries, transport } = capture()
 

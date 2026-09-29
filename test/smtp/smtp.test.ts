@@ -25,6 +25,18 @@ const fullMessage: OutgoingMessage = {
   headers: { 'X-Entity-Ref-ID': '42' },
 }
 
+const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+
+const withAttachments: OutgoingMessage = {
+  ...message,
+  html: '<p>Hello</p><img src="cid:qr@myapp.loc" alt="QR code">',
+  attachments: [
+    { filename: 'invoice-1042.pdf', content: Buffer.from('%PDF-1.7 invoice'), contentType: 'application/pdf' },
+    { filename: 'orders.csv', content: 'id,name\n1,Ліза', contentType: 'text/csv; charset=utf-8' },
+    { filename: 'qr.png', content: png, contentType: 'image/png', cid: 'qr@myapp.loc' },
+  ],
+}
+
 let server: TestSmtpServer | undefined
 
 afterEach(async () => {
@@ -104,6 +116,28 @@ describe('smtpTransport over SMTP', () => {
     expect(data).toContain('<p>Hello</p>')
     expect(data).not.toMatch(/^Bcc:/im)
     expect(data).not.toContain('hidden@example.com')
+  })
+
+  it('delivers regular attachments and inline images', async () => {
+    const { port, mails } = await startServer()
+    const transport = smtpTransport({ host: '127.0.0.1', port })
+
+    await transport.send(withAttachments)
+
+    const data = mails[0]?.data ?? ''
+    expect(data).toMatch(/^Content-Type: multipart\/mixed;/im)
+    expect(data).toMatch(/^Content-Type: multipart\/related;/im)
+    expect(data).toMatch(/^Content-Type: application\/pdf; name="?invoice-1042\.pdf"?$/im)
+    expect(data).toMatch(/^Content-Disposition: attachment; filename="?invoice-1042\.pdf"?$/im)
+    expect(data).toContain(Buffer.from('%PDF-1.7 invoice').toString('base64'))
+    expect(data).toMatch(/^Content-Type: text\/csv; charset=utf-8; name="?orders\.csv"?$/im)
+    expect(data).toMatch(/^Content-Disposition: attachment; filename="?orders\.csv"?$/im)
+    expect(data).toMatch(/^Content-Type: image\/png; name="?qr\.png"?$/im)
+    expect(data).toMatch(/^Content-Disposition: inline; filename="?qr\.png"?$/im)
+    expect(data).toMatch(/^Content-ID: <qr@myapp\.loc>$/im)
+    expect(data).toContain(Buffer.from(png).toString('base64'))
+    const related = data.slice(data.search(/multipart\/related/i))
+    expect(related).toContain('<img src="cid:qr@myapp.loc" alt="QR code">')
   })
 
   it('logs in with the credentials', async () => {
@@ -209,6 +243,50 @@ describe('smtpTransport with a nodemailer transporter', () => {
     })
   })
 
+  it('maps attachments to nodemailer attachments with an explicit disposition', async () => {
+    const transporter = fakeTransporter(() => Promise.resolve({ messageId: '<1@test>' }))
+
+    await smtpTransport(transporter).send(withAttachments)
+
+    const attachments = transporter.sendMail.mock.calls[0]?.[0].attachments
+    expect(attachments).toEqual([
+      {
+        filename: 'invoice-1042.pdf',
+        content: Buffer.from('%PDF-1.7 invoice'),
+        contentType: 'application/pdf',
+        contentDisposition: 'attachment',
+      },
+      {
+        filename: 'orders.csv',
+        content: 'id,name\n1,Ліза',
+        contentType: 'text/csv; charset=utf-8',
+        contentDisposition: 'attachment',
+      },
+      {
+        filename: 'qr.png',
+        content: Buffer.from(png),
+        contentType: 'image/png',
+        contentDisposition: 'inline',
+        cid: 'qr@myapp.loc',
+      },
+    ])
+    expect(Buffer.isBuffer(attachments?.[2]?.content)).toBe(true)
+  })
+
+  it('shares the memory of Uint8Array content', async () => {
+    const transporter = fakeTransporter(() => Promise.resolve({ messageId: '<1@test>' }))
+    const content = new Uint8Array(new ArrayBuffer(16), 4, 8).fill(7)
+
+    await smtpTransport(transporter).send({
+      ...message,
+      attachments: [{ filename: 'slice.bin', content, contentType: 'application/octet-stream' }],
+    })
+
+    const sent = transporter.sendMail.mock.calls[0]?.[0].attachments?.[0]?.content
+    expect(sent).toEqual(Buffer.alloc(8, 7))
+    expect(Buffer.isBuffer(sent) && sent.buffer).toBe(content.buffer)
+  })
+
   it('leaves optional fields out', async () => {
     const transporter = fakeTransporter(() => Promise.resolve({ messageId: '<1@test>' }))
 
@@ -216,7 +294,13 @@ describe('smtpTransport with a nodemailer transporter', () => {
 
     expect(result).toEqual({ messageId: '<1@test>' })
     expect(transporter.sendMail).toHaveBeenCalledWith(
-      expect.objectContaining({ to: ['user@example.com'], cc: undefined, bcc: undefined, headers: undefined }),
+      expect.objectContaining({
+        to: ['user@example.com'],
+        cc: undefined,
+        bcc: undefined,
+        headers: undefined,
+        attachments: undefined,
+      }),
     )
   })
 

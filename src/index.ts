@@ -1,7 +1,7 @@
 export { MailerError, type MailerErrorCode } from './errors'
 export { html, raw, safeUrl, type HtmlValue, type SafeHtml } from './core/html'
 export type { Branding, ResolvedBranding, Theme, ThemeInput } from './core/theme'
-export type { Block, HeadingOptions, Ui, UiMessages } from './core/blocks'
+export type { Block, HeadingOptions, ImageOptions, Ui, UiMessages } from './core/blocks'
 export {
   defaultLayout,
   defineLayout,
@@ -22,8 +22,16 @@ export type { RenderedEmail } from './templates/render'
 export type { VerifyEmailProps } from './templates/verify-email'
 export type { ResetPasswordProps } from './templates/reset-password'
 export type { PasswordChangedProps } from './templates/password-changed'
-export type { MailAddress, MailAddresses, MailTransport, OutgoingMessage, SendResult } from './transports/types'
+export type {
+  Attachment,
+  MailAddress,
+  MailAddresses,
+  MailTransport,
+  OutgoingAttachment,
+  OutgoingMessage,
+  SendResult,
+} from './transports/types'
 export { memoryTransport, type MemoryTransport } from './transports/memory'
 export { consoleTransport, type ConsoleTransportOptions } from './transports/console'
-export type { MailerConfig, MailErrorEvent, MailEvent, MailSentEvent } from './config'
+export type { AttachmentInfo, MailerConfig, MailErrorEvent, MailEvent, MailSentEvent } from './config'
 export { createMailer, type Mailer, type RenderOptions, type SendOptions } from './mailer'

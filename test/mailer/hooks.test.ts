@@ -2,7 +2,9 @@ import { inspect } from 'node:util'
 
 import { afterEach, beforeEach, describe, expect, expectTypeOf, it, vi, type MockInstance } from 'vitest'
 
-import type { MailErrorEvent, MailSentEvent } from '../../src/config'
+import type { AttachmentInfo, MailErrorEvent, MailSentEvent } from '../../src/config'
+import { html } from '../../src/core/html'
+import { defineLayout } from '../../src/core/layout'
 import { MailerError } from '../../src/errors'
 import { createMailer } from '../../src/mailer'
 import { memoryTransport } from '../../src/transports/memory'
@@ -103,6 +105,43 @@ describe('onSent', () => {
       'to',
     ])
     expectNoToken(sent[0])
+  })
+
+  it('describes attachments without their content', async () => {
+    const { sent, onSent } = hooks()
+    const transport = memoryTransport()
+    const mailer = createMailer({ transport, from, branding, onSent })
+
+    await mailer.send('verifyEmail', {
+      to,
+      props: { verifyUrl },
+      attachments: [
+        { filename: 'token.txt', content: `Your token: ${token}` },
+        { filename: 'token.bin', content: Buffer.from(token), contentType: 'application/x-token' },
+      ],
+    })
+
+    expect(sent[0]?.attachments).toStrictEqual([
+      { filename: 'token.txt', contentType: 'text/plain; charset=utf-8', size: 28 },
+      { filename: 'token.bin', contentType: 'application/x-token', size: 16 },
+    ])
+    expect(transport.sent[0]?.attachments?.[0]?.content).toBe(`Your token: ${token}`)
+    expectNoToken(sent[0])
+  })
+
+  it('counts attachment sizes in bytes', async () => {
+    const { sent, onSent } = hooks()
+    const mailer = createMailer({ transport: memoryTransport(), from, branding, onSent })
+
+    await mailer.send('passwordChanged', {
+      to,
+      attachments: [
+        { filename: 'name.txt', content: 'Ліза' },
+        { filename: 'slice.bin', content: new Uint8Array(new ArrayBuffer(16), 4, 8) },
+      ],
+    })
+
+    expect(sent[0]?.attachments?.map((attachment) => attachment.size)).toEqual([8, 8])
   })
 
   it('is awaited before send resolves', async () => {
@@ -207,6 +246,35 @@ describe('onError', () => {
     expectNoToken(failed[0])
   })
 
+  it('describes the attachments when the HTML references a missing cid', async () => {
+    const { failed, onError } = hooks()
+    const layout = defineLayout(({ content }) => ({ html: html`<img src="cid:logo">${content.html}`, text: '' }))
+    const mailer = createMailer({ transport: memoryTransport(), from, branding, layout, onError })
+
+    await mailer
+      .send('passwordChanged', { to, attachments: [{ filename: 'secret.txt', content: token, cid: 'logo2' }] })
+      .catch(() => undefined)
+
+    expect(failed[0]?.attachments).toStrictEqual([
+      { filename: 'secret.txt', contentType: 'text/plain; charset=utf-8', size: token.length },
+    ])
+    expect(failed[0]?.subject).toBe('Your password was changed')
+    expectNoToken(failed[0])
+  })
+
+  it('leaves attachments out when the options are invalid', async () => {
+    const { failed, onError } = hooks()
+    const mailer = createMailer({ transport: memoryTransport(), from, branding, onError })
+
+    await mailer
+      .send('passwordChanged', { to, attachments: [{ filename: 'a\r\n.txt', content: token }] })
+      .catch(() => undefined)
+
+    expect((failed[0]?.error as MailerError).code).toBe('INVALID_OPTIONS')
+    expect(failed[0]).not.toHaveProperty('attachments')
+    expectNoToken(failed[0])
+  })
+
   it('receives the error for invalid options, with the options as passed', async () => {
     const { failed, onError } = hooks()
     const mailer = createMailer({ transport: memoryTransport(), from, branding, onError })
@@ -276,5 +344,7 @@ describe('hook types', () => {
     })
     expectTypeOf<MailSentEvent>().not.toHaveProperty('html')
     expectTypeOf<MailSentEvent>().not.toHaveProperty('props')
+    expectTypeOf<NonNullable<MailSentEvent['attachments']>[number]>().toEqualTypeOf<AttachmentInfo>()
+    expectTypeOf<AttachmentInfo>().not.toHaveProperty('content')
   })
 })

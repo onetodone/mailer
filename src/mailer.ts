@@ -2,10 +2,12 @@ import { inspect } from 'node:util'
 
 import { z } from 'zod'
 
+import { describeAttachment, linkInlineImages, withContentType } from './attachments'
 import {
   configSchema,
   describeLocales,
   knownLocales,
+  type AttachmentInfo,
   type CustomTemplates,
   type MailerConfig,
   type MailErrorEvent,
@@ -18,8 +20,8 @@ import { buildMessages, type Locale, type LocaleMessages, type MessagesOverrides
 import { builtInTemplates, type BuiltInTemplates } from './templates/built-in'
 import type { Template, TemplateProps, TemplateRegistry } from './templates/define'
 import { renderTemplate, type RenderedEmail } from './templates/render'
-import type { MailAddresses, OutgoingMessage, SendResult } from './transports/types'
-import { describeInput, headers, isRecord, mailAddresses, objectError } from './validators'
+import type { Attachment, MailAddresses, OutgoingMessage, SendResult } from './transports/types'
+import { attachments, describeInput, headers, isRecord, mailAddresses, objectError } from './validators'
 
 /** Built-in templates merged with custom ones; a custom template replaces a built-in one with the same name. */
 export type WithBuiltIns<Custom> = {
@@ -47,8 +49,9 @@ type PropsOption<T> =
       }
 
 /**
- * Options for {@link Mailer.send}: recipients, headers, locale and the
- * template's props. `props` may be left out when every prop is optional.
+ * Options for {@link Mailer.send}: recipients, headers, attachments, locale
+ * and the template's props. `props` may be left out when every prop is
+ * optional.
  */
 export type SendOptions<T = Template, L extends string = Locale> = {
   /** Recipients: one address or a list. */
@@ -61,6 +64,12 @@ export type SendOptions<T = Template, L extends string = Locale> = {
   readonly replyTo?: MailAddresses | undefined
   /** Extra message headers, such as `{ 'X-Entity-Ref-ID': '42' }`. Values must not contain line breaks. */
   readonly headers?: Readonly<Record<string, string>> | undefined
+  /**
+   * Files to attach, such as an invoice. An attachment with a `cid` is an
+   * inline image the HTML shows through `cid:<cid>`, and every `cid:` the HTML
+   * references needs an attachment with that `cid`.
+   */
+  readonly attachments?: readonly Attachment[] | undefined
   /** Locale of this email. Default: the mailer's locale. */
   readonly locale?: L | undefined
 } & PropsOption<T>
@@ -82,8 +91,9 @@ export interface Mailer<Templates = BuiltInTemplates, L extends string = Locale>
   /**
    * Renders a template and hands the email to the transport.
    *
-   * @throws {MailerError} `INVALID_OPTIONS` for invalid addresses, headers or
-   * locale, `UNKNOWN_TEMPLATE`, `INVALID_PROPS`, or `TRANSPORT_FAILED` with the
+   * @throws {MailerError} `INVALID_OPTIONS` for invalid addresses, headers,
+   * attachments or locale, or a `cid:` in the HTML without an attachment;
+   * `UNKNOWN_TEMPLATE`, `INVALID_PROPS`, or `TRANSPORT_FAILED` with the
    * transport's error as `cause`. Errors thrown by template or layout code
    * pass through unchanged.
    *
@@ -189,6 +199,7 @@ export function createMailer<
       bcc: mailAddresses.optional(),
       replyTo: mailAddresses.optional(),
       headers: headers.optional(),
+      attachments: attachments.optional(),
       locale,
       props: z.unknown().optional(),
     },
@@ -220,6 +231,7 @@ export function createMailer<
     const input: SendInput = isRecord(options) ? options : {}
     const replyTo = input.replyTo ?? settings.replyTo
     const emailLocale = typeof input.locale === 'string' ? input.locale : defaultLocale
+    let attachmentsInfo: AttachmentInfo[] | undefined
     const event = () =>
       withoutUndefined({
         template: name,
@@ -230,13 +242,23 @@ export function createMailer<
         bcc: input.bcc,
         replyTo,
         headers: input.headers,
+        attachments: attachmentsInfo,
         durationMs: performance.now() - started,
       }) as MailEvent
 
     let subject: string | undefined
     let result: SendResult
     try {
-      const { to, cc, bcc, headers: extraHeaders, props } = parseOptions(sendOptions, options, 'send')
+      const {
+        to,
+        cc,
+        bcc,
+        headers: extraHeaders,
+        attachments: passed,
+        props,
+      } = parseOptions(sendOptions, options, 'send')
+      const files = passed?.map(withContentType)
+      attachmentsInfo = files?.map(describeAttachment)
       const email = await renderEmail(name, props, emailLocale)
       subject = email.subject
       result = await deliver(
@@ -250,6 +272,7 @@ export function createMailer<
           html: email.html,
           text: email.text,
           headers: extraHeaders,
+          attachments: linkInlineImages(email.html, files),
         }),
       )
     } catch (error) {

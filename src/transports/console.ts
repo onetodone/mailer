@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 
-import type { MailAddress, MailAddresses, MailTransport, OutgoingMessage } from './types'
+import { contentSize } from '../attachments'
+import type { MailAddress, MailAddresses, MailTransport, OutgoingAttachment, OutgoingMessage } from './types'
 
 /** Options for {@link consoleTransport}. */
 export interface ConsoleTransportOptions {
@@ -23,6 +24,16 @@ function formatAddresses(addresses: MailAddresses): string {
   return [addresses].flat().map(formatAddress).join(', ')
 }
 
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return `${String(bytes)} B`
+  return bytes < 1024 * 1024 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function formatAttachment({ filename, content, contentType, cid }: OutgoingAttachment): string {
+  const details = [contentType, formatSize(contentSize(content)), ...(cid === undefined ? [] : [`inline cid:${cid}`])]
+  return `${filename} (${details.join(', ')})`
+}
+
 function formatMessage(message: OutgoingMessage): string {
   const headers: [string, MailAddresses | undefined][] = [
     ['From', message.from],
@@ -35,6 +46,9 @@ function formatMessage(message: OutgoingMessage): string {
     separator,
     ...headers.flatMap(([name, value]) => (value === undefined ? [] : [`${name}: ${formatAddresses(value)}`])),
     `Subject: ${message.subject}`,
+    ...(message.attachments === undefined || message.attachments.length === 0
+      ? []
+      : [`Attachments: ${message.attachments.map(formatAttachment).join(', ')}`]),
     '',
     message.text,
   ].join('\n')
@@ -42,8 +56,9 @@ function formatMessage(message: OutgoingMessage): string {
 
 /**
  * Creates a transport that prints emails instead of sending them: the
- * addresses, the subject and the plain-text version. Use it in development
- * only, because the text contains links with tokens.
+ * addresses, the subject, the name, type and size of each attachment, and the
+ * plain-text version. Use it in development only, because the text contains
+ * links with tokens.
  *
  * @example
  * const transport = process.env.NODE_ENV === 'production' ? smtpTransport(smtpOptions) : consoleTransport()

@@ -12,9 +12,20 @@ import { describeInput, expected, isRecord, mailAddress, mailAddresses, objectEr
 /** Custom templates by name. Each template's `name` must equal its key. */
 export type CustomTemplates<T> = { readonly [K in keyof T]: Template<K & string> }
 
+/** An attachment in hook events: what it is, never its content. */
+export interface AttachmentInfo {
+  /** File name the recipient sees. */
+  readonly filename: string
+  /** MIME type, as passed or as guessed from the file name. */
+  readonly contentType: string
+  /** Size of the content in bytes. */
+  readonly size: number
+}
+
 /**
- * Details of an email in hook events. The HTML, the plain text and the props
- * are left out, so events are safe to log: links in them often carry tokens.
+ * Details of an email in hook events. The HTML, the plain text, the props and
+ * the attachment content are left out, so events are safe to log: links in
+ * them often carry tokens.
  */
 export interface MailEvent {
   /** Name of the template. */
@@ -33,6 +44,8 @@ export interface MailEvent {
   readonly replyTo?: MailAddresses | undefined
   /** Extra message headers. */
   readonly headers?: Readonly<Record<string, string>> | undefined
+  /** File name, type and size of each attachment. Left out when the options failed validation. */
+  readonly attachments?: readonly AttachmentInfo[] | undefined
   /** Milliseconds from the `send` call to its outcome, rendering included. */
   readonly durationMs: number
 }
