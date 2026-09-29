@@ -8,11 +8,14 @@ import { MailerError } from '../../src/errors'
 import { buildMessages } from '../../src/i18n'
 import { builtInTemplates, type BuiltInTemplates } from '../../src/templates/built-in'
 import { defineTemplate, type TemplateProps, type TemplateRegistry } from '../../src/templates/define'
+import type { EmailChangeRequestedProps } from '../../src/templates/email-change-requested'
+import type { EmailChangedProps } from '../../src/templates/email-changed'
 import type { PasswordChangedProps } from '../../src/templates/password-changed'
 import { renderTemplate, type RenderedEmail, type RenderTemplateOptions } from '../../src/templates/render'
 import type { ResetPasswordProps } from '../../src/templates/reset-password'
 import type { StandardSchemaV1 } from '../../src/templates/standard-schema'
 import type { VerifyEmailProps } from '../../src/templates/verify-email'
+import type { VerifyEmailChangeProps } from '../../src/templates/verify-email-change'
 
 const branding = resolveBranding({
   companyName: 'My App',
@@ -98,6 +101,31 @@ describe('renderTemplate types', () => {
       readonly ip?: string | undefined
       readonly supportUrl?: string | undefined
     }>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['verifyEmailChange']>>().toEqualTypeOf<VerifyEmailChangeProps>()
+    expectTypeOf<VerifyEmailChangeProps>().toEqualTypeOf<{
+      readonly userName?: string | undefined
+      readonly verifyUrl: string
+      readonly expiresInMinutes?: number | undefined
+    }>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['emailChangeRequested']>>().toEqualTypeOf<EmailChangeRequestedProps>()
+    expectTypeOf<EmailChangeRequestedProps>().toEqualTypeOf<{
+      readonly userName?: string | undefined
+      readonly newEmail: string
+      readonly requestedAt?: Date | undefined
+      readonly timeZone?: string | undefined
+      readonly ip?: string | undefined
+      readonly cancelUrl?: string | undefined
+      readonly supportUrl?: string | undefined
+    }>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['emailChanged']>>().toEqualTypeOf<EmailChangedProps>()
+    expectTypeOf<EmailChangedProps>().toEqualTypeOf<{
+      readonly userName?: string | undefined
+      readonly newEmail?: string | undefined
+      readonly changedAt?: Date | undefined
+      readonly timeZone?: string | undefined
+      readonly ip?: string | undefined
+      readonly supportUrl?: string | undefined
+    }>()
     expectTypeOf(renderTemplate<{ note: typeof note }, 'note'>)
       .parameter(2)
       .toEqualTypeOf<{ text: string; show: boolean }>()
@@ -106,10 +134,10 @@ describe('renderTemplate types', () => {
 
 describe('renderTemplate', () => {
   it('throws UNKNOWN_TEMPLATE for a name that is not registered', async () => {
-    const error = await rejection(renderUnchecked(builtInTemplates, 'welcome', {}, options))
+    const error = await rejection(renderUnchecked(builtInTemplates, 'orderShipped', {}, options))
     expect(error.code).toBe('UNKNOWN_TEMPLATE')
     expect(error.message).toBe(
-      'Unknown template "welcome". Available templates: verifyEmail, resetPassword, passwordChanged.',
+      'Unknown template "orderShipped". Available templates: verifyEmail, resetPassword, passwordChanged, verifyEmailChange, emailChangeRequested, emailChanged.',
     )
     const inherited = await rejection(renderUnchecked(builtInTemplates, 'toString', {}, options))
     expect(inherited.code).toBe('UNKNOWN_TEMPLATE')

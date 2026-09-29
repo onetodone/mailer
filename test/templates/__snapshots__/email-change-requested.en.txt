@@ -1,0 +1,27 @@
+Subject: Email change requested
+
+My App
+
+Email change requested
+
+Hi Lizzie,
+
+We got a request to change the email for your My App account to lizzie.new@example.com.
+
+IP address: 203.0.113.7
+
+If this was you, confirm the change from the email we sent to lizzie.new@example.com.
+
+---
+
+If it wasn't you, cancel the change and change your password.
+
+Cancel the change: https://myapp.loc/email/cancel?token=abc123
+
+If the button doesn't work, copy this link into your browser:
+https://myapp.loc/email/cancel?token=abc123
+
+--
+You received this email because you have an account at My App.
+Questions? Write to us at support@myapp.loc
+© 2026 My App. All rights reserved.

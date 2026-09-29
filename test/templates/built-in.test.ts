@@ -20,6 +20,8 @@ const userNames: Partial<Record<Locale, string>> = { be: 'Ліза' }
 const verifyUrl = 'https://myapp.loc/verify?token=abc123'
 const resetUrl = 'https://myapp.loc/reset?token=abc123'
 const supportUrl = 'https://myapp.loc/support'
+const cancelUrl = 'https://myapp.loc/email/cancel?token=abc123'
+const newEmail = 'lizzie.new@example.com'
 const changedAt = new Date('2026-05-04T09:30:00Z')
 
 function options(locale: Locale = 'en', extra: Partial<RenderTemplateOptions> = {}): RenderTemplateOptions {
@@ -62,6 +64,36 @@ const snapshotCases: [file: string, render: (locale: Locale) => Promise<Rendered
         builtInTemplates,
         'passwordChanged',
         { userName: userNames[locale] ?? 'Lizzie', ip: '203.0.113.7', supportUrl },
+        options(locale),
+      ),
+  ],
+  [
+    'verify-email-change',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'verifyEmailChange',
+        { userName: userNames[locale] ?? 'Lizzie', verifyUrl, expiresInMinutes: 1440 },
+        options(locale),
+      ),
+  ],
+  [
+    'email-change-requested',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'emailChangeRequested',
+        { userName: userNames[locale] ?? 'Lizzie', newEmail, ip: '203.0.113.7', cancelUrl },
+        options(locale),
+      ),
+  ],
+  [
+    'email-changed',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'emailChanged',
+        { userName: userNames[locale] ?? 'Lizzie', newEmail, ip: '203.0.113.7', supportUrl },
         options(locale),
       ),
   ],
@@ -200,5 +232,129 @@ describe('passwordChanged', () => {
       code: 'INVALID_PROPS',
       message: `Invalid props for template "passwordChanged": ${detail}.`,
     })
+  })
+})
+
+describe('verifyEmailChange', () => {
+  it('links the button and the fallback to the verify URL', async () => {
+    const email = await renderTemplate(builtInTemplates, 'verifyEmailChange', { verifyUrl }, options())
+    expect(email.subject).toBe('Confirm your new email')
+    expect(email.html.match(/href="https:\/\/myapp\.loc\/verify\?token=abc123"/g)).toHaveLength(3)
+    expect(email.text).toContain(`Confirm new email: ${verifyUrl}`)
+  })
+
+  it('mentions expiry only with expiresInMinutes', async () => {
+    const without = await renderTemplate(builtInTemplates, 'verifyEmailChange', { verifyUrl }, options())
+    expect(without.text).not.toContain('expires')
+    const withExpiry = await renderTemplate(
+      builtInTemplates,
+      'verifyEmailChange',
+      { verifyUrl, expiresInMinutes: 60 },
+      options(),
+    )
+    expect(withExpiry.text).toContain('The link expires in 1 hour.')
+  })
+})
+
+describe('emailChangeRequested', () => {
+  it('names the new address and links the cancel button', async () => {
+    const email = await renderTemplate(builtInTemplates, 'emailChangeRequested', { newEmail, cancelUrl }, options())
+    expect(email.text).toContain(`to change the email for your My App account to ${newEmail}.`)
+    expect(email.text).toContain(`from the email we sent to ${newEmail}.`)
+    expect(email.html.match(/href="https:\/\/myapp\.loc\/email\/cancel\?token=abc123"/g)).toHaveLength(3)
+    expect(email.text).toContain(`Cancel the change: ${cancelUrl}`)
+    expect(email.text).not.toContain('Contact support')
+    expect(email.text).not.toContain('write to us right away')
+  })
+
+  it('points to support without a cancel URL', async () => {
+    const withUrl = await renderTemplate(builtInTemplates, 'emailChangeRequested', { newEmail, supportUrl }, options())
+    expect(withUrl.text).toContain(`Contact support: ${supportUrl}`)
+    expect(withUrl.text).not.toContain('Cancel the change')
+    const withAddress = await renderTemplate(builtInTemplates, 'emailChangeRequested', { newEmail }, options())
+    expect(withAddress.html).toContain('<a href="mailto:support@myapp.loc"')
+    expect(withAddress.text).toContain("If it wasn't you, write to us right away at support@myapp.loc.")
+  })
+
+  it('shows when and where the request came from', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      'emailChangeRequested',
+      { newEmail, requestedAt: changedAt, timeZone: 'Europe/Minsk', ip: '203.0.113.7' },
+      options(),
+    )
+    const line = lineStartingWith(email.text, 'When: ')
+    expect(line).toContain('2026')
+    expect(line).toMatch(/12:30.*GMT\+3/)
+    expect(email.text).toContain(`${line}\nIP address: 203.0.113.7`)
+  })
+
+  it('leaves out the details without requestedAt and ip', async () => {
+    const email = await renderTemplate(builtInTemplates, 'emailChangeRequested', { newEmail }, options())
+    expect(email.text).not.toContain('When:')
+    expect(email.text).not.toContain('IP address:')
+  })
+
+  it('escapes the new address', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      'emailChangeRequested',
+      { newEmail: '<b>x</b>@example.com' },
+      options(),
+    )
+    expect(email.html).not.toContain('<b>x</b>')
+    expect(email.html).toContain('&lt;b&gt;x&lt;/b&gt;@example.com')
+  })
+
+  it.each<[string, Record<string, unknown>, string]>([
+    ['a missing new address', {}, 'newEmail: is required'],
+    ['an empty new address', { newEmail: ' ' }, 'newEmail: must not be empty'],
+    ['a relative cancel URL', { newEmail, cancelUrl: '/cancel' }, 'cancelUrl: must be an absolute http: or https: URL'],
+  ])('rejects %s', async (_case, props, detail) => {
+    const error: unknown = await renderTemplate(
+      builtInTemplates,
+      'emailChangeRequested',
+      props as never,
+      options(),
+    ).then(
+      () => undefined,
+      (reason: unknown) => reason,
+    )
+    expect(error).toBeInstanceOf(MailerError)
+    expect(error).toMatchObject({
+      code: 'INVALID_PROPS',
+      message: `Invalid props for template "emailChangeRequested": ${detail}.`,
+    })
+  })
+})
+
+describe('emailChanged', () => {
+  it('renders without props', async () => {
+    const email = await renderTemplate(builtInTemplates, 'emailChanged', {}, options())
+    expect(email.subject).toBe('Your email was changed')
+    expect(email.text).not.toContain('New email:')
+    expect(email.text).not.toContain('When:')
+    expect(email.text).not.toContain('IP address:')
+    expect(email.text).toContain('From now on, emails about your account go to the new address.')
+    expect(email.html).toContain('<a href="mailto:support@myapp.loc"')
+  })
+
+  it('lists the new address, the time and the IP address in order', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      'emailChanged',
+      { newEmail: 'l***@example.com', changedAt, ip: '203.0.113.7' },
+      options(),
+    )
+    expect(email.text).toContain(
+      `New email: l***@example.com\n${lineStartingWith(email.text, 'When: ')}\nIP address: 203.0.113.7`,
+    )
+    expect(lineStartingWith(email.text, 'When: ')).toContain('UTC')
+  })
+
+  it('links the support button to the support URL', async () => {
+    const email = await renderTemplate(builtInTemplates, 'emailChanged', { supportUrl }, options())
+    expect(email.text).toContain(`Contact support: ${supportUrl}`)
+    expect(email.text).not.toContain('write to us right away')
   })
 })

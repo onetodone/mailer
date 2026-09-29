@@ -1,0 +1,25 @@
+Subject: Confirm your new email
+
+My App
+
+Confirm your new email
+
+Hi Lizzie,
+
+You asked to use this address for your My App account. Confirm it to finish the change. Until then, your account keeps using your current email.
+
+Confirm new email: https://myapp.loc/verify?token=abc123
+
+If the button doesn't work, copy this link into your browser:
+https://myapp.loc/verify?token=abc123
+
+---
+
+The link expires in 24 hours.
+
+If you didn't ask for this, just ignore this email. Nothing will change.
+
+--
+You received this email because you have an account at My App.
+Questions? Write to us at support@myapp.loc
+© 2026 My App. All rights reserved.

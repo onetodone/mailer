@@ -1,0 +1,30 @@
+Subject: Your email was changed
+
+My App
+
+Your email was changed
+
+Hi Lizzie,
+
+The email for your My App account was changed.
+
+New email: lizzie.new@example.com
+IP address: 203.0.113.7
+
+From now on, emails about your account go to the new address.
+
+If this was you, you don't need to do anything.
+
+---
+
+If it wasn't you, contact support right away.
+
+Contact support: https://myapp.loc/support
+
+If the button doesn't work, copy this link into your browser:
+https://myapp.loc/support
+
+--
+You received this email because you have an account at My App.
+Questions? Write to us at support@myapp.loc
+© 2026 My App. All rights reserved.

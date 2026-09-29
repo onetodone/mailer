@@ -1,0 +1,27 @@
+Subject: Запыт на змену email
+
+My App
+
+Запыт на змену email
+
+Вітаем, Ліза!
+
+Мы атрымалі запыт змяніць email вашага акаўнта ў My App на lizzie.new@example.com.
+
+IP-адрас: 203.0.113.7
+
+Калі гэта былі вы, пацвердзіце змену ў лісце, які мы даслалі на lizzie.new@example.com.
+
+---
+
+Калі гэта былі не вы, адмяніце змену і задайце новы пароль.
+
+Адмяніць змену: https://myapp.loc/email/cancel?token=abc123
+
+Калі кнопка не працуе, скапіюйце гэту спасылку ў браўзер:
+https://myapp.loc/email/cancel?token=abc123
+
+--
+You received this email because you have an account at My App.
+Ёсць пытанні? Пішыце нам: support@myapp.loc
+© 2026 My App. Усе правы абаронены.

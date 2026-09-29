@@ -1,9 +1,8 @@
 import { z } from 'zod'
 
-import { html } from '../core/html'
 import { date, httpUrl, nonEmptyText, objectError, timeZone } from '../validators'
 import { defineTemplate } from './define'
-import { greeting, userName } from './shared'
+import { details, greeting, supportBlocks, userName } from './shared'
 
 /** Props of the built-in `passwordChanged` template. All optional. */
 export interface PasswordChangedProps {
@@ -35,39 +34,25 @@ const schema: z.ZodType<z.output<typeof props>, PasswordChangedProps> = props
 export const passwordChanged = defineTemplate({
   name: 'passwordChanged',
   schema,
-  render: ({ props, ui, t, format, branding, theme }) => {
-    const details = [
-      props.changedAt !== undefined &&
-        t('passwordChanged.changedAt', { date: format.dateTime(props.changedAt, props.timeZone) }),
-      props.ip !== undefined && t('passwordChanged.ip', { ip: props.ip }),
-    ].filter((line) => line !== false)
-    const email = branding.supportEmail
-    const notYou =
-      props.supportUrl === undefined
-        ? [
-            ui.paragraph(
-              t.html('passwordChanged.notYouEmail', {
-                email: html`<a href="mailto:${email}" style="color:${theme.primary};text-decoration:underline;">${email}</a>`,
-              }),
-            ),
-          ]
-        : [
-            ui.paragraph(t('passwordChanged.notYou')),
-            ui.button(t('passwordChanged.button'), props.supportUrl),
-            ui.linkFallback(props.supportUrl),
-          ]
-    return {
-      subject: t('passwordChanged.subject'),
-      preheader: t('passwordChanged.preheader'),
-      body: [
-        ui.heading(t('passwordChanged.heading')),
-        greeting(ui, t, props.userName),
-        ui.paragraph(t('passwordChanged.intro')),
-        details.length > 0 && ui.paragraph(details.join('\n')),
-        ui.paragraph(t('passwordChanged.ifYou')),
-        ui.divider(),
-        ...notYou,
-      ],
-    }
-  },
+  render: ({ props, ui, t, format, branding }) => ({
+    subject: t('passwordChanged.subject'),
+    preheader: t('passwordChanged.preheader'),
+    body: [
+      ui.heading(t('passwordChanged.heading')),
+      greeting(ui, t, props.userName),
+      ui.paragraph(t('passwordChanged.intro')),
+      details(ui, [
+        props.changedAt !== undefined &&
+          t('passwordChanged.changedAt', { date: format.dateTime(props.changedAt, props.timeZone) }),
+        props.ip !== undefined && t('passwordChanged.ip', { ip: props.ip }),
+      ]),
+      ui.paragraph(t('passwordChanged.ifYou')),
+      ui.divider(),
+      ...supportBlocks({ ui, t, branding }, props.supportUrl, {
+        text: 'passwordChanged.notYou',
+        button: 'passwordChanged.button',
+        email: 'passwordChanged.notYouEmail',
+      }),
+    ],
+  }),
 })

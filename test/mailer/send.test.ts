@@ -15,6 +15,8 @@ const to = 'lizzie@example.com'
 const verifyUrl = 'https://myapp.loc/verify?token=abc123'
 const resetUrl = 'https://myapp.loc/reset?token=abc123'
 const supportUrl = 'https://myapp.loc/support'
+const cancelUrl = 'https://myapp.loc/email/cancel?token=abc123'
+const newEmail = 'lizzie.new@example.com'
 
 const orderShipped = defineTemplate({
   name: 'orderShipped',
@@ -80,6 +82,33 @@ describe('built-in templates through the memory transport', () => {
           props: { userName: userNames[locale], ip: '203.0.113.7', supportUrl },
         }),
     ],
+    [
+      'verify-email-change',
+      (mailer, locale) =>
+        mailer.send('verifyEmailChange', {
+          to,
+          locale,
+          props: { userName: userNames[locale], verifyUrl, expiresInMinutes: 1440 },
+        }),
+    ],
+    [
+      'email-change-requested',
+      (mailer, locale) =>
+        mailer.send('emailChangeRequested', {
+          to,
+          locale,
+          props: { userName: userNames[locale], newEmail, ip: '203.0.113.7', cancelUrl },
+        }),
+    ],
+    [
+      'email-changed',
+      (mailer, locale) =>
+        mailer.send('emailChanged', {
+          to,
+          locale,
+          props: { userName: userNames[locale], newEmail, ip: '203.0.113.7', supportUrl },
+        }),
+    ],
   ]
 
   beforeAll(() => {
@@ -140,7 +169,13 @@ describe('custom templates', () => {
     expect(transport.sent[0]?.subject).toBe('Order #42 shipped')
     expect(transport.sent[0]?.text).toContain('Track order: https://shop.loc/track/42')
     expectTypeOf<Parameters<typeof mailer.send>[0]>().toEqualTypeOf<
-      'verifyEmail' | 'resetPassword' | 'passwordChanged' | 'orderShipped'
+      | 'verifyEmail'
+      | 'resetPassword'
+      | 'passwordChanged'
+      | 'verifyEmailChange'
+      | 'emailChangeRequested'
+      | 'emailChanged'
+      | 'orderShipped'
     >()
     const check = async () => {
       // @ts-expect-error: orderId is required
