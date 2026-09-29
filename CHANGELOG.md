@@ -1,5 +1,50 @@
 # @onetodone/mailer
 
+## 0.2.0
+
+### Minor Changes
+
+- 7bc8714: Add built-in emails that confirm an account deletion and tell the owner once the account is deleted.
+  
+  - `confirmAccountDeletion` asks the owner to confirm the deletion with a button to `confirmUrl`, and warns that a deleted account and its data can't be restored. Props: `confirmUrl`, `userName`, `expiresInMinutes` (`ConfirmAccountDeletionProps`).
+  - `accountDeleted` tells the owner that the account was deleted, with a way to contact support if it wasn't them (`supportUrl`, else `branding.supportEmail`). Every prop is optional: `userName`, `supportUrl` (`AccountDeletedProps`).
+  - Texts in English and Belarusian, overridable through `messages` in the `confirmAccountDeletion` and `accountDeleted` sections. Apps that keep deleted accounts for a grace period can reword `confirmAccountDeletion.warning` and `accountDeleted.farewell`.
+- 45611f1: Add built-in templates for changing the email address.
+  
+  - `verifyEmailChange` goes to the new address and asks the user to confirm it. Props: `verifyUrl`, `userName`, `expiresInMinutes` (`VerifyEmailChangeProps`).
+  - `emailChangeRequested` goes to the current address when a change is requested. It names `newEmail` and offers a button that cancels the change (`cancelUrl`), or a way to contact support without it (`supportUrl`, else `branding.supportEmail`). Props: `newEmail`, `userName`, `requestedAt`, `timeZone`, `ip`, `cancelUrl`, `supportUrl` (`EmailChangeRequestedProps`).
+  - `emailChanged` goes to the old address once the change is done, with a way to contact support. Every prop is optional: `userName`, `newEmail`, `changedAt`, `timeZone`, `ip`, `supportUrl` (`EmailChangedProps`).
+  - `newEmail` accepts any non-empty text, so a masked address such as `l***@example.com` works.
+  - Texts in English and Belarusian, overridable through `messages` in the `verifyEmailChange`, `emailChangeRequested` and `emailChanged` sections.
+  - `Messages` describes the full built-in dictionary and gains keys whenever built-in templates are added, in any release, so a full dictionary typed as `Messages` is not covered by semver. Use `MessagesOverrides` (or `LocaleMessages` for one locale) for your own texts; keys you leave out fall back to English.
+  - Polish the Belarusian wording of the `resetPassword` intro: «Націсніце кнопку, каб задаць новы пароль.»
+  - Migration: if you type a full dictionary as `Messages`, add the `verifyEmailChange`, `emailChangeRequested` and `emailChanged` sections, or check it with `satisfies MessagesOverrides` instead, so that missing keys fall back to English.
+- ffa8d14: Add built-in security notices for new sign-ins, two-factor authentication changes and locked accounts.
+  
+  - `newSignIn` tells the owner about a sign-in, such as from a new device, and lists `signedInAt`, `device`, `location` and `ip` when you pass them. It offers a button to a page that secures the account (`secureUrl`), or a way to contact support without it (`supportUrl`, else `branding.supportEmail`). Every prop is optional: `userName`, `signedInAt`, `timeZone`, `ip`, `device`, `location`, `secureUrl`, `supportUrl` (`NewSignInProps`).
+  - `twoFactorEnabled` and `twoFactorDisabled` tell the owner that two-factor authentication was turned on or off, with a way to contact support. Every prop is optional: `userName`, `changedAt`, `timeZone`, `ip`, `supportUrl` (`TwoFactorEnabledProps`, `TwoFactorDisabledProps`).
+  - `accountLocked` tells the owner that the account was locked after too many failed sign-in attempts, shows `lockedUntil` and `ip` when you pass them, and offers a button that unlocks the account (`unlockUrl`), or help from support without it (`supportUrl`, else `branding.supportEmail`). It ends with advice to choose a new password for owners who did not try to sign in. Every prop is optional: `userName`, `lockedUntil`, `timeZone`, `ip`, `unlockUrl`, `supportUrl` (`AccountLockedProps`).
+  - Texts in English and Belarusian, overridable through `messages` in the `newSignIn`, `twoFactorEnabled`, `twoFactorDisabled` and `accountLocked` sections.
+- a32a33f: Add built-in templates for one-time codes, sign-in links and welcome emails.
+  
+  - `otpCode` sends a one-time code for sign-in, two-step verification or confirming an action. Props: `code`, `userName`, `expiresInMinutes` (`OtpCodeProps`). The subject and inbox preview leave out the code, because they show in notifications and on lock screens; both texts accept `{code}`, so a `messages` override can add it.
+  - `magicLink` sends a link that signs the user in without a password and tells the reader not to share it. Props: `signInUrl`, `userName`, `expiresInMinutes` (`MagicLinkProps`).
+  - `welcome` greets a new user with a button to `ctaUrl`, or to `branding.appUrl` without it. Every prop is optional: `userName`, `ctaUrl` (`WelcomeProps`).
+  - Texts in English and Belarusian, overridable through `messages` in the `otpCode`, `magicLink` and `welcome` sections.
+
+### Patch Changes
+
+- 99f9462: Add attachments and inline images.
+  
+  - `mailer.send` accepts `attachments`: files with a `filename`, `content` (a `Buffer`, a `Uint8Array`, or text sent as UTF-8), an optional `contentType` and an optional `cid`. Without `contentType`, the type is guessed from the file name extension, with `application/octet-stream` as the fallback, and text content gets `; charset=utf-8`.
+  - An attachment with a `cid` is an inline image that the HTML shows through `cid:<cid>`. After rendering, `send` checks the HTML, layout included, and rejects with `INVALID_OPTIONS` naming every `cid:` reference without an attachment, before anything is sent. An attachment whose `cid` the HTML never references is sent as a regular attachment.
+  - `ui.image(src, { alt, width, height })` shows an image from an absolute `http:` or `https:` URL, or an attachment through a `cid:` reference. It renders email-safe markup with an explicit width (534 px, the content width, by default and at most), shrinks on narrow screens, and shows the alt text in the plain-text version. An invalid source throws `UNSAFE_URL`.
+  - File names and content types with line breaks or other control characters are rejected with `INVALID_OPTIONS`, so attachments cannot inject MIME headers through any transport. Content types must be MIME types, and a `cid` uses ASCII letters, digits, `.`, `_`, `-` and `@` and is unique within an email.
+  - `smtpTransport` delivers attachments, with inline images next to the HTML. `consoleTransport` prints the name, type and size of each attachment, and `memoryTransport` records them in `sent`.
+  - `OutgoingMessage` has an optional `attachments` list, in which `contentType` is always set and `cid` is set only on referenced inline images. A custom transport must deliver every attachment or reject.
+  - Hook events list the `filename`, `contentType` and `size` of each attachment, never its content.
+  - Types `Attachment`, `OutgoingAttachment`, `AttachmentInfo` and `ImageOptions`.
+
 ## 0.1.1
 
 ### Patch Changes
