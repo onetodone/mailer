@@ -1,5 +1,22 @@
 # @onetodone/mailer
 
+## 0.2.1
+
+### Patch Changes
+
+- 817dab4: Document the semver policy of the `Locale` type: built-in locales can be added in any release.
+  
+  - `Locale` lists the built-in locales and gains values whenever a built-in locale is added, in any release, so code that requires every `Locale` value (such as `Record<Locale, …>`) is not covered by semver.
+  - If you already use a locale through `messages` and it becomes built-in, your overrides still win; keys you did not override come from the built-in texts instead of English.
+- 1f1d989: Add per-locale texts to custom templates.
+  
+  - `defineTemplate` accepts `messages`: the template's texts by locale. `en` is required and lists every text key; other locales may leave keys out, which fall back to English key by key. Plural forms are not supported in template texts.
+  - In a template with `messages`, `t` and `t.html` take the template's own keys under its name, such as `t('invoice.subject', { number })`, plus the `common` keys, and reject any other key at compile time. A template without `messages` keeps `t` for every built-in key.
+  - The `messages` setting of `createMailer` overrides the texts of registered custom templates under their names, with the same English fallback as the built-in texts. `MessagesOverrides<typeof templates>` and `LocaleMessages<typeof templates>` type such overrides outside the `createMailer` call.
+  - A custom template with `messages` that replaces a built-in template also replaces the built-in texts of that template in every locale.
+  - `createMailer` throws `INVALID_CONFIG` for template texts that are not strings, a missing `en`, a key that `en` does not have, a locale that is neither built-in nor a key of `messages`, and a template with `messages` named `common` or containing a dot.
+  - Types `TemplateMessages` and `TemplateTexts`. `Template`, `TemplateRenderContext`, `Translate`, `MessagesOverrides` and `LocaleMessages` take optional type parameters, and `TemplateProps` accepts templates with `messages`.
+
 ## 0.2.0
 
 ### Minor Changes
