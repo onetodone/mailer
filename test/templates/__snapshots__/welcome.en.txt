@@ -1,0 +1,19 @@
+Subject: Welcome to My App
+
+My App
+
+Welcome to My App
+
+Hi Lizzie,
+
+Thanks for joining! Your account is ready, and you can start using My App right away.
+
+Get started: https://myapp.loc/
+
+If the button doesn't work, copy this link into your browser:
+https://myapp.loc/
+
+--
+You received this email because you have an account at My App.
+Questions? Write to us at support@myapp.loc
+© 2026 My App. All rights reserved.

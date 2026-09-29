@@ -23,6 +23,8 @@ const supportUrl = 'https://myapp.loc/support'
 const cancelUrl = 'https://myapp.loc/email/cancel?token=abc123'
 const newEmail = 'lizzie.new@example.com'
 const changedAt = new Date('2026-05-04T09:30:00Z')
+const signInUrl = 'https://myapp.loc/sign-in?token=abc123'
+const code = 'K7Q2M9XW'
 
 function options(locale: Locale = 'en', extra: Partial<RenderTemplateOptions> = {}): RenderTemplateOptions {
   return { branding, layout: defaultLayout, locale, messages: messages[locale], ...extra }
@@ -96,6 +98,31 @@ const snapshotCases: [file: string, render: (locale: Locale) => Promise<Rendered
         { userName: userNames[locale] ?? 'Lizzie', newEmail, ip: '203.0.113.7', supportUrl },
         options(locale),
       ),
+  ],
+  [
+    'otp-code',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'otpCode',
+        { userName: userNames[locale] ?? 'Lizzie', code, expiresInMinutes: 10 },
+        options(locale),
+      ),
+  ],
+  [
+    'magic-link',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'magicLink',
+        { userName: userNames[locale] ?? 'Lizzie', signInUrl, expiresInMinutes: 15 },
+        options(locale),
+      ),
+  ],
+  [
+    'welcome',
+    (locale) =>
+      renderTemplate(builtInTemplates, 'welcome', { userName: userNames[locale] ?? 'Lizzie' }, options(locale)),
   ],
 ]
 
@@ -356,5 +383,126 @@ describe('emailChanged', () => {
     const email = await renderTemplate(builtInTemplates, 'emailChanged', { supportUrl }, options())
     expect(email.text).toContain(`Contact support: ${supportUrl}`)
     expect(email.text).not.toContain('write to us right away')
+  })
+})
+
+describe('otpCode', () => {
+  it('shows the code in the body only', async () => {
+    const email = await renderTemplate(builtInTemplates, 'otpCode', { code }, options())
+    expect(email.subject).toBe('Your verification code')
+    expect(email.subject).not.toContain(code)
+    expect(email.html).toContain('Use this one-time code to continue in My App.')
+    expect(email.html.match(new RegExp(code, 'g'))).toHaveLength(1)
+    expect(email.html).toMatch(new RegExp(`letter-spacing:6px;[^"]*">${code}</td>`))
+    expect(email.text).toContain(`Enter this code in My App to continue:\n\n${code}\n\n`)
+    expect(email.text).toContain("Don't share this code with anyone.")
+  })
+
+  it('fills {code} in overridden subject and preheader texts', async () => {
+    const overridden = buildMessages({
+      en: { otpCode: { subject: 'Your code: {code}', preheader: '{code} is your {companyName} code.' } },
+    })
+    const email = await renderTemplate(
+      builtInTemplates,
+      'otpCode',
+      { code },
+      options('en', { messages: overridden.en }),
+    )
+    expect(email.subject).toBe(`Your code: ${code}`)
+    expect(email.html).toContain(`${code} is your My App code.`)
+  })
+
+  it('mentions expiry only with expiresInMinutes', async () => {
+    const without = await renderTemplate(builtInTemplates, 'otpCode', { code }, options())
+    expect(without.text).not.toContain('expires')
+    const withExpiry = await renderTemplate(builtInTemplates, 'otpCode', { code, expiresInMinutes: 5 }, options())
+    expect(withExpiry.text).toContain('The code expires in 5 minutes.')
+  })
+
+  it('trims and escapes the code', async () => {
+    const email = await renderTemplate(builtInTemplates, 'otpCode', { code: ' <b>12</b> ' }, options())
+    expect(email.html).not.toContain('<b>12</b>')
+    expect(email.html).toContain('>&lt;b&gt;12&lt;/b&gt;</td>')
+    expect(email.text).toContain('\n\n<b>12</b>\n\n')
+  })
+
+  it.each<[string, Record<string, unknown>, string]>([
+    ['a missing code', {}, 'code: is required'],
+    ['an empty code', { code: ' ' }, 'code: must not be empty'],
+    ['a numeric code', { code: 482913 }, 'code: must be a string, received number'],
+    ['a zero expiry', { code, expiresInMinutes: 0 }, 'expiresInMinutes: must be a positive integer'],
+  ])('rejects %s', async (_case, props, detail) => {
+    const error: unknown = await renderTemplate(builtInTemplates, 'otpCode', props as never, options()).then(
+      () => undefined,
+      (reason: unknown) => reason,
+    )
+    expect(error).toBeInstanceOf(MailerError)
+    expect(error).toMatchObject({ code: 'INVALID_PROPS', message: `Invalid props for template "otpCode": ${detail}.` })
+  })
+})
+
+describe('magicLink', () => {
+  it('links the button and the fallback to the sign-in URL', async () => {
+    const email = await renderTemplate(builtInTemplates, 'magicLink', { signInUrl }, options())
+    expect(email.subject).toBe('Your sign-in link')
+    expect(email.html.match(/href="https:\/\/myapp\.loc\/sign-in\?token=abc123"/g)).toHaveLength(3)
+    expect(email.text).toContain(`Sign in: ${signInUrl}`)
+    expect(email.text).toContain("Don't share this link: anyone who has it can sign in to your account.")
+  })
+
+  it('mentions expiry only with expiresInMinutes', async () => {
+    const without = await renderTemplate(builtInTemplates, 'magicLink', { signInUrl }, options())
+    expect(without.text).not.toContain('expires')
+    const withExpiry = await renderTemplate(
+      builtInTemplates,
+      'magicLink',
+      { signInUrl, expiresInMinutes: 15 },
+      options('be'),
+    )
+    expect(withExpiry.text).toContain('Спасылка дзейнічае 15 хвілін.')
+  })
+
+  it('rejects a link that is not http(s)', async () => {
+    const error: unknown = await renderTemplate(
+      builtInTemplates,
+      'magicLink',
+      { signInUrl: 'javascript:alert(1)' },
+      options(),
+    ).then(
+      () => undefined,
+      (reason: unknown) => reason,
+    )
+    expect(error).toMatchObject({
+      code: 'INVALID_PROPS',
+      message: 'Invalid props for template "magicLink": signInUrl: must be an absolute http: or https: URL.',
+    })
+  })
+})
+
+describe('welcome', () => {
+  it('links to the app URL without props', async () => {
+    const email = await renderTemplate(builtInTemplates, 'welcome', {}, options())
+    expect(email.subject).toBe('Welcome to My App')
+    expect(email.text).toContain('\n\nHi there,\n\n')
+    expect(email.text).toContain('Get started: https://myapp.loc/')
+    expect(email.html.match(/href="https:\/\/myapp\.loc\/"/g)).toHaveLength(4)
+  })
+
+  it('links the button and the fallback to ctaUrl', async () => {
+    const ctaUrl = 'https://myapp.loc/onboarding'
+    const email = await renderTemplate(builtInTemplates, 'welcome', { ctaUrl }, options())
+    expect(email.html.match(/href="https:\/\/myapp\.loc\/onboarding"/g)).toHaveLength(3)
+    expect(email.text).toContain(`Get started: ${ctaUrl}`)
+  })
+
+  it('rejects a relative ctaUrl', async () => {
+    const error: unknown = await renderTemplate(builtInTemplates, 'welcome', { ctaUrl: '/start' }, options()).then(
+      () => undefined,
+      (reason: unknown) => reason,
+    )
+    expect(error).toMatchObject({
+      code: 'INVALID_PROPS',
+      message: 'Invalid props for template "welcome": ctaUrl: must be an absolute http: or https: URL.',
+    })
   })
 })

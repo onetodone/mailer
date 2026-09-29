@@ -1,0 +1,27 @@
+Subject: Your sign-in link
+
+My App
+
+Sign in to My App
+
+Hi Lizzie,
+
+Click the button to sign in to your My App account.
+
+Sign in: https://myapp.loc/sign-in?token=abc123
+
+If the button doesn't work, copy this link into your browser:
+https://myapp.loc/sign-in?token=abc123
+
+---
+
+The link expires in 15 minutes.
+
+Don't share this link: anyone who has it can sign in to your account.
+
+If you didn't try to sign in, just ignore this email.
+
+--
+You received this email because you have an account at My App.
+Questions? Write to us at support@myapp.loc
+© 2026 My App. All rights reserved.

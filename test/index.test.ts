@@ -5,10 +5,13 @@ import type {
   Attachment,
   AttachmentInfo,
   Branding,
+  EmailChangedProps,
+  EmailChangeRequestedProps,
   ImageOptions,
   LayoutContext,
   Locale,
   LocaleMessages,
+  MagicLinkProps,
   MailAddress,
   MailAddresses,
   Mailer,
@@ -21,6 +24,7 @@ import type {
   MemoryTransport,
   MessageKey,
   MessagesOverrides,
+  OtpCodeProps,
   OutgoingAttachment,
   OutgoingMessage,
   PasswordChangedProps,
@@ -34,7 +38,9 @@ import type {
   TemplateRenderContext,
   ThemeInput,
   Translate,
+  VerifyEmailChangeProps,
   VerifyEmailProps,
+  WelcomeProps,
 } from '../src/index'
 
 describe('main entry', () => {
@@ -108,6 +114,12 @@ describe('main entry', () => {
     expectTypeOf<VerifyEmailProps>().toHaveProperty('verifyUrl')
     expectTypeOf<ResetPasswordProps>().toHaveProperty('resetUrl')
     expectTypeOf<PasswordChangedProps>().toHaveProperty('changedAt')
+    expectTypeOf<VerifyEmailChangeProps>().toHaveProperty('verifyUrl')
+    expectTypeOf<EmailChangeRequestedProps>().toHaveProperty('newEmail')
+    expectTypeOf<EmailChangedProps>().toHaveProperty('newEmail')
+    expectTypeOf<OtpCodeProps>().toHaveProperty('code')
+    expectTypeOf<MagicLinkProps>().toHaveProperty('signInUrl')
+    expectTypeOf<WelcomeProps>().toHaveProperty('ctaUrl')
     expectTypeOf<{ pl: LocaleMessages }>().toExtend<MessagesOverrides>()
     expectTypeOf<'INVALID_OPTIONS'>().toExtend<MailerErrorCode>()
   })

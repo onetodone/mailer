@@ -20,7 +20,7 @@
 
 ## Features
 
-- Built-in templates for email verification, password reset, email address changes and security notices.
+- Built-in templates for email verification, welcome emails, one-time codes, sign-in links, password reset, email address changes and security notices.
 - One call to send an email. Template names autocomplete, and props are checked at compile time and validated at runtime.
 - Branding from configuration: logo, company name, colors, footer text and support address.
 - Texts in English and Belarusian. Override any text, or add a locale that falls back to English key by key.
@@ -109,8 +109,11 @@ const { smtpTransport } = require('@onetodone/mailer/smtp')
 | `verifyEmailChange`    | A user asked to change their email; sent to the new address to confirm it                                      | Confirm your new email    |
 | `emailChangeRequested` | A user asked to change their email; sent to the current address, so the owner can cancel it if it was not them | Email change requested    |
 | `emailChanged`         | The email was changed; sent to the old address, so the owner can act if it was not them                        | Your email was changed    |
+| `otpCode`              | A user needs a one-time code, such as for sign-in, two-step verification or confirming an action               | Your verification code    |
+| `magicLink`            | A user signs in with a link instead of a password                                                              | Your sign-in link         |
+| `welcome`              | A new account is ready                                                                                         | Welcome to {companyName}  |
 
-Each email has an inbox preview text, a heading, a greeting and a short explanation. Where there is a link, it adds a button and the same link as plain text for readers whose button does not work. It ends with a note for recipients who did not ask for the email.
+Each email has an inbox preview text, a heading, a greeting and a short explanation. Where there is a link, it adds a button and the same link as plain text for readers whose button does not work. Every email except `welcome` ends with a note for recipients who did not ask for it.
 
 ### `verifyEmail`
 
@@ -159,11 +162,11 @@ await mailer.send('passwordChanged', {
 
 Send it to the new address. The account keeps its current email until the link is opened.
 
-| Prop | Type | Required | Description |
-| --- | --- | --- | --- |
-| `verifyUrl` | `string` | yes | Absolute `http:` or `https:` link that confirms the new address. |
-| `userName` | `string` | no | Name for the greeting. Without it, or when it is empty, the greeting has no name. |
-| `expiresInMinutes` | `number` | no | How long the link works, in minutes. Without it, the email does not mention expiry. |
+| Prop               | Type     | Required | Description                                                                         |
+| ------------------ | -------- | -------- | ----------------------------------------------------------------------------------- |
+| `verifyUrl`        | `string` | yes      | Absolute `http:` or `https:` link that confirms the new address.                    |
+| `userName`         | `string` | no       | Name for the greeting. Without it, or when it is empty, the greeting has no name.   |
+| `expiresInMinutes` | `number` | no       | How long the link works, in minutes. Without it, the email does not mention expiry. |
 
 ### `emailChangeRequested`
 
@@ -212,6 +215,48 @@ await mailer.send('emailChanged', {
 })
 ```
 
+### `otpCode`
+
+A one-time code for any purpose, such as sign-in, two-step verification or confirming an action.
+
+| Prop               | Type     | Required | Description                                                                                   |
+| ------------------ | -------- | -------- | --------------------------------------------------------------------------------------------- |
+| `code`             | `string` | yes      | The code to enter, such as `482913`. Codes of up to 8 characters fit on narrow phone screens. |
+| `userName`         | `string` | no       | Name for the greeting. Without it, or when it is empty, the greeting has no name.             |
+| `expiresInMinutes` | `number` | no       | How long the code works, in minutes. Without it, the email does not mention expiry.           |
+
+```ts
+await mailer.send('otpCode', {
+  to: 'lizzie@example.com',
+  props: { code: '482913', expiresInMinutes: 10 },
+})
+```
+
+The subject and the inbox preview leave out the code, because they show in notifications and on lock screens. Both texts accept `{code}`, so a [text override](#2-texts-and-locales) such as `{ en: { otpCode: { subject: 'Your code: {code}' } } }` puts it back.
+
+### `magicLink`
+
+| Prop               | Type     | Required | Description                                                                         |
+| ------------------ | -------- | -------- | ----------------------------------------------------------------------------------- |
+| `signInUrl`        | `string` | yes      | Absolute `http:` or `https:` link that signs the user in.                           |
+| `userName`         | `string` | no       | Name for the greeting. Without it, or when it is empty, the greeting has no name.   |
+| `expiresInMinutes` | `number` | no       | How long the link works, in minutes. Without it, the email does not mention expiry. |
+
+Anyone who has the link can sign in, and the email tells the reader not to share it. Make the link work once and for a short time, such as 15 minutes.
+
+### `welcome`
+
+Send it once the account is ready, for example after the email address is confirmed. Every prop is optional, so `props` can be left out.
+
+| Prop       | Type     | Description                                                                                                                |
+| ---------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `userName` | `string` | Name for the greeting. Without it, or when it is empty, the greeting has no name.                                          |
+| `ctaUrl`   | `string` | Absolute `http:` or `https:` link behind the "Get started" button, such as an onboarding page. Default: `branding.appUrl`. |
+
+```ts
+await mailer.send('welcome', { to: 'lizzie@example.com', props: { userName: 'Lizzie' } })
+```
+
 Durations are written in whole days (from 2 days on), hours or minutes, with the plural rules of the locale: `30` gives "30 minutes", `60` gives "1 hour", `1440` gives "24 hours" and `2880` gives "2 days". Dates include the time zone name, such as "May 4, 2026 at 9:30 AM UTC".
 
 Props are checked twice. TypeScript reports missing, unknown or mistyped props, and at runtime invalid values, such as a `javascript:` link, throw a `MailerError` with code `INVALID_PROPS`.
@@ -220,16 +265,16 @@ Props are checked twice. TypeScript reports missing, unknown or mistyped props, 
 
 `mailer.send(template, options)` renders the template and hands the email to the transport. It resolves with the transport's result: `{ messageId, accepted?, rejected? }`.
 
-| Option    | Description                                                                  |
-| --------- | ---------------------------------------------------------------------------- |
-| `to`      | Recipients: one address or a list. Required.                                 |
-| `cc`      | Carbon-copy recipients.                                                      |
-| `bcc`     | Blind carbon-copy recipients.                                                |
-| `replyTo` | Where replies go. Replaces the mailer's `replyTo` for this email.            |
-| `headers` | Extra message headers, such as `{ 'X-Entity-Ref-ID': 'order-1042' }`.        |
+| Option        | Description                                                                           |
+| ------------- | ------------------------------------------------------------------------------------- |
+| `to`          | Recipients: one address or a list. Required.                                          |
+| `cc`          | Carbon-copy recipients.                                                               |
+| `bcc`         | Blind carbon-copy recipients.                                                         |
+| `replyTo`     | Where replies go. Replaces the mailer's `replyTo` for this email.                     |
+| `headers`     | Extra message headers, such as `{ 'X-Entity-Ref-ID': 'order-1042' }`.                 |
 | `attachments` | Files to attach and inline images. See [attachments](#attachments-and-inline-images). |
-| `locale`  | Locale of this email. Default: the mailer's `locale`.                        |
-| `props`   | Template props. Can be left out when every prop of the template is optional. |
+| `locale`      | Locale of this email. Default: the mailer's `locale`.                                 |
+| `props`       | Template props. Can be left out when every prop of the template is optional.          |
 
 An address is written in one of three forms: `'lizzie@example.com'`, `'Lizzie Smith <lizzie@example.com>'` or `{ name: 'Lizzie Smith', address: 'lizzie@example.com' }`. Any field that takes addresses also accepts a non-empty list of them. Addresses reach the transport exactly as you passed them.
 
@@ -269,12 +314,12 @@ await mailer.send('orderShipped', {
 })
 ```
 
-| Field         | Description                                                                                                                                                                                                  |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `filename`    | Required. File name the recipient sees.                                                                                                                                                                      |
-| `content`     | Required. The file as a `Buffer` or `Uint8Array`, or text, which is sent as UTF-8.                                                                                                                           |
+| Field         | Description                                                                                                                                                                                                                                     |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `filename`    | Required. File name the recipient sees.                                                                                                                                                                                                         |
+| `content`     | Required. The file as a `Buffer` or `Uint8Array`, or text, which is sent as UTF-8.                                                                                                                                                              |
 | `contentType` | MIME type, such as `application/pdf`. Default: guessed from the extension of `filename` (PDF, office documents, CSV, text, calendar, common images), or `application/octet-stream`. A guessed text type of text content gets `; charset=utf-8`. |
-| `cid`         | Content-ID that makes the file an inline image, see below.                                                                                                                                                   |
+| `cid`         | Content-ID that makes the file an inline image, see below.                                                                                                                                                                                      |
 
 There is no `path` option: read files yourself, so every transport receives the same data.
 
@@ -483,6 +528,9 @@ Text keys:
 | `verifyEmailChange`    | `subject`, `preheader`, `heading`, `intro`, `button`, `expires`, `ignore`                                                                   | `{duration}` in `expires`                                                                                  |
 | `emailChangeRequested` | `subject`, `preheader`, `heading`, `intro`, `requestedAt`, `ip`, `ifYou`, `notYouCancel`, `cancelButton`, `notYou`, `button`, `notYouEmail` | `{newEmail}` in `intro` and `ifYou`, `{date}` in `requestedAt`, `{ip}` in `ip`, `{email}` in `notYouEmail` |
 | `emailChanged`         | `subject`, `preheader`, `heading`, `intro`, `newEmail`, `changedAt`, `ip`, `newAddress`, `ifYou`, `notYou`, `button`, `notYouEmail`         | `{newEmail}` in `newEmail`, `{date}` in `changedAt`, `{ip}` in `ip`, `{email}` in `notYouEmail`            |
+| `otpCode`              | `subject`, `preheader`, `heading`, `intro`, `expires`, `doNotShare`, `ignore`                                                               | `{code}` in `subject` and `preheader`, `{duration}` in `expires`                                           |
+| `magicLink`            | `subject`, `preheader`, `heading`, `intro`, `button`, `expires`, `doNotShare`, `ignore`                                                     | `{duration}` in `expires`                                                                                  |
+| `welcome`              | `subject`, `preheader`, `heading`, `intro`, `button`                                                                                        |                                                                                                            |
 
 The `Messages` type describes every key, so your editor shows what each text is for as you type.
 
@@ -586,18 +634,18 @@ await mailer.send('orderShipped', {
 
 It returns the `subject`, an optional `preheader` (the inbox preview text) and the `body` blocks in order. `false`, `null` and `undefined` entries in `body` are skipped, so conditional blocks can stay inline.
 
-| Block                         | Renders                                                                                 |
-| ----------------------------- | --------------------------------------------------------------------------------------- |
-| `ui.heading(text, { level })` | A heading, level 1 (the default), 2 or 3.                                               |
-| `ui.paragraph(text)`          | Body text. Line breaks in a string become `<br>`.                                       |
-| `ui.button(label, url)`       | A button that also renders in Outlook for Windows.                                      |
-| `ui.linkFallback(url)`        | The link as text under a "copy this link" line, for readers whose button does not work. |
-| `ui.code(value)`              | A large monospace code, such as a one-time password.                                    |
+| Block                                   | Renders                                                                                                                                                                                                                                           |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ui.heading(text, { level })`           | A heading, level 1 (the default), 2 or 3.                                                                                                                                                                                                         |
+| `ui.paragraph(text)`                    | Body text. Line breaks in a string become `<br>`.                                                                                                                                                                                                 |
+| `ui.button(label, url)`                 | A button that also renders in Outlook for Windows.                                                                                                                                                                                                |
+| `ui.linkFallback(url)`                  | The link as text under a "copy this link" line, for readers whose button does not work.                                                                                                                                                           |
+| `ui.code(value)`                        | A large monospace code, such as a one-time password.                                                                                                                                                                                              |
 | `ui.image(src, { alt, width, height })` | An image from an `http:` or `https:` URL, or an [inline image](#attachments-and-inline-images) through `cid:`. `width` defaults to 534 px, the width of the content, and the image shrinks on narrow screens. The plain-text version shows `alt`. |
-| `ui.note(text)`               | Smaller muted text, such as "If this wasn't you, ignore this email."                    |
-| `ui.divider()`                | A horizontal rule.                                                                      |
-| `ui.spacer(size)`             | Vertical space in pixels. Default `16`.                                                 |
-| `ui.raw(html, text)`          | Your own trusted markup, with its plain-text version.                                   |
+| `ui.note(text)`                         | Smaller muted text, such as "If this wasn't you, ignore this email."                                                                                                                                                                              |
+| `ui.divider()`                          | A horizontal rule.                                                                                                                                                                                                                                |
+| `ui.spacer(size)`                       | Vertical space in pixels. Default `16`.                                                                                                                                                                                                           |
+| `ui.raw(html, text)`                    | Your own trusted markup, with its plain-text version.                                                                                                                                                                                             |
 
 Every block renders both HTML and plain text, so the plain-text version of the email comes with no extra work. Strings passed to blocks are escaped. For markup such as a link inside a sentence, use the `html` tag, which escapes every interpolated value:
 
@@ -845,14 +893,14 @@ const mailer = createMailer({
 
 The package throws `MailerError`, which has a `code` to branch on:
 
-| Code               | Thrown when                                                                                              | `cause`               |
-| ------------------ | -------------------------------------------------------------------------------------------------------- | --------------------- |
-| `INVALID_CONFIG`   | `createMailer` or `smtpTransport` gets invalid settings.                                                 | The validation error  |
-| `INVALID_OPTIONS`  | `send` or `render` gets an invalid address, header, attachment, locale or option, or the HTML references a `cid:` without an attachment. | The validation error, if any |
-| `INVALID_PROPS`    | Template props fail the template's schema.                                                               | The schema's issues   |
-| `UNKNOWN_TEMPLATE` | No template is registered under the requested name.                                                      |                       |
-| `TRANSPORT_FAILED` | The transport could not deliver the email.                                                               | The transport's error |
-| `UNSAFE_URL`       | `safeUrl`, `ui.button`, `ui.linkFallback` or `ui.image` gets a link that is not an absolute `http:` or `https:` URL, or `ui.image` gets an invalid `cid:` reference. |                       |
+| Code               | Thrown when                                                                                                                                                          | `cause`                      |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| `INVALID_CONFIG`   | `createMailer` or `smtpTransport` gets invalid settings.                                                                                                             | The validation error         |
+| `INVALID_OPTIONS`  | `send` or `render` gets an invalid address, header, attachment, locale or option, or the HTML references a `cid:` without an attachment.                             | The validation error, if any |
+| `INVALID_PROPS`    | Template props fail the template's schema.                                                                                                                           | The schema's issues          |
+| `UNKNOWN_TEMPLATE` | No template is registered under the requested name.                                                                                                                  |                              |
+| `TRANSPORT_FAILED` | The transport could not deliver the email.                                                                                                                           | The transport's error        |
+| `UNSAFE_URL`       | `safeUrl`, `ui.button`, `ui.linkFallback` or `ui.image` gets a link that is not an absolute `http:` or `https:` URL, or `ui.image` gets an invalid `cid:` reference. |                              |
 
 - Messages name the setting or prop and the problem. They never include link values, because links usually carry tokens.
 - Errors thrown by your own template or layout code pass through unchanged, as does a `MailerError` thrown by your own transport.

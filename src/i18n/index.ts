@@ -157,6 +157,53 @@ export interface EmailChangedMessages {
   readonly notYouEmail: string
 }
 
+/** Texts of the `otpCode` template. */
+export interface OtpCodeMessages {
+  /** The built-in texts leave out the code, because subjects show in notifications and on lock screens; `{code}` is available. */
+  readonly subject: string
+  /** Inbox preview text. The built-in texts leave out the code, as in `subject`; `{code}` is available. */
+  readonly preheader: string
+  readonly heading: string
+  /** Paragraph above the code. */
+  readonly intro: string
+  /** Expiry note, with `{duration}` such as "10 minutes". */
+  readonly expires: string
+  /** Warning not to share the code. */
+  readonly doNotShare: string
+  /** Note for recipients who did not ask for a code. */
+  readonly ignore: string
+}
+
+/** Texts of the `magicLink` template. */
+export interface MagicLinkMessages {
+  readonly subject: string
+  /** Inbox preview text. */
+  readonly preheader: string
+  readonly heading: string
+  /** Paragraph under the greeting. */
+  readonly intro: string
+  /** Button label. */
+  readonly button: string
+  /** Expiry note, with `{duration}` such as "15 minutes". */
+  readonly expires: string
+  /** Warning not to share the link. */
+  readonly doNotShare: string
+  /** Note for recipients who did not try to sign in. */
+  readonly ignore: string
+}
+
+/** Texts of the `welcome` template. */
+export interface WelcomeMessages {
+  readonly subject: string
+  /** Inbox preview text. */
+  readonly preheader: string
+  readonly heading: string
+  /** Paragraph under the greeting. */
+  readonly intro: string
+  /** Button label. */
+  readonly button: string
+}
+
 /**
  * Every text of the built-in templates, the blocks and the layout for one locale.
  *
@@ -174,6 +221,9 @@ export interface Messages {
   readonly verifyEmailChange: VerifyEmailChangeMessages
   readonly emailChangeRequested: EmailChangeRequestedMessages
   readonly emailChanged: EmailChangedMessages
+  readonly otpCode: OtpCodeMessages
+  readonly magicLink: MagicLinkMessages
+  readonly welcome: WelcomeMessages
 }
 
 type StringKeys<T> = { [K in keyof T]: T[K] extends string ? K : never }[keyof T] & string

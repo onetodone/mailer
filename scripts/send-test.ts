@@ -1,9 +1,8 @@
 import { randomUUID } from 'node:crypto'
 
-import { createMailer } from '@onetodone/mailer'
 import { smtpTransport } from '@onetodone/mailer/smtp'
 
-import { branding, env, from, locales, samples } from './samples.ts'
+import { createSampleMailer, env, from, locales, samples } from './samples.ts'
 
 const user = env('SMTP_USER')
 const mailFrom = env('MAIL_FROM')
@@ -30,16 +29,15 @@ const to = (env('MAIL_TO') ?? 'Lizzie <lizzie@example.com>')
   .map((address) => address.trim())
   .filter((address) => address !== '')
 
-const mailer = createMailer({
-  transport: smtpTransport({
+const mailer = createSampleMailer(
+  smtpTransport({
     host,
     port,
     secure,
     auth: user === undefined ? undefined : { user, pass: env('SMTP_PASS') ?? '' },
   }),
-  from: mailFrom ?? from,
-  branding,
-})
+  mailFrom ?? from,
+)
 
 let sent = 0
 try {
@@ -49,6 +47,7 @@ try {
         to,
         locale,
         props: sample.props,
+        attachments: sample.attachments,
         // A unique X-Entity-Ref-ID keeps Gmail from threading emails that share a subject.
         headers: { 'X-Entity-Ref-ID': randomUUID() },
       })

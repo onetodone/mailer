@@ -1,15 +1,25 @@
-import type {
-  Branding,
-  EmailChangedProps,
-  EmailChangeRequestedProps,
-  Locale,
-  MailAddress,
-  Mailer,
-  PasswordChangedProps,
-  ResetPasswordProps,
-  VerifyEmailChangeProps,
-  VerifyEmailProps,
+import {
+  createMailer,
+  defineTemplate,
+  type Attachment,
+  type Branding,
+  type EmailChangedProps,
+  type EmailChangeRequestedProps,
+  type Locale,
+  type MagicLinkProps,
+  type MailAddress,
+  type MailTransport,
+  type OtpCodeProps,
+  type PasswordChangedProps,
+  type ResetPasswordProps,
+  type TemplateProps,
+  type VerifyEmailChangeProps,
+  type VerifyEmailProps,
+  type WelcomeProps,
 } from '@onetodone/mailer'
+import { z } from 'zod'
+
+import { qrLikePng, samplePdf } from './sample-files.ts'
 
 export function env(name: string): string | undefined {
   const value = process.env[name]
@@ -36,6 +46,45 @@ export const from: MailAddress = { name: 'MyApp', address: 'no-reply@example.com
 // A record keyed by Locale makes a locale missing from this list a type error.
 export const locales = Object.keys({ en: true, be: true } satisfies Record<Locale, true>) as Locale[]
 
+const mediaTexts = {
+  en: {
+    subject: 'Images and attachments',
+    remote: 'An image from an https: URL:',
+    inline: 'An inline image from an attachment, shown through cid:',
+    attached: 'A PDF file is attached to this email.',
+  },
+  be: {
+    subject: 'Выявы і далучаныя файлы',
+    remote: 'Выява па https:-спасылцы:',
+    inline: 'Убудаваная выява з далучанага файла, паказаная праз cid:',
+    attached: 'Да гэтага ліста далучаны PDF-файл.',
+  },
+} satisfies Record<Locale, Record<string, string>>
+
+// Covers ui.image with both kinds of sources, and attachments, which no built-in template uses.
+const media = defineTemplate({
+  name: 'media',
+  schema: z.strictObject({ imageUrl: z.url({ protocol: /^https?$/ }) }),
+  render: ({ props, ui, locale }) => {
+    const text = locale === 'be' ? mediaTexts.be : mediaTexts.en
+    return {
+      subject: text.subject,
+      body: [
+        ui.heading(text.subject),
+        ui.paragraph(text.remote),
+        ui.image(props.imageUrl, { alt: 'Sample banner', width: 534, height: 200 }),
+        ui.paragraph(text.inline),
+        ui.image('cid:sample-qr', { alt: 'Sample QR code', width: 198, height: 198 }),
+        ui.note(text.attached),
+      ],
+    }
+  },
+})
+
+export function createSampleMailer(transport: MailTransport, sender: MailAddress = from) {
+  return createMailer({ transport, from: sender, branding, templates: { media } })
+}
+
 interface PropsByTemplate {
   verifyEmail: VerifyEmailProps
   resetPassword: ResetPasswordProps
@@ -43,16 +92,21 @@ interface PropsByTemplate {
   verifyEmailChange: VerifyEmailChangeProps
   emailChangeRequested: EmailChangeRequestedProps
   emailChanged: EmailChangedProps
+  otpCode: OtpCodeProps
+  magicLink: MagicLinkProps
+  welcome: WelcomeProps
+  media: TemplateProps<typeof media>
 }
 
-type TemplateName = Parameters<Mailer['render']>[0]
+type TemplateName = Parameters<ReturnType<typeof createSampleMailer>['render']>[0]
 
-// Indexing by every built-in template name makes a template without an entry in PropsByTemplate a type error.
+// Indexing by every template name makes a template without an entry in PropsByTemplate a type error.
 export type Sample = {
   [Name in TemplateName]: {
     readonly slug: string
     readonly template: Name
     readonly props: PropsByTemplate[Name]
+    readonly attachments?: readonly Attachment[]
   }
 }[TemplateName]
 
@@ -114,4 +168,29 @@ export const samples: readonly Sample[] = [
     },
   },
   { slug: 'email-changed-minimal', template: 'emailChanged', props: {} },
+  {
+    slug: 'otp-code',
+    template: 'otpCode',
+    props: { userName: 'Lizzie', code: 'K7Q2M9XW', expiresInMinutes: 10 },
+  },
+  {
+    slug: 'magic-link',
+    template: 'magicLink',
+    props: { userName: 'Lizzie', signInUrl: 'https://example.com/sign-in?token=preview', expiresInMinutes: 15 },
+  },
+  {
+    slug: 'welcome',
+    template: 'welcome',
+    props: { userName: 'Lizzie', ctaUrl: 'https://example.com/get-started' },
+  },
+  { slug: 'welcome-minimal', template: 'welcome', props: {} },
+  {
+    slug: 'media',
+    template: 'media',
+    props: { imageUrl: env('IMAGE_URL') ?? 'https://placehold.co/1068x400/png?text=MyApp' },
+    attachments: [
+      { filename: 'qr.png', content: qrLikePng(), cid: 'sample-qr' },
+      { filename: 'Рахунак 1042.pdf', content: samplePdf('MyApp sample invoice 1042') },
+    ],
+  },
 ]
