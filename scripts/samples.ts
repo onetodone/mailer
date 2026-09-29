@@ -50,7 +50,39 @@ export const branding: Branding = {
 export const from: MailAddress = { name: 'MyApp', address: 'no-reply@example.com' }
 
 // A record keyed by Locale makes a locale missing from this list a type error.
-export const locales = Object.keys({ en: true, be: true } satisfies Record<Locale, true>) as Locale[]
+const builtInLocales = Object.keys({
+  en: true,
+  be: true,
+  cs: true,
+  de: true,
+  et: true,
+  fr: true,
+  it: true,
+  ja: true,
+  ka: true,
+  lt: true,
+  lv: true,
+  pl: true,
+  ro: true,
+  th: true,
+  uk: true,
+} satisfies Record<Locale, true>) as Locale[]
+
+function selectLocales(setting: string | undefined): Locale[] {
+  if (setting === undefined) return builtInLocales
+  const codes = setting
+    .split(',')
+    .map((code) => code.trim())
+    .filter((code) => code !== '')
+  const selected = builtInLocales.filter((locale) => codes.includes(locale))
+  if (selected.length === 0 || codes.some((code) => !(builtInLocales as string[]).includes(code))) {
+    console.error(`LOCALES must list built-in locales (${builtInLocales.join(', ')}), received "${setting}".`)
+    process.exit(1)
+  }
+  return selected
+}
+
+export const locales = selectLocales(env('LOCALES'))
 
 // Covers ui.image with both kinds of sources, and attachments, which no built-in template uses.
 const media = defineTemplate({

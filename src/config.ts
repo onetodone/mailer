@@ -81,7 +81,7 @@ export interface MailerConfig<
   readonly from: MailAddress
   /** Default addresses replies go to. A `replyTo` passed to `send` replaces it. */
   readonly replyTo?: MailAddresses | undefined
-  /** Default locale: a built-in one (`en`, `be`) or a key of `messages`. Default `en`. */
+  /** Default locale: a built-in one (see {@link Locale}) or a key of `messages`. Default `en`. */
   readonly locale?: NoInfer<Locale | (keyof Overrides & string)> | undefined
   /** IANA time zone for dates in emails, such as `Europe/Berlin`. Default `UTC`. */
   readonly timeZone?: string | undefined

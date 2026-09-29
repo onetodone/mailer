@@ -2,7 +2,20 @@ import { html, type SafeHtml } from '../core/html'
 import type { BuiltInTemplates } from '../templates/built-in'
 import type { TemplateSections } from '../templates/messages'
 import { be } from './be'
+import { cs } from './cs'
+import { de } from './de'
 import { en } from './en'
+import { et } from './et'
+import { fr } from './fr'
+import { it } from './it'
+import { ja } from './ja'
+import { ka } from './ka'
+import { lt } from './lt'
+import { lv } from './lv'
+import { pl } from './pl'
+import { ro } from './ro'
+import { th } from './th'
+import { uk } from './uk'
 
 /**
  * Forms of one message for each `Intl.PluralRules` category of the locale.
@@ -408,7 +421,7 @@ export type MessagesOverrides<Templates = BuiltInTemplates> = Readonly<
   Record<string, LocaleMessages<Templates> | undefined>
 >
 
-export const dictionaries = { en, be } satisfies MessageSource
+export const dictionaries = { en, be, cs, de, et, fr, it, ja, ka, lt, lv, pl, ro, th, uk } satisfies MessageSource
 
 /**
  * A locale with built-in texts.

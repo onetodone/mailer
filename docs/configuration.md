@@ -6,7 +6,7 @@
 | `from`      | Required. Sender of every email, in any [address form](sending.md).                                                                           |
 | `branding`  | Required. Company name, links, logo, footer text and theme. See [branding and theme](customization.md#1-branding-and-theme).                  |
 | `replyTo`   | Default address or addresses for replies.                                                                                                     |
-| `locale`    | Default locale: `en` (the default), `be`, or a key of `messages`.                                                                             |
+| `locale`    | Default locale: a [built-in locale](locales.md) such as `en` (the default) or `de`, or a key of `messages`.                                   |
 | `timeZone`  | IANA time zone for dates in emails, such as `Europe/Berlin`. Default `UTC`.                                                                   |
 | `messages`  | Text overrides and extra locales. See [texts and locales](locales.md).                                                                        |
 | `layout`    | Replaces the built-in layout. See [layout](customization.md#3-layout).                                                                        |

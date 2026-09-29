@@ -269,6 +269,6 @@ await mailer.send('orderShipped', {
 
 Pass the templates to `MessagesOverrides` (or `LocaleMessages`) when you declare `messages` outside the `createMailer` call. Without them, these types know only the built-in sections.
 
-A template's locales must be locales of the mailer: `en`, `be` or a key of `messages`. Add `pl: {}` to `messages` to send in Polish with only your template's Polish texts. Any other locale in a template, such as a typo, throws `INVALID_CONFIG` when the mailer is created. So do a text that is not a string, a key that `en` does not have, and a name that clashes with the `common` section or contains a dot.
+A template's locales must be locales of the mailer: a built-in locale or a key of `messages`. Add `sk: {}` to `messages` to send in Slovak with only your template's Slovak texts. Any other locale in a template, such as a typo, throws `INVALID_CONFIG` when the mailer is created. So do a text that is not a string, a key that `en` does not have, and a name that clashes with the `common` section or contains a dot.
 
 A template with its own texts that replaces a built-in one also replaces the built-in texts in every locale: a locale it leaves out falls back to its English texts, and `messages` accepts its keys under that name.

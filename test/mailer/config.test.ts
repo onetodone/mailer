@@ -94,8 +94,8 @@ describe('createMailer config', () => {
     ],
     [
       'an unknown locale',
-      { locale: 'de' },
-      'locale must be a built-in locale ("en", "be") or a key of messages, received "de"',
+      { locale: 'nl' },
+      'locale must be a built-in locale ("en", "be", "cs", "de", "et", "fr", "it", "ja", "ka", "lt", "lv", "pl", "ro", "th", "uk") or a key of messages, received "nl"',
     ],
     [
       'an unknown message key',
@@ -175,8 +175,8 @@ describe('createMailer config', () => {
     ],
     [
       'template texts in a locale the mailer does not know',
-      { templates: { invoice: withTexts('invoice', { en: { subject: 'Invoice' }, pl: { subject: 'Faktura' } }) } },
-      'templates.invoice.messages.pl is not a locale of the mailer: use a built-in locale ("en", "be") or a key of messages',
+      { templates: { invoice: withTexts('invoice', { en: { subject: 'Invoice' }, sk: { subject: 'Faktúra' } }) } },
+      'templates.invoice.messages.sk is not a locale of the mailer: use a built-in locale ("en", "be", "cs", "de", "et", "fr", "it", "ja", "ka", "lt", "lv", "pl", "ro", "th", "uk") or a key of messages',
     ],
     [
       'template texts under the common section',
@@ -256,11 +256,11 @@ describe('createMailer config', () => {
     const receipt = defineTemplate({
       name: 'receipt',
       schema: z.object({}),
-      messages: { en: { subject: 'Receipt' }, pl: { subject: 'Paragon' } },
+      messages: { en: { subject: 'Receipt' }, sk: { subject: 'Účtenka' } },
       render: ({ t }) => ({ subject: t('receipt.subject'), body: [] }),
     })
     expect(() =>
-      createMailer({ transport: memoryTransport(), from, branding, templates: { receipt }, messages: { pl: {} } }),
+      createMailer({ transport: memoryTransport(), from, branding, templates: { receipt }, messages: { sk: {} } }),
     ).not.toThrow()
   })
 
@@ -294,10 +294,10 @@ describe('createMailer config', () => {
         transport: memoryTransport(),
         from,
         branding,
-        // @ts-expect-error: "de" has no texts
-        locale: 'de',
+        // @ts-expect-error: "nl" has no texts
+        locale: 'nl',
       })
-      createMailer({ transport: memoryTransport(), from, branding, locale: 'pl', messages: { pl: {} } })
+      createMailer({ transport: memoryTransport(), from, branding, locale: 'sk', messages: { sk: {} } })
       createMailer({
         transport: memoryTransport(),
         from,
