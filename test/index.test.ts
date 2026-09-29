@@ -38,8 +38,10 @@ import type {
   SafeHtml,
   SendOptions,
   SendResult,
+  TemplateMessages,
   TemplateProps,
   TemplateRenderContext,
+  TemplateTexts,
   ThemeInput,
   Translate,
   TwoFactorDisabledProps,
@@ -86,6 +88,42 @@ describe('main entry', () => {
     })
     expect(template.name).toBe('ping')
     expectTypeOf<TemplateProps<typeof template>>().toEqualTypeOf<unknown>()
+  })
+
+  it('exposes types for the texts of custom templates', () => {
+    const texts = {
+      en: { subject: 'Invoice #{number}', intro: 'Your invoice is attached.' },
+      be: { subject: 'Рахунак №{number}' },
+    } satisfies TemplateMessages
+    expectTypeOf(texts.en).toExtend<TemplateTexts>()
+    const invoice = mailer.defineTemplate({
+      name: 'invoice',
+      schema: { '~standard': { version: 1, vendor: 'test', validate: () => ({ value: {} }) } },
+      messages: texts,
+      render: ({ t }) => {
+        expectTypeOf(t).toEqualTypeOf<
+          Translate<'invoice.subject' | 'invoice.intro' | (`common.${string}` & MessageKey)>
+        >()
+        return { subject: t('invoice.subject'), body: [] }
+      },
+    })
+    const plain = mailer.defineTemplate({
+      name: 'plain',
+      schema: { '~standard': { version: 1, vendor: 'test', validate: () => ({ value: {} }) } },
+      render: () => ({ subject: 'Plain', body: [] }),
+    })
+    expect(invoice.messages).toBe(texts)
+    expect(plain.messages).toBeUndefined()
+    interface Templates {
+      invoice: typeof invoice
+      plain: typeof plain
+    }
+    expectTypeOf<{ be: { invoice: { intro: string }; verifyEmail: { subject: string } } }>().toExtend<
+      MessagesOverrides<Templates>
+    >()
+    expectTypeOf<{ be: { invoice: { title: string } } }>().not.toExtend<MessagesOverrides<Templates>>()
+    expectTypeOf<LocaleMessages<Templates>>().toHaveProperty('invoice')
+    expectTypeOf<LocaleMessages<{ plain: typeof plain }>>().toEqualTypeOf<LocaleMessages>()
   })
 
   it('exposes types for custom transports', () => {

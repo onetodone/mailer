@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest'
+import { z } from 'zod'
 
 import { html, isSafeHtml } from '../../src/core/html'
 import { be } from '../../src/i18n/be'
 import { en } from '../../src/i18n/en'
 import { buildMessages, createI18n, dictionaries, type Locale, type MessagesOverrides } from '../../src/i18n'
+import type { TemplateRegistry } from '../../src/templates/define'
+import { withTemplateMessages } from '../../src/templates/messages'
 
 function i18n(
   locale: Locale,
@@ -61,6 +64,45 @@ describe('buildMessages', () => {
     const messages = buildMessages({ pl: { common: { greeting: 'Cześć {name},' } } })
     expect(messages.pl?.common.greeting).toBe('Cześć {name},')
     expect(messages.pl?.verifyEmail).toEqual(en.verifyEmail)
+  })
+})
+
+describe('withTemplateMessages', () => {
+  const texts = { subject: 'Invoice', intro: 'Attached.' }
+  const template = { name: 'invoice', schema: z.object({}), render: () => ({ subject: '', body: [] }) }
+
+  function build(templates: TemplateRegistry) {
+    const messages = buildMessages({}, withTemplateMessages(dictionaries, templates))
+    return messages as unknown as Readonly<Record<string, Readonly<Record<string, unknown>> | undefined>>
+  }
+
+  it('returns the dictionaries as they are without template texts', () => {
+    expect(withTemplateMessages(dictionaries, { invoice: template })).toBe(dictionaries)
+  })
+
+  it('adds the texts of a template as a section of every locale', () => {
+    const messages = build({ invoice: { ...template, messages: { en: texts, be: { subject: 'Рахунак' } } } })
+    expect(messages.en?.invoice).toEqual(texts)
+    expect(messages.be?.invoice).toEqual({ subject: 'Рахунак', intro: 'Attached.' })
+    expect(messages.be?.verifyEmail).toEqual(be.verifyEmail)
+  })
+
+  it('replaces a built-in section, so the other locales fall back to the template texts', () => {
+    const messages = build({ resetPassword: { ...template, name: 'resetPassword', messages: { en: texts } } })
+    expect(messages.en?.resetPassword).toEqual(texts)
+    expect(messages.be?.resetPassword).toEqual(texts)
+  })
+
+  it('adds the locales of template texts', () => {
+    const messages = build({ invoice: { ...template, messages: { en: texts, pl: { subject: 'Faktura' } } } })
+    expect(messages.pl?.invoice).toEqual({ subject: 'Faktura', intro: 'Attached.' })
+    expect(messages.pl?.common).toEqual(en.common)
+  })
+
+  it('does not mutate the dictionaries', () => {
+    const snapshot = structuredClone(dictionaries)
+    build({ resetPassword: { ...template, name: 'resetPassword', messages: { en: texts } } })
+    expect(dictionaries).toEqual(snapshot)
   })
 })
 

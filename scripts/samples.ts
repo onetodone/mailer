@@ -52,39 +52,35 @@ export const from: MailAddress = { name: 'MyApp', address: 'no-reply@example.com
 // A record keyed by Locale makes a locale missing from this list a type error.
 export const locales = Object.keys({ en: true, be: true } satisfies Record<Locale, true>) as Locale[]
 
-const mediaTexts = {
-  en: {
-    subject: 'Images and attachments',
-    remote: 'An image from an https: URL:',
-    inline: 'An inline image from an attachment, shown through cid:',
-    attached: 'A PDF file is attached to this email.',
-  },
-  be: {
-    subject: 'Выявы і далучаныя файлы',
-    remote: 'Выява па https:-спасылцы:',
-    inline: 'Убудаваная выява з далучанага файла, паказаная праз cid:',
-    attached: 'Да гэтага ліста далучаны PDF-файл.',
-  },
-} satisfies Record<Locale, Record<string, string>>
-
 // Covers ui.image with both kinds of sources, and attachments, which no built-in template uses.
 const media = defineTemplate({
   name: 'media',
   schema: z.strictObject({ imageUrl: z.url({ protocol: /^https?$/ }) }),
-  render: ({ props, ui, locale }) => {
-    const text = locale === 'be' ? mediaTexts.be : mediaTexts.en
-    return {
-      subject: text.subject,
-      body: [
-        ui.heading(text.subject),
-        ui.paragraph(text.remote),
-        ui.image(props.imageUrl, { alt: 'Sample banner', width: 534, height: 200 }),
-        ui.paragraph(text.inline),
-        ui.image('cid:sample-qr', { alt: 'Sample QR code', width: 198, height: 198 }),
-        ui.note(text.attached),
-      ],
-    }
+  messages: {
+    en: {
+      subject: 'Images and attachments',
+      remote: 'An image from an https: URL:',
+      inline: 'An inline image from an attachment, shown through cid:',
+      attached: 'A PDF file is attached to this email.',
+    },
+    be: {
+      subject: 'Выявы і далучаныя файлы',
+      remote: 'Выява па https:-спасылцы:',
+      inline: 'Убудаваная выява з далучанага файла, паказаная праз cid:',
+      attached: 'Да гэтага ліста далучаны PDF-файл.',
+    },
   },
+  render: ({ props, ui, t }) => ({
+    subject: t('media.subject'),
+    body: [
+      ui.heading(t('media.subject')),
+      ui.paragraph(t('media.remote')),
+      ui.image(props.imageUrl, { alt: 'Sample banner', width: 534, height: 200 }),
+      ui.paragraph(t('media.inline')),
+      ui.image('cid:sample-qr', { alt: 'Sample QR code', width: 198, height: 198 }),
+      ui.note(t('media.attached')),
+    ],
+  }),
 })
 
 export function createSampleMailer(transport: MailTransport, sender: MailAddress = from) {

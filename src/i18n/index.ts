@@ -1,4 +1,6 @@
 import { html, type SafeHtml } from '../core/html'
+import type { BuiltInTemplates } from '../templates/built-in'
+import type { TemplateSections } from '../templates/messages'
 import { be } from './be'
 import { en } from './en'
 
@@ -373,12 +375,24 @@ type StringKeys<T> = { [K in keyof T]: T[K] extends string ? K : never }[keyof T
 /** Dotted path of a text in {@link Messages}, such as `'verifyEmail.subject'`. */
 export type MessageKey = { [S in keyof Messages]: `${S}.${StringKeys<Messages[S]>}` }[keyof Messages]
 
+export type CommonMessageKey = Extract<MessageKey, `common.${string}`>
+
 export type DeepPartial<T> = {
   readonly [K in keyof T]?: (T[K] extends string ? T[K] : DeepPartial<T[K]>) | undefined
 }
 
-/** Texts of one locale; keys it leaves out fall back to English. */
-export type LocaleMessages = DeepPartial<Messages>
+// A custom template with its own texts replaces the built-in section of the same name.
+type MailerMessages<Templates> = [keyof TemplateSections<Templates>] extends [never]
+  ? Messages
+  : Omit<Messages, keyof TemplateSections<Templates>> & TemplateSections<Templates>
+
+/**
+ * Texts of one locale; keys it leaves out fall back to English.
+ *
+ * Pass the custom templates as `Templates`, such as `LocaleMessages<typeof templates>`,
+ * to include the texts of templates with their own `messages`.
+ */
+export type LocaleMessages<Templates = BuiltInTemplates> = DeepPartial<MailerMessages<Templates>>
 
 export type MessageSource = Readonly<Record<string, LocaleMessages | undefined>> & { readonly en: Messages }
 
@@ -386,8 +400,13 @@ export type MessageSource = Readonly<Record<string, LocaleMessages | undefined>>
  * Text overrides by locale, for the `messages` setting. Each locale's texts are
  * merged key by key over the built-in ones, and any locale falls back to
  * English for the keys it leaves out.
+ *
+ * Pass the custom templates as `Templates`, such as `MessagesOverrides<typeof templates>`,
+ * to override the texts of templates with their own `messages` too.
  */
-export type MessagesOverrides = Readonly<Record<string, LocaleMessages | undefined>>
+export type MessagesOverrides<Templates = BuiltInTemplates> = Readonly<
+  Record<string, LocaleMessages<Templates> | undefined>
+>
 
 export const dictionaries = { en, be } satisfies MessageSource
 
@@ -442,15 +461,18 @@ export type HtmlMessageParams = Readonly<Record<string, string | number | SafeHt
  * Looks up a text for the current locale and fills its `{name}` placeholders.
  * `{companyName}` is always available; placeholders without a value stay as they are.
  *
+ * `Key` lists the text keys it accepts: every built-in key by default, or the
+ * template's own keys plus `common.*` in a template with its own `messages`.
+ *
  * @example
  * t('common.greeting', { name: props.userName })
  * t.html('passwordChanged.notYouEmail', { email: html`<a href="mailto:${address}">${address}</a>` })
  */
-export interface Translate {
+export interface Translate<Key extends string = MessageKey> {
   /** Returns plain text. Blocks escape it, so it is safe to pass to `ui.paragraph` and the like. */
-  (key: MessageKey, params?: MessageParams): string
+  (key: Key, params?: MessageParams): string
   /** Returns markup: the text and string params are escaped, {@link SafeHtml} params are inserted as-is. */
-  readonly html: (key: MessageKey, params?: HtmlMessageParams) => SafeHtml
+  readonly html: (key: Key, params?: HtmlMessageParams) => SafeHtml
 }
 
 /** Locale-aware formatting for template texts. */
@@ -478,7 +500,7 @@ export interface I18nOptions {
 
 const placeholder = /\{(\w+)\}/g
 
-function lookup(messages: Messages, key: MessageKey): string {
+function lookup(messages: Messages, key: string): string {
   const dot = key.indexOf('.')
   const section: unknown = messages[key.slice(0, dot) as keyof Messages]
   const value = isRecord(section) ? section[key.slice(dot + 1)] : undefined

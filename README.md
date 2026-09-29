@@ -24,7 +24,7 @@
 - One call to send an email. Template names autocomplete, and props are checked at compile time and validated at runtime.
 - Branding from configuration: logo, company name, colors, footer text and support address.
 - Texts in English and Belarusian. Override any text, or add a locale that falls back to English key by key.
-- Custom layouts and templates with the same typed API. Props are validated with any [Standard Schema](https://standardschema.dev) library, such as zod, valibot or arktype.
+- Custom layouts and templates with the same typed API. Props are validated with any [Standard Schema](https://standardschema.dev) library, such as zod, valibot or arktype, and custom templates can bring their own texts per locale.
 - Table-based HTML with inline styles and an Outlook button fallback, plus a plain-text version of every email.
 - Attachments, such as invoices, and inline images through `cid:` for pictures without a public URL, such as QR codes.
 - SMTP delivery through nodemailer, memory and console transports for tests and development, or a transport of your own.
@@ -33,7 +33,7 @@
 ## Requirements
 
 - Node.js 22 or later.
-- ESM or CommonJS. Type declarations are included.
+- ESM or CommonJS. Type declarations are included and need TypeScript 5.4 or later.
 - [nodemailer](https://nodemailer.com) 6 or later, only for SMTP delivery through `@onetodone/mailer/smtp`.
 
 ## Install
@@ -583,7 +583,7 @@ const mailer = createMailer({
 })
 ```
 
-Placeholders in braces are filled in when the email renders. `{companyName}` works in every text, and some texts have their own placeholders (see the table below). An unknown text key throws `INVALID_CONFIG`.
+Placeholders in braces are filled in when the email renders. `{companyName}` works in every text, and some texts have their own placeholders (see the table below). An unknown text key throws `INVALID_CONFIG`. The texts of custom templates are overridden the same way, under the template's name (see [texts of custom templates](#texts-of-custom-templates)).
 
 To add a locale, add its tag to `messages`. It must be a BCP 47 tag such as `pl` or `pt-BR`. Every key the locale leaves out falls back to English, including your `en` overrides. `send`, `render` and the `locale` setting then accept the tag, and TypeScript rejects locales the mailer does not know:
 
@@ -618,7 +618,7 @@ await mailer.render('passwordChanged', { locale: 'de' }) // type error: "de" is 
 
 Plural forms (`common.minutes`, `common.hours`, `common.days`) take one text per [plural category](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules/select) of the locale: `zero`, `one`, `two`, `few`, `many` and `other`. `{count}` is replaced by the number. A category without a text uses `other`.
 
-When you declare `messages` outside the `createMailer` call, check it with `satisfies MessagesOverrides` rather than a type annotation. An annotation widens the keys to `string`, and the mailer loses its list of locales:
+When you declare `messages` outside the `createMailer` call, check it with `satisfies MessagesOverrides` rather than a type annotation. An annotation widens the keys to `string`, and the mailer loses its list of locales. For the texts of custom templates, use `MessagesOverrides<typeof templates>` (see [texts of custom templates](#texts-of-custom-templates)):
 
 ```ts
 import type { MessagesOverrides } from '@onetodone/mailer'
@@ -742,7 +742,7 @@ await mailer.send('orderShipped', {
 | ---------- | ---------------------------------------------------------------------------------------------------------- |
 | `props`    | Props after validation, with the schema's defaults and transforms applied.                                 |
 | `ui`       | Content blocks styled with the theme.                                                                      |
-| `t`        | Built-in texts for the email's locale, with placeholders filled in: `t('common.greeting', { name })`.      |
+| `t`        | Texts for the email's locale, with placeholders filled in: `t('common.greeting', { name })`. See below.    |
 | `t.html`   | The same texts as markup: the text and plain values are escaped, and `html` values are inserted as markup. |
 | `format`   | `format.duration(minutes)` and `format.dateTime(date, timeZone?)` for the email's locale.                  |
 | `locale`   | Locale of the email.                                                                                       |
@@ -804,26 +804,67 @@ await mailer.send('resetPassword', { to: 'lizzie@example.com', props: { code: '4
 
 #### Texts of custom templates
 
-`t` knows only the built-in text keys, and `messages` accepts only the built-in sections. A custom template keeps its own texts and picks them by `locale`:
+Give a template its own texts with `messages`. `en` is required and lists every text key. Other locales can leave out any key, which then falls back to English:
 
 ```ts
-const texts = {
-  en: { subject: 'Your order has shipped', button: 'Track order' },
-  be: { subject: 'Ваша замова адпраўлена', button: 'Адсачыць замову' },
-}
-
 const orderShipped = defineTemplate({
   name: 'orderShipped',
-  schema: z.object({ trackUrl: z.url({ protocol: /^https?$/ }) }),
-  render: ({ props, ui, locale }) => {
-    const text = locale === 'be' ? texts.be : texts.en
-    return {
-      subject: text.subject,
-      body: [ui.button(text.button, props.trackUrl), ui.linkFallback(props.trackUrl)],
-    }
+  schema: z.object({ orderId: z.string(), trackUrl: z.url({ protocol: /^https?$/ }) }),
+  messages: {
+    en: {
+      subject: 'Order #{orderId} has shipped',
+      intro: 'Your order from {companyName} is on its way.',
+      button: 'Track order',
+    },
+    be: {
+      subject: 'Замова №{orderId} адпраўлена',
+      intro: 'Ваша замова ад {companyName} ужо ў дарозе.',
+      button: 'Адсачыць замову',
+    },
   },
+  render: ({ props, ui, t }) => ({
+    subject: t('orderShipped.subject', { orderId: props.orderId }),
+    body: [
+      ui.paragraph(t('common.greetingAnonymous')),
+      ui.paragraph(t('orderShipped.intro')),
+      ui.button(t('orderShipped.button'), props.trackUrl),
+      ui.linkFallback(props.trackUrl),
+    ],
+  }),
 })
 ```
+
+- The texts live in a section named after the template: `t` takes `'orderShipped.subject'` and the other keys of `en`, plus the `common` keys. Your editor autocompletes them, and any other key is a type error.
+- Placeholders work as in the built-in texts, and `{companyName}` works in every text.
+- A template without `messages` keeps `t` for every built-in key.
+- Plural forms are not supported in template texts. Pick the text in code, such as `count === 1 ? t('cart.oneItem') : t('cart.items', { count })`, or phrase the text without a number that needs a plural form, such as "Items: {count}".
+
+The mailer's `messages` setting overrides these texts under the template's name, the same way as the built-in ones. An `en` override also reaches the locales that fall back to English:
+
+```ts
+import { createMailer, type MessagesOverrides } from '@onetodone/mailer'
+
+const templates = { orderShipped }
+
+const messages = {
+  en: { orderShipped: { button: 'Where is my order?' } },
+  be: { orderShipped: { intro: 'Замова ўжо ў дарозе.' } },
+} satisfies MessagesOverrides<typeof templates>
+
+const mailer = createMailer({ transport, from, branding, templates, messages })
+
+await mailer.send('orderShipped', {
+  to: 'lizzie@example.com',
+  locale: 'be',
+  props: { orderId: '1042', trackUrl: 'https://example.com/orders/1042/tracking' },
+})
+```
+
+Pass the templates to `MessagesOverrides` (or `LocaleMessages`) when you declare `messages` outside the `createMailer` call. Without them, these types know only the built-in sections.
+
+A template's locales must be locales of the mailer: `en`, `be` or a key of `messages`. Add `pl: {}` to `messages` to send in Polish with only your template's Polish texts. Any other locale in a template, such as a typo, throws `INVALID_CONFIG` when the mailer is created. So do a text that is not a string, a key that `en` does not have, and a name that clashes with the `common` section or contains a dot.
+
+A template with its own texts that replaces a built-in one also replaces the built-in texts in every locale: a locale it leaves out falls back to its English texts, and `messages` accepts its keys under that name.
 
 ## Transports
 
