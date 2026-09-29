@@ -1,0 +1,22 @@
+Subject: Two-factor authentication was turned off
+
+My App
+
+Two-factor authentication was turned off
+
+Hi Lizzie,
+
+Two-factor authentication was turned off for your My App account. From now on, signing in takes only your password.
+
+IP address: 203.0.113.7
+
+If this was you, you don't need to do anything. You can turn it back on at any time.
+
+---
+
+If it wasn't you, write to us right away at support@myapp.loc.
+
+--
+You received this email because you have an account at My App.
+Questions? Write to us at support@myapp.loc
+© 2026 My App. All rights reserved.

@@ -1,0 +1,29 @@
+Subject: Новы ўваход у акаўнт
+
+My App
+
+Новы ўваход у акаўнт
+
+Вітаем, Ліза!
+
+Мы заўважылі новы ўваход у ваш акаўнт у My App.
+
+Прылада: Chrome on macOS
+Месцазнаходжанне: Berlin, Germany
+IP-адрас: 203.0.113.7
+
+Калі гэта былі вы, нічога рабіць не трэба.
+
+---
+
+Калі гэта былі не вы, адразу абараніце свой акаўнт.
+
+Абараніць акаўнт: https://myapp.loc/security?token=abc123
+
+Калі кнопка не працуе, скапіюйце гэту спасылку ў браўзер:
+https://myapp.loc/security?token=abc123
+
+--
+You received this email because you have an account at My App.
+Ёсць пытанні? Пішыце нам: support@myapp.loc
+© 2026 My App. Усе правы абаронены.

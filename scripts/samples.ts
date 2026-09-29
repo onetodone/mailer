@@ -1,6 +1,7 @@
 import {
   createMailer,
   defineTemplate,
+  type AccountLockedProps,
   type Attachment,
   type Branding,
   type EmailChangedProps,
@@ -9,10 +10,13 @@ import {
   type MagicLinkProps,
   type MailAddress,
   type MailTransport,
+  type NewSignInProps,
   type OtpCodeProps,
   type PasswordChangedProps,
   type ResetPasswordProps,
   type TemplateProps,
+  type TwoFactorDisabledProps,
+  type TwoFactorEnabledProps,
   type VerifyEmailChangeProps,
   type VerifyEmailProps,
   type WelcomeProps,
@@ -95,6 +99,10 @@ interface PropsByTemplate {
   otpCode: OtpCodeProps
   magicLink: MagicLinkProps
   welcome: WelcomeProps
+  newSignIn: NewSignInProps
+  twoFactorEnabled: TwoFactorEnabledProps
+  twoFactorDisabled: TwoFactorDisabledProps
+  accountLocked: AccountLockedProps
   media: TemplateProps<typeof media>
 }
 
@@ -184,6 +192,48 @@ export const samples: readonly Sample[] = [
     props: { userName: 'Lizzie', ctaUrl: 'https://example.com/get-started' },
   },
   { slug: 'welcome-minimal', template: 'welcome', props: {} },
+  {
+    slug: 'new-sign-in',
+    template: 'newSignIn',
+    props: {
+      userName: 'Lizzie',
+      signedInAt: new Date(),
+      timeZone: 'Europe/Minsk',
+      ip: '203.0.113.42',
+      device: 'Chrome on macOS',
+      location: 'Minsk, Belarus',
+      secureUrl: 'https://example.com/security?token=preview',
+    },
+  },
+  { slug: 'new-sign-in-minimal', template: 'newSignIn', props: {} },
+  {
+    slug: 'two-factor-enabled',
+    template: 'twoFactorEnabled',
+    props: {
+      userName: 'Lizzie',
+      changedAt: new Date(),
+      timeZone: 'Europe/Minsk',
+      ip: '203.0.113.42',
+      supportUrl: 'https://example.com/support',
+    },
+  },
+  {
+    slug: 'two-factor-disabled',
+    template: 'twoFactorDisabled',
+    props: { userName: 'Lizzie', changedAt: new Date(), timeZone: 'Europe/Minsk', ip: '203.0.113.42' },
+  },
+  {
+    slug: 'account-locked',
+    template: 'accountLocked',
+    props: {
+      userName: 'Lizzie',
+      lockedUntil: new Date(Date.now() + 30 * 60_000),
+      timeZone: 'Europe/Minsk',
+      ip: '203.0.113.42',
+      unlockUrl: 'https://example.com/unlock?token=preview',
+    },
+  },
+  { slug: 'account-locked-minimal', template: 'accountLocked', props: {} },
   {
     slug: 'media',
     template: 'media',

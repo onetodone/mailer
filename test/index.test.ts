@@ -2,6 +2,7 @@ import { describe, expect, expectTypeOf, it } from 'vitest'
 
 import * as mailer from '../src/index'
 import type {
+  AccountLockedProps,
   Attachment,
   AttachmentInfo,
   Branding,
@@ -24,6 +25,7 @@ import type {
   MemoryTransport,
   MessageKey,
   MessagesOverrides,
+  NewSignInProps,
   OtpCodeProps,
   OutgoingAttachment,
   OutgoingMessage,
@@ -38,6 +40,8 @@ import type {
   TemplateRenderContext,
   ThemeInput,
   Translate,
+  TwoFactorDisabledProps,
+  TwoFactorEnabledProps,
   VerifyEmailChangeProps,
   VerifyEmailProps,
   WelcomeProps,
@@ -120,6 +124,10 @@ describe('main entry', () => {
     expectTypeOf<OtpCodeProps>().toHaveProperty('code')
     expectTypeOf<MagicLinkProps>().toHaveProperty('signInUrl')
     expectTypeOf<WelcomeProps>().toHaveProperty('ctaUrl')
+    expectTypeOf<NewSignInProps>().toHaveProperty('device')
+    expectTypeOf<TwoFactorEnabledProps>().toHaveProperty('changedAt')
+    expectTypeOf<TwoFactorDisabledProps>().toHaveProperty('changedAt')
+    expectTypeOf<AccountLockedProps>().toHaveProperty('unlockUrl')
     expectTypeOf<{ pl: LocaleMessages }>().toExtend<MessagesOverrides>()
     expectTypeOf<'INVALID_OPTIONS'>().toExtend<MailerErrorCode>()
   })

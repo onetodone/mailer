@@ -1,0 +1,27 @@
+Subject: Your account is locked
+
+My App
+
+Your account is locked
+
+Hi Lizzie,
+
+We locked your My App account after too many failed sign-in attempts.
+
+IP address: 203.0.113.7
+
+To unlock your account right away, click the button.
+
+Unlock account: https://myapp.loc/unlock?token=abc123
+
+If the button doesn't work, copy this link into your browser:
+https://myapp.loc/unlock?token=abc123
+
+---
+
+If it wasn't you, someone may be trying to guess your password. Choose a new one once you can sign in again.
+
+--
+You received this email because you have an account at My App.
+Questions? Write to us at support@myapp.loc
+© 2026 My App. All rights reserved.

@@ -18,6 +18,8 @@ const supportUrl = 'https://myapp.loc/support'
 const cancelUrl = 'https://myapp.loc/email/cancel?token=abc123'
 const newEmail = 'lizzie.new@example.com'
 const signInUrl = 'https://myapp.loc/sign-in?token=abc123'
+const secureUrl = 'https://myapp.loc/security?token=abc123'
+const unlockUrl = 'https://myapp.loc/unlock?token=abc123'
 
 const orderShipped = defineTemplate({
   name: 'orderShipped',
@@ -137,6 +139,48 @@ describe('built-in templates through the memory transport', () => {
           props: { userName: userNames[locale] },
         }),
     ],
+    [
+      'new-sign-in',
+      (mailer, locale) =>
+        mailer.send('newSignIn', {
+          to,
+          locale,
+          props: {
+            userName: userNames[locale],
+            device: 'Chrome on macOS',
+            location: 'Berlin, Germany',
+            ip: '203.0.113.7',
+            secureUrl,
+          },
+        }),
+    ],
+    [
+      'two-factor-enabled',
+      (mailer, locale) =>
+        mailer.send('twoFactorEnabled', {
+          to,
+          locale,
+          props: { userName: userNames[locale], ip: '203.0.113.7', supportUrl },
+        }),
+    ],
+    [
+      'two-factor-disabled',
+      (mailer, locale) =>
+        mailer.send('twoFactorDisabled', {
+          to,
+          locale,
+          props: { userName: userNames[locale], ip: '203.0.113.7' },
+        }),
+    ],
+    [
+      'account-locked',
+      (mailer, locale) =>
+        mailer.send('accountLocked', {
+          to,
+          locale,
+          props: { userName: userNames[locale], ip: '203.0.113.7', unlockUrl },
+        }),
+    ],
   ]
 
   beforeAll(() => {
@@ -206,6 +250,10 @@ describe('custom templates', () => {
       | 'otpCode'
       | 'magicLink'
       | 'welcome'
+      | 'newSignIn'
+      | 'twoFactorEnabled'
+      | 'twoFactorDisabled'
+      | 'accountLocked'
       | 'orderShipped'
     >()
     const check = async () => {
