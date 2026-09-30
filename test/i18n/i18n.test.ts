@@ -61,9 +61,9 @@ describe('buildMessages', () => {
   })
 
   it('adds a locale that exists only in the overrides', () => {
-    const messages = buildMessages({ pl: { common: { greeting: 'Cześć {name},' } } })
-    expect(messages.pl?.common.greeting).toBe('Cześć {name},')
-    expect(messages.pl?.verifyEmail).toEqual(en.verifyEmail)
+    const messages = buildMessages({ sk: { common: { greeting: 'Ahoj {name},' } } })
+    expect(messages.sk?.common.greeting).toBe('Ahoj {name},')
+    expect(messages.sk?.verifyEmail).toEqual(en.verifyEmail)
   })
 
   it('keeps the overrides of a custom locale that becomes built-in', () => {
@@ -105,9 +105,9 @@ describe('withTemplateMessages', () => {
   })
 
   it('adds the locales of template texts', () => {
-    const messages = build({ invoice: { ...template, messages: { en: texts, pl: { subject: 'Faktura' } } } })
-    expect(messages.pl?.invoice).toEqual({ subject: 'Faktura', intro: 'Attached.' })
-    expect(messages.pl?.common).toEqual(en.common)
+    const messages = build({ invoice: { ...template, messages: { en: texts, sk: { subject: 'Faktúra' } } } })
+    expect(messages.sk?.invoice).toEqual({ subject: 'Faktúra', intro: 'Attached.' })
+    expect(messages.sk?.common).toEqual(en.common)
   })
 
   it('does not mutate the dictionaries', () => {
@@ -117,7 +117,25 @@ describe('withTemplateMessages', () => {
   })
 })
 
+type Sections = Readonly<Record<string, Readonly<Record<string, unknown>>>>
+
+// `{companyName}` is optional in every text, so it is left out of the comparison.
+function placeholders(text: unknown): string[] {
+  const values = typeof text === 'string' ? [text] : Object.values((text ?? {}) as Readonly<Record<string, string>>)
+  const names = values.flatMap((value) => [...value.matchAll(/\{(\w+)\}/g)].map((match) => match[1] ?? ''))
+  return [...new Set(names)].filter((name) => name !== 'companyName').sort()
+}
+
 describe('dictionaries', () => {
+  it.each(Object.entries(dictionaries))('%s keeps the placeholders of the English texts', (locale, messages) => {
+    const translated = messages as unknown as Sections
+    for (const [section, texts] of Object.entries(en as unknown as Sections)) {
+      for (const [key, text] of Object.entries(texts)) {
+        expect(placeholders(translated[section]?.[key]), `${locale} ${section}.${key}`).toEqual(placeholders(text))
+      }
+    }
+  })
+
   it.each(Object.entries(dictionaries))('%s has a plural form for every category of the locale', (locale, messages) => {
     const { minutes, hours, days } = messages.common
     const categories = new Intl.PluralRules(locale).resolvedOptions().pluralCategories

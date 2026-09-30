@@ -75,7 +75,9 @@ describe('main entry', () => {
   })
 
   it('exposes types for custom templates and texts', () => {
-    expectTypeOf<Locale>().toEqualTypeOf<'en' | 'be'>()
+    expectTypeOf<Locale>().toEqualTypeOf<
+      'en' | 'be' | 'cs' | 'de' | 'et' | 'fr' | 'it' | 'ja' | 'ka' | 'lt' | 'lv' | 'pl' | 'ro' | 'th' | 'uk'
+    >()
     expectTypeOf<'verifyEmail.subject' | 'common.linkFallback'>().toExtend<MessageKey>()
     expectTypeOf<'common.minutes'>().not.toExtend<MessageKey>()
     expectTypeOf<TemplateRenderContext<{ id: string }>['t']>().toEqualTypeOf<Translate>()
@@ -170,7 +172,7 @@ describe('main entry', () => {
     expectTypeOf<AccountLockedProps>().toHaveProperty('unlockUrl')
     expectTypeOf<ConfirmAccountDeletionProps>().toHaveProperty('confirmUrl')
     expectTypeOf<AccountDeletedProps>().toHaveProperty('supportUrl')
-    expectTypeOf<{ pl: LocaleMessages }>().toExtend<MessagesOverrides>()
+    expectTypeOf<{ sk: LocaleMessages }>().toExtend<MessagesOverrides>()
     expectTypeOf<'INVALID_OPTIONS'>().toExtend<MailerErrorCode>()
   })
 })

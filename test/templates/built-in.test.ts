@@ -199,13 +199,23 @@ afterAll(() => {
   vi.useRealTimers()
 })
 
-describe.each(locales)('built-in templates (%s)', (locale) => {
+describe.each<Locale>(['en', 'be'])('built-in templates (%s)', (locale) => {
   it.each(snapshotCases)('%s matches the snapshot', async (file, render) => {
     const email = await render(locale)
     await expect(email.html).toMatchFileSnapshot(`./__snapshots__/${file}.${locale}.html`)
     await expect(`Subject: ${email.subject}\n\n${email.text}\n`).toMatchFileSnapshot(
       `./__snapshots__/${file}.${locale}.txt`,
     )
+  })
+})
+
+describe.each(locales)('built-in templates in every locale (%s)', (locale) => {
+  it.each(snapshotCases)('%s renders with every placeholder filled', async (_file, render) => {
+    const email = await render(locale)
+    for (const part of [email.subject, email.html, email.text]) {
+      expect(part).not.toBe('')
+      expect(part).not.toMatch(/\{[A-Za-z]+\}/)
+    }
   })
 })
 

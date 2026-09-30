@@ -7,46 +7,46 @@
 | Bulgarian            | `bg` |    ❌     |
 | Chinese (Simplified) | `zh` |    ❌     |
 | Croatian             | `hr` |    ❌     |
-| Czech                | `cs` |    ❌     |
+| Czech                | `cs` |    ✅     |
 | Danish               | `da` |    ❌     |
 | Dutch                | `nl` |    ❌     |
 | English (default)    | `en` |    ✅     |
-| Estonian             | `et` |    ❌     |
+| Estonian             | `et` |    ✅     |
 | Finnish              | `fi` |    ❌     |
-| French               | `fr` |    ❌     |
-| Georgian             | `ka` |    ❌     |
-| German               | `de` |    ❌     |
+| French               | `fr` |    ✅     |
+| Georgian             | `ka` |    ✅     |
+| German               | `de` |    ✅     |
 | Greek                | `el` |    ❌     |
 | Hebrew               | `he` |    ❌     |
 | Hindi                | `hi` |    ❌     |
 | Hungarian            | `hu` |    ❌     |
 | Indonesian           | `id` |    ❌     |
-| Italian              | `it` |    ❌     |
-| Japanese             | `ja` |    ❌     |
+| Italian              | `it` |    ✅     |
+| Japanese             | `ja` |    ✅     |
 | Kazakh               | `kk` |    ❌     |
 | Korean               | `ko` |    ❌     |
-| Latvian              | `lv` |    ❌     |
-| Lithuanian           | `lt` |    ❌     |
+| Latvian              | `lv` |    ✅     |
+| Lithuanian           | `lt` |    ✅     |
 | Norwegian            | `nb` |    ❌     |
-| Polish               | `pl` |    ❌     |
+| Polish               | `pl` |    ✅     |
 | Portuguese           | `pt` |    ❌     |
-| Romanian             | `ro` |    ❌     |
+| Romanian             | `ro` |    ✅     |
 | Russian              | `ru` |    ❌     |
 | Serbian              | `sr` |    ❌     |
 | Slovak               | `sk` |    ❌     |
 | Slovenian            | `sl` |    ❌     |
 | Spanish              | `es` |    ❌     |
 | Swedish              | `sv` |    ❌     |
-| Thai                 | `th` |    ❌     |
+| Thai                 | `th` |    ✅     |
 | Turkish              | `tr` |    ❌     |
-| Ukrainian            | `uk` |    ❌     |
+| Ukrainian            | `uk` |    ✅     |
 | Vietnamese           | `vi` |    ❌     |
 
 ✅ — built-in texts for every template. ❌ — no built-in texts: add the language through `messages`, and every key you leave out falls back to English. Arabic and Hebrew are written right to left, which the default layout does not support.
 
 The examples below reuse `transport`, `from` and `branding` from the [quick start](../README.md#quick-start).
 
-The built-in texts are in English (`en`, the default) and Belarusian (`be`). Set the default with `locale`, and the locale of a single email with the `locale` option of `send` or `render`.
+The built-in texts cover the languages marked ✅ in the table; English (`en`) is the default. Set the default with `locale`, and the locale of a single email with the `locale` option of `send` or `render`.
 
 `messages` overrides texts key by key. Every key you leave out keeps its built-in text:
 
@@ -69,35 +69,35 @@ const mailer = createMailer({
 
 Placeholders in braces are filled in when the email renders. `{companyName}` works in every text, and some texts have their own placeholders (see the table below). An unknown text key throws `INVALID_CONFIG`. The texts of custom templates are overridden the same way, under the template's name (see [texts of custom templates](customization.md#texts-of-custom-templates)).
 
-To add a locale, add its tag to `messages`. It must be a BCP 47 tag such as `pl` or `pt-BR`. Every key the locale leaves out falls back to English, including your `en` overrides. `send`, `render` and the `locale` setting then accept the tag, and TypeScript rejects locales the mailer does not know:
+To add a locale, add its tag to `messages`. It must be a BCP 47 tag such as `sk` or `pt-BR`. Every key the locale leaves out falls back to English, including your `en` overrides. `send`, `render` and the `locale` setting then accept the tag, and TypeScript rejects locales the mailer does not know:
 
 ```ts
 const mailer = createMailer({
   transport,
   from,
   branding,
-  locale: 'pl',
+  locale: 'sk',
   messages: {
-    pl: {
+    sk: {
       common: {
-        greeting: 'Cześć {name},',
-        minutes: { one: '{count} minutę', few: '{count} minuty', many: '{count} minut', other: '{count} minuty' },
+        greeting: 'Dobrý deň, {name},',
+        minutes: { one: '{count} minútu', few: '{count} minúty', many: '{count} minúty', other: '{count} minút' },
       },
       verifyEmail: {
-        subject: 'Potwierdź swój adres e-mail',
-        heading: 'Potwierdź swój adres e-mail',
-        button: 'Potwierdź adres',
+        subject: 'Potvrďte svoj e-mail',
+        heading: 'Potvrďte svoj e-mail',
+        button: 'Potvrdiť e-mail',
       },
     },
   },
 })
 
 await mailer.send('verifyEmail', {
-  to: 'ola@example.com',
+  to: 'zuzana@example.com',
   props: { verifyUrl: 'https://example.com/verify?token=abc123' },
 })
 
-await mailer.render('passwordChanged', { locale: 'de' }) // type error: "de" is not a locale of this mailer
+await mailer.render('passwordChanged', { locale: 'nl' }) // type error: "nl" is not a locale of this mailer
 ```
 
 Plural forms (`common.minutes`, `common.hours`, `common.days`) take one text per [plural category](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules/select) of the locale: `zero`, `one`, `two`, `few`, `many` and `other`. `{count}` is replaced by the number. A category without a text uses `other`.
@@ -108,7 +108,7 @@ When you declare `messages` outside the `createMailer` call, check it with `sati
 import type { MessagesOverrides } from '@onetodone/mailer'
 
 const messages = {
-  pl: { verifyEmail: { subject: 'Potwierdź swój adres e-mail' } },
+  sk: { verifyEmail: { subject: 'Potvrďte svoj e-mail' } },
 } satisfies MessagesOverrides
 ```
 

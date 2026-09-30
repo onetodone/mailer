@@ -4,7 +4,6 @@ import { z } from 'zod'
 import { html } from '../../src/core/html'
 import { defineLayout } from '../../src/core/layout'
 import { MailerError } from '../../src/errors'
-import type { Locale } from '../../src/i18n'
 import { createMailer, type Mailer } from '../../src/mailer'
 import { defineTemplate } from '../../src/templates/define'
 import { memoryTransport } from '../../src/transports/memory'
@@ -57,8 +56,8 @@ describe('built-in templates through the memory transport', () => {
     footerText: 'You received this email because you have an account at My App.',
     theme: { primary: '#3b82f6' },
   }
-  const userNames: Record<Locale, string> = { en: 'Lizzie', be: 'Ліза' }
-  const cases: [file: string, send: (mailer: Mailer, locale: Locale) => Promise<unknown>][] = [
+  const userNames = { en: 'Lizzie', be: 'Ліза' }
+  const cases: [file: string, send: (mailer: Mailer, locale: keyof typeof userNames) => Promise<unknown>][] = [
     [
       'verify-email',
       (mailer, locale) =>
@@ -211,7 +210,7 @@ describe('built-in templates through the memory transport', () => {
     vi.useRealTimers()
   })
 
-  describe.each<Locale>(['en', 'be'])('%s', (locale) => {
+  describe.each(['en', 'be'] as const)('%s', (locale) => {
     it.each(cases)('sends %s as rendered in the template snapshots', async (file, send) => {
       const transport = memoryTransport()
       const mailer = createMailer({ transport, from, branding: snapshotBranding })
@@ -344,14 +343,14 @@ describe('texts and locales', () => {
       transport,
       from,
       branding,
-      locale: 'pl',
-      messages: { pl: { verifyEmail: { subject: 'Potwierdź swój email' } } },
+      locale: 'sk',
+      messages: { sk: { verifyEmail: { subject: 'Potvrďte svoj e-mail' } } },
     })
 
     await mailer.send('verifyEmail', { to, props: { verifyUrl, expiresInMinutes: 5 } })
 
-    expect(transport.sent[0]?.subject).toBe('Potwierdź swój email')
-    expect(transport.sent[0]?.html).toContain('<html lang="pl" ')
+    expect(transport.sent[0]?.subject).toBe('Potvrďte svoj e-mail')
+    expect(transport.sent[0]?.html).toContain('<html lang="sk" ')
     expect(transport.sent[0]?.text).toContain('The link expires in 5 minutes.')
   })
 
@@ -368,16 +367,20 @@ describe('texts and locales', () => {
   })
 
   it('rejects a locale without texts', async () => {
-    const mailer = createMailer({ transport: memoryTransport(), from, branding, messages: { pl: {} } })
-    const sendError = await mailerRejection(mailer.send('passwordChanged', { to, locale: 'de' as never }))
+    const mailer = createMailer({ transport: memoryTransport(), from, branding, messages: { sk: {} } })
+    const sendError = await mailerRejection(mailer.send('passwordChanged', { to, locale: 'nl' as never }))
     expect(sendError.code).toBe('INVALID_OPTIONS')
-    expect(sendError.message).toBe('Invalid send options: locale must be one of "en", "be", "pl", received "de".')
-    const renderError = await mailerRejection(mailer.render('passwordChanged', { locale: 'de' as never }))
+    expect(sendError.message).toBe(
+      'Invalid send options: locale must be one of "en", "be", "cs", "de", "et", "fr", "it", "ja", "ka", "lt", "lv", "pl", "ro", "th", "uk", "sk", received "nl".',
+    )
+    const renderError = await mailerRejection(mailer.render('passwordChanged', { locale: 'nl' as never }))
     expect(renderError.code).toBe('INVALID_OPTIONS')
-    expect(renderError.message).toBe('Invalid render options: locale must be one of "en", "be", "pl", received "de".')
+    expect(renderError.message).toBe(
+      'Invalid render options: locale must be one of "en", "be", "cs", "de", "et", "fr", "it", "ja", "ka", "lt", "lv", "pl", "ro", "th", "uk", "sk", received "nl".',
+    )
     const check = async () => {
-      // @ts-expect-error: "de" has no texts
-      await mailer.send('passwordChanged', { to, locale: 'de' })
+      // @ts-expect-error: "nl" has no texts
+      await mailer.send('passwordChanged', { to, locale: 'nl' })
     }
     expect(check).toBeTypeOf('function')
   })
