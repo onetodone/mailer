@@ -1,6 +1,7 @@
 import { html, type SafeHtml } from '../core/html'
 import type { BuiltInTemplates } from '../templates/built-in'
 import type { TemplateSections } from '../templates/messages'
+import { beLatn } from './be-Latn'
 import { be } from './be'
 import { cs } from './cs'
 import { de } from './de'
@@ -421,7 +422,24 @@ export type MessagesOverrides<Templates = BuiltInTemplates> = Readonly<
   Record<string, LocaleMessages<Templates> | undefined>
 >
 
-export const dictionaries = { en, be, cs, de, et, fr, it, ja, ka, lt, lv, pl, ro, th, uk } satisfies MessageSource
+export const dictionaries = {
+  en,
+  'be-Latn': beLatn,
+  be,
+  cs,
+  de,
+  et,
+  fr,
+  it,
+  ja,
+  ka,
+  lt,
+  lv,
+  pl,
+  ro,
+  th,
+  uk,
+} satisfies MessageSource
 
 /**
  * A locale with built-in texts.

@@ -76,7 +76,7 @@ describe('main entry', () => {
 
   it('exposes types for custom templates and texts', () => {
     expectTypeOf<Locale>().toEqualTypeOf<
-      'en' | 'be' | 'cs' | 'de' | 'et' | 'fr' | 'it' | 'ja' | 'ka' | 'lt' | 'lv' | 'pl' | 'ro' | 'th' | 'uk'
+      'en' | 'be-Latn' | 'be' | 'cs' | 'de' | 'et' | 'fr' | 'it' | 'ja' | 'ka' | 'lt' | 'lv' | 'pl' | 'ro' | 'th' | 'uk'
     >()
     expectTypeOf<'verifyEmail.subject' | 'common.linkFallback'>().toExtend<MessageKey>()
     expectTypeOf<'common.minutes'>().not.toExtend<MessageKey>()

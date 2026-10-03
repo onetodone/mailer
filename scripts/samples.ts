@@ -52,6 +52,7 @@ export const from: MailAddress = { name: 'MyApp', address: 'no-reply@example.com
 // A record keyed by Locale makes a locale missing from this list a type error.
 const builtInLocales = Object.keys({
   en: true,
+  'be-Latn': true,
   be: true,
   cs: true,
   de: true,
