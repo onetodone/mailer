@@ -1,46 +1,47 @@
 # Texts and locales
 
-| Language             | Code |  Built-in  |
-| -------------------- | ---- |  :------:  |
-| Arabic               | `ar` |    ❌     |
-| Belarusian           | `be` |    ✅     |
-| Bulgarian            | `bg` |    ❌     |
-| Chinese (Simplified) | `zh` |    ❌     |
-| Croatian             | `hr` |    ❌     |
-| Czech                | `cs` |    ✅     |
-| Danish               | `da` |    ❌     |
-| Dutch                | `nl` |    ❌     |
-| English (default)    | `en` |    ✅     |
-| Estonian             | `et` |    ✅     |
-| Finnish              | `fi` |    ❌     |
-| French               | `fr` |    ✅     |
-| Georgian             | `ka` |    ✅     |
-| German               | `de` |    ✅     |
-| Greek                | `el` |    ❌     |
-| Hebrew               | `he` |    ❌     |
-| Hindi                | `hi` |    ❌     |
-| Hungarian            | `hu` |    ❌     |
-| Indonesian           | `id` |    ❌     |
-| Italian              | `it` |    ✅     |
-| Japanese             | `ja` |    ✅     |
-| Kazakh               | `kk` |    ❌     |
-| Korean               | `ko` |    ❌     |
-| Latvian              | `lv` |    ✅     |
-| Lithuanian           | `lt` |    ✅     |
-| Norwegian            | `nb` |    ❌     |
-| Polish               | `pl` |    ✅     |
-| Portuguese           | `pt` |    ❌     |
-| Romanian             | `ro` |    ✅     |
-| Russian              | `ru` |    ❌     |
-| Serbian              | `sr` |    ❌     |
-| Slovak               | `sk` |    ❌     |
-| Slovenian            | `sl` |    ❌     |
-| Spanish              | `es` |    ❌     |
-| Swedish              | `sv` |    ❌     |
-| Thai                 | `th` |    ✅     |
-| Turkish              | `tr` |    ❌     |
-| Ukrainian            | `uk` |    ✅     |
-| Vietnamese           | `vi` |    ❌     |
+| Language             |   Code    |  Built-in  |
+| -------------------- | --------- |  :------:  |
+| Arabic               | `ar`      |    ❌     |
+| Belarusian           | `be`      |    ✅     |
+| Belarusian (Latin)   | `be-Latn` |    ✅     |
+| Bulgarian            | `bg`      |    ❌     |
+| Chinese (Simplified) | `zh`      |    ❌     |
+| Croatian             | `hr`      |    ❌     |
+| Czech                | `cs`      |    ✅     |
+| Danish               | `da`      |    ❌     |
+| Dutch                | `nl`      |    ❌     |
+| English (default)    | `en`      |    ✅     |
+| Estonian             | `et`      |    ✅     |
+| Finnish              | `fi`      |    ❌     |
+| French               | `fr`      |    ✅     |
+| Georgian             | `ka`      |    ✅     |
+| German               | `de`      |    ✅     |
+| Greek                | `el`      |    ❌     |
+| Hebrew               | `he`      |    ❌     |
+| Hindi                | `hi`      |    ❌     |
+| Hungarian            | `hu`      |    ❌     |
+| Indonesian           | `id`      |    ❌     |
+| Italian              | `it`      |    ✅     |
+| Japanese             | `ja`      |    ✅     |
+| Kazakh               | `kk`      |    ❌     |
+| Korean               | `ko`      |    ❌     |
+| Latvian              | `lv`      |    ✅     |
+| Lithuanian           | `lt`      |    ✅     |
+| Norwegian            | `nb`      |    ❌     |
+| Polish               | `pl`      |    ✅     |
+| Portuguese           | `pt`      |    ❌     |
+| Romanian             | `ro`      |    ✅     |
+| Russian              | `ru`      |    ❌     |
+| Serbian              | `sr`      |    ❌     |
+| Slovak               | `sk`      |    ❌     |
+| Slovenian            | `sl`      |    ❌     |
+| Spanish              | `es`      |    ❌     |
+| Swedish              | `sv`      |    ❌     |
+| Thai                 | `th`      |    ✅     |
+| Turkish              | `tr`      |    ❌     |
+| Ukrainian            | `uk`      |    ✅     |
+| Vietnamese           | `vi`      |    ❌     |
 
 ✅ — built-in texts for every template. ❌ — no built-in texts: add the language through `messages`, and every key you leave out falls back to English. Arabic and Hebrew are written right to left, which the default layout does not support.
 

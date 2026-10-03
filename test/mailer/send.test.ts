@@ -371,12 +371,12 @@ describe('texts and locales', () => {
     const sendError = await mailerRejection(mailer.send('passwordChanged', { to, locale: 'nl' as never }))
     expect(sendError.code).toBe('INVALID_OPTIONS')
     expect(sendError.message).toBe(
-      'Invalid send options: locale must be one of "en", "be", "cs", "de", "et", "fr", "it", "ja", "ka", "lt", "lv", "pl", "ro", "th", "uk", "sk", received "nl".',
+      'Invalid send options: locale must be one of "en", "be-Latn", "be", "cs", "de", "et", "fr", "it", "ja", "ka", "lt", "lv", "pl", "ro", "th", "uk", "sk", received "nl".',
     )
     const renderError = await mailerRejection(mailer.render('passwordChanged', { locale: 'nl' as never }))
     expect(renderError.code).toBe('INVALID_OPTIONS')
     expect(renderError.message).toBe(
-      'Invalid render options: locale must be one of "en", "be", "cs", "de", "et", "fr", "it", "ja", "ka", "lt", "lv", "pl", "ro", "th", "uk", "sk", received "nl".',
+      'Invalid render options: locale must be one of "en", "be-Latn", "be", "cs", "de", "et", "fr", "it", "ja", "ka", "lt", "lv", "pl", "ro", "th", "uk", "sk", received "nl".',
     )
     const check = async () => {
       // @ts-expect-error: "nl" has no texts
