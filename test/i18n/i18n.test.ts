@@ -4,7 +4,14 @@ import { z } from 'zod'
 import { html, isSafeHtml } from '../../src/core/html'
 import { be } from '../../src/i18n/be'
 import { en } from '../../src/i18n/en'
-import { buildMessages, createI18n, dictionaries, type Locale, type MessagesOverrides } from '../../src/i18n'
+import {
+  buildMessages,
+  createI18n,
+  dictionaries,
+  type Locale,
+  type MessagesOverrides,
+  type Translate,
+} from '../../src/i18n'
 import type { TemplateRegistry } from '../../src/templates/define'
 import { withTemplateMessages } from '../../src/templates/messages'
 
@@ -173,6 +180,21 @@ describe('t', () => {
   it('uses overridden texts', () => {
     const { t } = i18n('en', { en: { verifyEmail: { subject: 'Welcome to {companyName}' } } })
     expect(t('verifyEmail.subject')).toBe('Welcome to My App')
+  })
+
+  it('picks plural forms by count, and other without a numeric count', () => {
+    const { t } = i18n('be') as unknown as { t: Translate<never, 'common.days'> }
+    expect(t('common.days', { count: 2 })).toBe('2 дні')
+    expect(t('common.days', { count: 5 })).toBe('5 дзён')
+    const untyped = t as unknown as (key: string, params?: Record<string, unknown>) => string
+    expect(untyped('common.days')).toBe(be.common.days.other)
+    expect(untyped('common.days', { count: '2' })).toBe(be.common.days.other.replace('{count}', '2'))
+  })
+
+  it('returns the key for a missing text', () => {
+    const untyped = i18n('en').t as unknown as (key: string) => string
+    expect(untyped('verifyEmail.missing')).toBe('verifyEmail.missing')
+    expect(untyped('missing.subject')).toBe('missing.subject')
   })
 })
 

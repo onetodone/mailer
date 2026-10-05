@@ -1,18 +1,21 @@
 import { z } from 'zod'
 
-import type { CommonMessageKey, MessageKey, MessageSource } from '../i18n'
-import { localeRecordError, localeTag, text } from '../i18n/schema'
+import type { CommonMessageKey, MessageKey, MessageSource, PluralForms } from '../i18n'
+import { localeRecordError, localeTag, textOrPluralForms } from '../i18n/schema'
 import { isRecord, objectError } from '../validators'
 import type { Template, TemplateRegistry } from './define'
 
 /**
  * Texts of a custom template for one locale: each text key maps to a text
- * with `{name}` placeholders.
+ * with `{name}` placeholders, or to plural forms picked by `count`.
  *
- * Text values may gain more forms, such as plural forms, in any release. Use
- * this type to check texts with `satisfies`, not to read values through it.
+ * Text values may gain more forms in any release. Use this type to check
+ * texts with `satisfies`, not to read values through it.
  */
-export type TemplateTexts = Readonly<Record<string, string>>
+export type TemplateTexts = Readonly<Record<string, string | PluralForms>>
+
+// Distributive, so that a key typed `string | PluralForms` accepts either form.
+type LocaleText<T> = T extends string ? string : Partial<PluralForms>
 
 /**
  * Texts of a custom template by locale, for the `messages` option of
@@ -20,31 +23,55 @@ export type TemplateTexts = Readonly<Record<string, string>>
  * built-in or keys of the mailer's `messages`, may leave keys out; those fall
  * back to English.
  *
- * Text values may gain more forms, such as plural forms, in any release. Use
- * this type to check texts with `satisfies`, not to read values through it.
+ * A text with plural forms has one text per `Intl.PluralRules` category of the
+ * locale (`zero`, `one`, `two`, `few`, `many`, `other`); `other` is required in
+ * `en`. Other locales keep the English form of each key: a string for a
+ * string, plural forms for plural forms, with any categories they need.
+ *
+ * Text values may gain more forms in any release. Use this type to check
+ * texts with `satisfies`, not to read values through it.
  *
  * @example
  * const messages = {
- *   en: { subject: 'Invoice #{number}', intro: 'Your invoice is attached.' },
- *   be: { subject: 'Рахунак №{number}', intro: 'Рахунак у ўкладанні.' },
+ *   en: {
+ *     subject: 'Invoice #{number}',
+ *     items: { one: '{count} item', other: '{count} items' },
+ *   },
+ *   be: {
+ *     subject: 'Рахунак №{number}',
+ *     items: { one: '{count} пазіцыя', few: '{count} пазіцыі', many: '{count} пазіцый', other: '{count} пазіцыі' },
+ *   },
  * } satisfies TemplateMessages
  */
 export type TemplateMessages<Texts extends TemplateTexts = TemplateTexts> = { readonly en: Texts } & Readonly<
-  Record<string, NoInfer<{ readonly [K in keyof Texts]?: string | undefined }> | undefined>
+  Record<string, NoInfer<{ readonly [K in keyof Texts]?: LocaleText<Texts[K]> | undefined }> | undefined>
 >
+
+type TextKeys<Texts> = { [K in keyof Texts]: Texts[K] extends string ? K : never }[keyof Texts] & string
+
+type PluralKeys<Texts> = { [K in keyof Texts]: Texts[K] extends string ? never : K }[keyof Texts] & string
 
 /**
  * Text keys `t` accepts in a template: every built-in key in a template
- * without its own texts, otherwise the template's own keys under its name
- * plus the `common` keys.
+ * without its own texts, otherwise the template's own text keys under its
+ * name plus the `common` keys.
  */
 export type TemplateMessageKey<Name extends string, Texts extends TemplateTexts | undefined> = [Texts] extends [
   TemplateTexts,
 ]
   ? string extends keyof Texts
     ? CommonMessageKey
-    : `${Name}.${keyof Texts & string}` | CommonMessageKey
+    : `${Name}.${TextKeys<Texts>}` | CommonMessageKey
   : MessageKey
+
+/** Keys of a template's own texts with plural forms, under its name; `t` requires `count` for them. */
+export type TemplatePluralKey<Name extends string, Texts extends TemplateTexts | undefined> = [Texts] extends [
+  TemplateTexts,
+]
+  ? string extends keyof Texts
+    ? never
+    : `${Name}.${PluralKeys<Texts>}`
+  : never
 
 type OwnTexts<T> =
   T extends Template<string, unknown, unknown, infer Texts>
@@ -55,9 +82,14 @@ type OwnTexts<T> =
       : never
     : never
 
+// Plural forms in full, so that overrides may add categories the English texts leave out.
+type SectionTexts<Texts> = { readonly [K in keyof Texts]: Texts[K] extends string ? Texts[K] : PluralForms }
+
 /** Dictionary sections of the custom templates that have their own texts, by template name. */
 export type TemplateSections<Templates> = {
-  readonly [K in keyof Templates as [OwnTexts<Templates[K]>] extends [never] ? never : K]: OwnTexts<Templates[K]>
+  readonly [K in keyof Templates as [OwnTexts<Templates[K]>] extends [never] ? never : K]: SectionTexts<
+    OwnTexts<Templates[K]>
+  >
 }
 
 /** A template with its own texts is a dictionary section, so its name must not clash with `common` or split at a dot. */
@@ -67,7 +99,7 @@ export function sectionNameProblem(name: string): string | undefined {
   return undefined
 }
 
-const localeTexts = z.record(z.string(), text.optional(), { error: objectError })
+const localeTexts = z.record(z.string(), textOrPluralForms, { error: objectError })
 
 export const templateMessagesSchema = z
   .record(localeTag, localeTexts.optional(), { error: localeRecordError })
@@ -79,6 +111,9 @@ export const templateMessagesSchema = z
     }
     for (const [key, value] of Object.entries(en)) {
       if (value === undefined) ctx.addIssue({ code: 'custom', path: ['en', key], message: 'is required', input: value })
+      else if (isRecord(value) && value.other === undefined) {
+        ctx.addIssue({ code: 'custom', path: ['en', key, 'other'], message: 'is required', input: undefined })
+      }
     }
     for (const [locale, texts] of Object.entries(messages)) {
       if (locale === 'en' || texts === undefined) continue
@@ -89,6 +124,18 @@ export const templateMessagesSchema = z
           path: [locale],
           message: objectError({ code: 'unrecognized_keys', keys }),
           input: texts,
+        })
+      }
+      for (const [key, value] of Object.entries(texts)) {
+        const english = en[key]
+        if (!(typeof english === 'string' && isRecord(value)) && !(isRecord(english) && typeof value === 'string')) {
+          continue
+        }
+        ctx.addIssue({
+          code: 'custom',
+          path: [locale, key],
+          message: typeof english === 'string' ? 'must be a string, as in en' : 'must be plural forms, as in en',
+          input: value,
         })
       }
     }

@@ -20,6 +20,13 @@ const invoice = defineTemplate({
   render: ({ t }) => ({ subject: t('invoice.subject'), body: [] }),
 })
 
+const cart = defineTemplate({
+  name: 'cart',
+  schema: z.object({}),
+  messages: { en: { subject: 'Your cart', items: { one: '{count} item', other: '{count} items' } } },
+  render: ({ t }) => ({ subject: t('cart.items', { count: 2 }), body: [] }),
+})
+
 function config(override: Record<string, unknown> = {}): Record<string, unknown> {
   return { transport: memoryTransport(), from, branding, ...override }
 }
@@ -156,7 +163,7 @@ describe('createMailer config', () => {
     [
       'a template text that is not a string',
       { templates: { invoice: withTexts('invoice', { en: { subject: 42 } }) } },
-      'templates.invoice.messages.en.subject must be a string, received number',
+      'templates.invoice.messages.en.subject must be a string or plural forms, received number',
     ],
     [
       'a missing English template text',
@@ -167,6 +174,56 @@ describe('createMailer config', () => {
       'a template text that English does not have',
       { templates: { invoice: withTexts('invoice', { en: { subject: 'Invoice' }, be: { title: 'Рахунак' } }) } },
       'templates.invoice.messages.be has unknown key "title"',
+    ],
+    [
+      'template plural forms without other',
+      { templates: { invoice: withTexts('invoice', { en: { items: { one: '{count} item' } } }) } },
+      'templates.invoice.messages.en.items.other is required',
+    ],
+    [
+      'a template plural form that is not a string',
+      { templates: { invoice: withTexts('invoice', { en: { items: { one: 1, other: '{count} items' } } }) } },
+      'templates.invoice.messages.en.items.one must be a string, received number',
+    ],
+    [
+      'an unknown plural category in template texts',
+      {
+        templates: {
+          invoice: withTexts('invoice', { en: { items: { single: '{count} item', other: '{count} items' } } }),
+        },
+      },
+      'templates.invoice.messages.en.items has unknown key "single"',
+    ],
+    [
+      'plural forms where the English text is a string',
+      {
+        templates: {
+          invoice: withTexts('invoice', { en: { subject: 'Invoice' }, be: { subject: { other: 'Рахунак' } } }),
+        },
+      },
+      'templates.invoice.messages.be.subject must be a string, as in en',
+    ],
+    [
+      'a string where the English text has plural forms',
+      {
+        templates: {
+          invoice: withTexts('invoice', {
+            en: { items: { one: '{count} item', other: '{count} items' } },
+            be: { items: '{count}' },
+          }),
+        },
+      },
+      'templates.invoice.messages.be.items must be plural forms, as in en',
+    ],
+    [
+      'an unknown plural category in an override of template texts',
+      { templates: { cart }, messages: { be: { cart: { items: { single: '{count} рэч' } } } } },
+      'messages.be.cart.items has unknown key "single"',
+    ],
+    [
+      'an override of template plural forms with a string',
+      { templates: { cart }, messages: { be: { cart: { items: '{count} рэчаў' } } } },
+      'messages.be.cart.items must be an object',
     ],
     [
       'an invalid locale tag in template texts',
@@ -248,7 +305,7 @@ describe('createMailer config', () => {
     expect(error.message).toBe(
       'Invalid mailer configuration: transport must be an object with a send method, received object; ' +
         'messages.en.invoice has unknown key "title"; ' +
-        'templates.receipt.messages.en.subject must be a string, received number.',
+        'templates.receipt.messages.en.subject must be a string or plural forms, received number.',
     )
   })
 

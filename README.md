@@ -8,7 +8,7 @@
 - One call to send an email. Template names autocomplete, and props are checked at compile time and validated at runtime.
 - Branding from configuration: logo, company name, colors, footer text and support address.
 - Built-in texts in [many languages](https://github.com/onetodone/mailer/blob/main/docs/locales.md). Override any text, or add a locale that falls back to English key by key.
-- Custom layouts and templates with the same typed API. Props are validated with any [Standard Schema](https://standardschema.dev) library, such as zod, valibot or arktype, and custom templates can bring their own texts per locale.
+- Custom layouts and templates with the same typed API. Props are validated with any [Standard Schema](https://standardschema.dev) library, such as zod, valibot or arktype, and custom templates can bring their own texts per locale, plural forms included.
 - Table-based HTML with inline styles and an Outlook button fallback, plus a plain-text version of every email.
 - Attachments, such as invoices, and inline images through `cid:` for pictures without a public URL, such as QR codes.
 - SMTP delivery through nodemailer, memory and console transports for tests and development, or a transport of your own.

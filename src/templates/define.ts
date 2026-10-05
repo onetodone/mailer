@@ -1,20 +1,21 @@
 import type { Block, Ui } from '../core/blocks'
 import type { ResolvedBranding, Theme } from '../core/theme'
 import type { Formatters, MessageKey, Translate } from '../i18n'
-import type { TemplateMessageKey, TemplateMessages, TemplateTexts } from './messages'
+import type { TemplateMessageKey, TemplateMessages, TemplatePluralKey, TemplateTexts } from './messages'
 import type { StandardSchemaV1 } from './standard-schema'
 
 /**
  * Everything a template receives to render one email. `Key` lists the text
- * keys `t` accepts: every built-in key by default.
+ * keys `t` accepts: every built-in key by default. `PluralKey` lists the keys
+ * of texts with plural forms, for which `t` requires `count`.
  */
-export interface TemplateRenderContext<Props, Key extends string = MessageKey> {
+export interface TemplateRenderContext<Props, Key extends string = MessageKey, PluralKey extends string = never> {
   /** Props after schema validation, with the schema's transforms and defaults applied. */
   readonly props: Props
   /** Content blocks bound to the theme and locale. */
   readonly ui: Ui
   /** Texts for the current locale. */
-  readonly t: Translate<Key>
+  readonly t: Translate<Key, PluralKey>
   /** Locale-aware durations and dates. */
   readonly format: Formatters
   /** Locale of the email, such as `en` or `be`. */
@@ -63,7 +64,9 @@ export interface Template<
   readonly messages?: ([Texts] extends [TemplateTexts] ? TemplateMessages<Texts> : never) | undefined
   // Method syntax keeps `Props` bivariant, so every template fits `TemplateRegistry`.
   /** Renders the subject, preheader and body from validated props. */
-  render(context: TemplateRenderContext<Props, TemplateMessageKey<Name, Texts>>): TemplateContent
+  render(
+    context: TemplateRenderContext<Props, TemplateMessageKey<Name, Texts>, TemplatePluralKey<Name, Texts>>,
+  ): TemplateContent
 }
 
 // Its `t` accepts only the `common` keys, which every template's `t` accepts, so any template fits.

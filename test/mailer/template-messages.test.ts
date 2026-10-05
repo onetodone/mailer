@@ -171,3 +171,119 @@ describe('template texts', () => {
     }>()
   })
 })
+
+const cart = defineTemplate({
+  name: 'cart',
+  schema: z.strictObject({ items: z.number() }),
+  messages: {
+    en: {
+      subject: 'Your cart',
+      items: { one: '{count} item in your cart', other: '{count} items in your cart' },
+      total: { one: 'Total for {count} item: {sum}', other: 'Total for {count} items: {sum}' },
+    },
+    be: {
+      subject: 'Ваш кошык',
+      items: {
+        one: '{count} тавар у кошыку',
+        few: '{count} тавары ў кошыку',
+        many: '{count} тавараў у кошыку',
+        other: '{count} тавару ў кошыку',
+      },
+    },
+  },
+  render: ({ props, ui, t }) => ({
+    subject: t('cart.subject'),
+    body: [
+      ui.paragraph(t('cart.items', { count: props.items })),
+      ui.paragraph(t.html('cart.total', { count: props.items, sum: html`<b>$5 &amp; more</b>` })),
+    ],
+  }),
+})
+
+function cartMailer(messages?: MessagesOverrides<{ cart: typeof cart }>) {
+  return createMailer({ transport: memoryTransport(), from, branding, templates: { cart }, messages })
+}
+
+describe('plural template texts', () => {
+  it('picks the form for count with the plural rules of the locale', async () => {
+    const mailer = cartMailer()
+    const text = async (items: number, locale?: 'be') =>
+      (await mailer.render('cart', { locale, props: { items } })).text
+
+    expect(await text(1)).toContain('1 item in your cart')
+    expect(await text(3)).toContain('3 items in your cart')
+    expect(await text(21, 'be')).toContain('21 тавар у кошыку')
+    expect(await text(3, 'be')).toContain('3 тавары ў кошыку')
+    expect(await text(5, 'be')).toContain('5 тавараў у кошыку')
+    expect(await text(1.5, 'be')).toContain('1,5 тавару ў кошыку')
+  })
+
+  it('formats count for the locale', async () => {
+    const mailer = cartMailer()
+
+    const en = await mailer.render('cart', { props: { items: 1000 } })
+
+    expect(en.text).toContain('1,000 items in your cart')
+  })
+
+  it('falls back to English plural forms a locale leaves out', async () => {
+    const mailer = cartMailer()
+
+    const be = await mailer.render('cart', { locale: 'be', props: { items: 2 } })
+
+    expect(be.text).toContain('Total for 2 items: $5 & more')
+  })
+
+  it('uses other for a category without a form', async () => {
+    const items = defineTemplate({
+      name: 'items',
+      schema: z.strictObject({}),
+      messages: { en: { subject: { other: '{count} items' } } },
+      render: ({ t }) => ({ subject: t('items.subject', { count: 1 }), body: [] }),
+    })
+    const mailer = createMailer({ transport: memoryTransport(), from, branding, templates: { items } })
+
+    const en = await mailer.render('items')
+
+    expect(en.subject).toBe('1 items')
+  })
+
+  it('takes overrides that add categories the English texts leave out', async () => {
+    const mailer = cartMailer({
+      sk: {
+        cart: {
+          items: { one: '{count} položka', few: '{count} položky', many: '{count} položky', other: '{count} položiek' },
+        },
+      },
+    })
+
+    const few = await mailer.render('cart', { locale: 'sk', props: { items: 3 } })
+    const other = await mailer.render('cart', { locale: 'sk', props: { items: 5 } })
+
+    expect(few.text).toContain('3 položky')
+    expect(other.text).toContain('5 položiek')
+  })
+
+  it('escapes the form in HTML and inserts safe params as markup', async () => {
+    const mailer = cartMailer({ en: { cart: { total: { other: '{count} <items>: {sum}' } } } })
+
+    const en = await mailer.render('cart', { props: { items: 2 } })
+
+    expect(en.html).toContain('2 &lt;items&gt;: <b>$5 &amp; more</b>')
+  })
+
+  it('requires count for texts with plural forms', () => {
+    defineTemplate({
+      ...cart,
+      render: ({ t }) => {
+        // @ts-expect-error: count is required
+        t('cart.items')
+        // @ts-expect-error: count is a number
+        t('cart.items', { count: '2' })
+        // @ts-expect-error: count is required
+        t.html('cart.total', { sum: '$5' })
+        return { subject: t('cart.subject'), body: [] }
+      },
+    })
+  })
+})

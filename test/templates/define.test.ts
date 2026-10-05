@@ -1,9 +1,9 @@
 import { describe, expect, expectTypeOf, it } from 'vitest'
 import { z } from 'zod'
 
-import type { Translate } from '../../src/i18n'
+import type { MessagesOverrides, Translate } from '../../src/i18n'
 import { defineTemplate, type Template, type TemplateProps } from '../../src/templates/define'
-import type { TemplateTexts } from '../../src/templates/messages'
+import type { TemplateMessages, TemplateTexts } from '../../src/templates/messages'
 import type { StandardSchemaV1 } from '../../src/templates/standard-schema'
 
 describe('defineTemplate', () => {
@@ -132,6 +132,84 @@ describe('defineTemplate with messages', () => {
         // @ts-expect-error: en is required
         messages: { be: { subject: 'Рахунак' } },
         render: () => ({ subject: 'Invoice', body: [] }),
+      })
+    }
+    expect(check).toBeTypeOf('function')
+  })
+})
+
+describe('defineTemplate with plural forms', () => {
+  const schema = z.object({ items: z.number() })
+  const messages = {
+    en: { subject: 'Your cart', items: { one: '{count} item', other: '{count} items' } },
+    be: { items: { one: '{count} тавар', few: '{count} тавары', many: '{count} тавараў' } },
+  } satisfies TemplateMessages
+
+  it('types t with the plural keys apart from the text keys', () => {
+    defineTemplate({
+      name: 'cart',
+      schema,
+      messages,
+      render: ({ props, t }) => {
+        expectTypeOf(t).toEqualTypeOf<
+          Translate<
+            | 'cart.subject'
+            | 'common.greeting'
+            | 'common.greetingAnonymous'
+            | 'common.linkFallback'
+            | 'common.footerSupport'
+            | 'common.footerRights',
+            'cart.items'
+          >
+        >()
+        expectTypeOf<Parameters<typeof t>[0]>().not.toEqualTypeOf<'cart.items'>()
+        return { subject: t('cart.subject'), body: [], preheader: t('cart.items', { count: props.items }) }
+      },
+    })
+  })
+
+  it('types overrides of plural forms with every category', () => {
+    const cart = defineTemplate({ name: 'cart', schema, messages, render: () => ({ subject: 'Cart', body: [] }) })
+    const overrides = {
+      sk: { cart: { items: { few: '{count} položky', other: '{count} položiek' } } },
+    } satisfies MessagesOverrides<{ cart: typeof cart }>
+    expect(overrides.sk.cart.items.few).toBe('{count} položky')
+    expect(cart.messages).toBe(messages)
+
+    // @ts-expect-error: plural forms, not a string
+    const asText: MessagesOverrides<{ cart: typeof cart }> = { sk: { cart: { items: '{count}' } } }
+    expect(asText).toBeDefined()
+  })
+
+  it('rejects plural forms that do not match the English texts', () => {
+    const check = () => {
+      defineTemplate({
+        name: 'cart',
+        schema,
+        // @ts-expect-error: other is required in English plural forms
+        messages: { en: { items: { one: '{count} item' } } },
+        render: () => ({ subject: 'Cart', body: [] }),
+      })
+      defineTemplate({
+        name: 'cart',
+        schema,
+        // @ts-expect-error: be keeps the plural forms of en
+        messages: { en: { items: { one: '{count} item', other: '{count} items' } }, be: { items: '{count}' } },
+        render: () => ({ subject: 'Cart', body: [] }),
+      })
+      defineTemplate({
+        name: 'cart',
+        schema,
+        // @ts-expect-error: be keeps the string of en
+        messages: { en: { subject: 'Cart' }, be: { subject: { other: 'Кошык' } } },
+        render: () => ({ subject: 'Cart', body: [] }),
+      })
+      defineTemplate({
+        name: 'cart',
+        schema,
+        // @ts-expect-error: an unknown plural category
+        messages: { en: { items: { single: '{count} item', other: '{count} items' } } },
+        render: () => ({ subject: 'Cart', body: [] }),
       })
     }
     expect(check).toBeTypeOf('function')

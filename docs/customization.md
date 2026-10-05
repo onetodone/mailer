@@ -244,7 +244,7 @@ const orderShipped = defineTemplate({
 - The texts live in a section named after the template: `t` takes `'orderShipped.subject'` and the other keys of `en`, plus the `common` keys. Your editor autocompletes them, and any other key is a type error.
 - Placeholders work as in the built-in texts, and `{companyName}` works in every text.
 - A template without `messages` keeps `t` for every built-in key.
-- Plural forms are not supported in template texts. Pick the text in code, such as `count === 1 ? t('cart.oneItem') : t('cart.items', { count })`, or phrase the text without a number that needs a plural form, such as "Items: {count}".
+- A text can have [plural forms](#plural-forms-in-template-texts) instead of a single string.
 
 The mailer's `messages` setting overrides these texts under the template's name, the same way as the built-in ones. An `en` override also reaches the locales that fall back to English:
 
@@ -269,6 +269,66 @@ await mailer.send('orderShipped', {
 
 Pass the templates to `MessagesOverrides` (or `LocaleMessages`) when you declare `messages` outside the `createMailer` call. Without them, these types know only the built-in sections.
 
-A template's locales must be locales of the mailer: a built-in locale or a key of `messages`. Add `sk: {}` to `messages` to send in Slovak with only your template's Slovak texts. Any other locale in a template, such as a typo, throws `INVALID_CONFIG` when the mailer is created. So do a text that is not a string, a key that `en` does not have, and a name that clashes with the `common` section or contains a dot.
+A template's locales must be locales of the mailer: a built-in locale or a key of `messages`. Add `sk: {}` to `messages` to send in Slovak with only your template's Slovak texts. Any other locale in a template, such as a typo, throws `INVALID_CONFIG` when the mailer is created. So do a text that is neither a string nor plural forms, a key that `en` does not have, a key whose form differs from `en` (a string where `en` has plural forms, or the other way round), and a name that clashes with the `common` section or contains a dot.
 
 A template with its own texts that replaces a built-in one also replaces the built-in texts in every locale: a locale it leaves out falls back to its English texts, and `messages` accepts its keys under that name.
+
+#### Plural forms in template texts
+
+A text that depends on a number can have one form per [plural category](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules/select) of the locale: `zero`, `one`, `two`, `few`, `many` and `other`. Pass the number as `count`, and `t` picks the form through the plural rules of the email's locale:
+
+```ts
+const cartReminder = defineTemplate({
+  name: 'cartReminder',
+  schema: z.object({ items: z.number().int().positive(), cartUrl: z.url({ protocol: /^https?$/ }) }),
+  messages: {
+    en: {
+      subject: 'You left something in your cart',
+      items: { one: 'You have {count} item in your cart.', other: 'You have {count} items in your cart.' },
+      button: 'Go to cart',
+    },
+    be: {
+      subject: 'Вы нешта пакінулі ў кошыку',
+      items: {
+        one: 'У вашым кошыку {count} тавар.',
+        few: 'У вашым кошыку {count} тавары.',
+        many: 'У вашым кошыку {count} тавараў.',
+        other: 'У вашым кошыку {count} тавару.',
+      },
+      button: 'Перайсці ў кошык',
+    },
+  },
+  render: ({ props, ui, t }) => ({
+    subject: t('cartReminder.subject'),
+    body: [
+      ui.paragraph(t('cartReminder.items', { count: props.items })),
+      ui.button(t('cartReminder.button'), props.cartUrl),
+    ],
+  }),
+})
+```
+
+- `count` is required for a text with plural forms; leaving it out is a type error. `t.html` takes it the same way.
+- `{count}` is the number formatted for the locale, such as "1,000" in English.
+- `other` is required in `en` and is used for any category without a form.
+- Each locale keeps the form of the English text: plural forms where `en` has plural forms, a string where it has a string. A locale lists the categories its language uses, which need not match the English ones. A category it leaves out falls back to the English form of that category, then to `other`, so give every category the language uses.
+- `messages` overrides plural forms category by category, and may add categories the English texts leave out:
+
+```ts
+import type { MessagesOverrides } from '@onetodone/mailer'
+
+const templates = { cartReminder }
+
+const messages = {
+  sk: {
+    cartReminder: {
+      items: {
+        one: 'V košíku máte {count} položku.',
+        few: 'V košíku máte {count} položky.',
+        many: 'V košíku máte {count} položky.',
+        other: 'V košíku máte {count} položiek.',
+      },
+    },
+  },
+} satisfies MessagesOverrides<typeof templates>
+```
