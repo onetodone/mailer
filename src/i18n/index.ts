@@ -496,22 +496,38 @@ export type MessageParams = Readonly<Record<string, string | number>>
 /** Values for `{name}` placeholders in HTML messages; {@link SafeHtml} values are inserted as markup. */
 export type HtmlMessageParams = Readonly<Record<string, string | number | SafeHtml>>
 
+/** Values for the placeholders of a text with plural forms; `count` picks the form. */
+type PluralMessageParams = MessageParams & { readonly count: number }
+
+/** Values for the placeholders of an HTML text with plural forms; `count` picks the form. */
+type HtmlPluralMessageParams = HtmlMessageParams & { readonly count: number }
+
 /**
  * Looks up a text for the current locale and fills its `{name}` placeholders.
  * `{companyName}` is always available; placeholders without a value stay as they are.
  *
  * `Key` lists the text keys it accepts: every built-in key by default, or the
  * template's own keys plus `common.*` in a template with its own `messages`.
+ * `PluralKey` lists the template's texts with plural forms: `count` picks the
+ * form through the plural rules of the locale, and `{count}` is the number
+ * formatted for the locale.
  *
  * @example
  * t('common.greeting', { name: props.userName })
+ * t('cart.items', { count: props.items.length })
  * t.html('passwordChanged.notYouEmail', { email: html`<a href="mailto:${address}">${address}</a>` })
  */
-export interface Translate<Key extends string = MessageKey> {
+export interface Translate<Key extends string = MessageKey, PluralKey extends string = never> {
+  // The text signature comes last, so `Parameters<Translate>` keeps describing it.
+  /** Returns plain text in the plural form for `count`. Blocks escape it. */
+  (key: PluralKey, params: PluralMessageParams): string
   /** Returns plain text. Blocks escape it, so it is safe to pass to `ui.paragraph` and the like. */
   (key: Key, params?: MessageParams): string
   /** Returns markup: the text and string params are escaped, {@link SafeHtml} params are inserted as-is. */
-  readonly html: (key: Key, params?: HtmlMessageParams) => SafeHtml
+  readonly html: {
+    (key: PluralKey, params: HtmlPluralMessageParams): SafeHtml
+    (key: Key, params?: HtmlMessageParams): SafeHtml
+  }
 }
 
 /** Locale-aware formatting for template texts. */
@@ -539,11 +555,10 @@ export interface I18nOptions {
 
 const placeholder = /\{(\w+)\}/g
 
-function lookup(messages: Messages, key: string): string {
+function lookup(messages: Messages, key: string): unknown {
   const dot = key.indexOf('.')
   const section: unknown = messages[key.slice(0, dot) as keyof Messages]
-  const value = isRecord(section) ? section[key.slice(dot + 1)] : undefined
-  return typeof value === 'string' ? value : key
+  return isRecord(section) ? section[key.slice(dot + 1)] : undefined
 }
 
 function interpolate(message: string, params: MessageParams): string {
@@ -566,16 +581,27 @@ export function createI18n({ locale, messages, companyName, timeZone = 'UTC' }: 
   t: Translate
   format: Formatters
 } {
-  const t: Translate = Object.assign(
-    (key: MessageKey, params: MessageParams = {}) => interpolate(lookup(messages, key), { companyName, ...params }),
-    {
-      html: (key: MessageKey, params: HtmlMessageParams = {}) =>
-        interpolateHtml(lookup(messages, key), { companyName, ...params }),
-    },
-  )
-
   const pluralRules = new Intl.PluralRules(locale)
   const numberFormat = new Intl.NumberFormat(locale)
+
+  // Without a numeric `count`, plural forms fall back to `other` and `{count}` keeps the given value.
+  function resolve<P extends HtmlMessageParams>(key: string, params: P): [string, P] {
+    const value = lookup(messages, key)
+    if (typeof value === 'string') return [value, params]
+    if (!isRecord(value) || typeof value.other !== 'string') return [key, params]
+    const { count } = params
+    if (typeof count !== 'number') return [value.other, params]
+    const form = value[pluralRules.select(count)]
+    return [typeof form === 'string' ? form : value.other, { ...params, count: numberFormat.format(count) }]
+  }
+
+  const t: Translate = Object.assign(
+    (key: MessageKey, params: MessageParams = {}) => interpolate(...resolve(key, { companyName, ...params })),
+    {
+      html: (key: MessageKey, params: HtmlMessageParams = {}) =>
+        interpolateHtml(...resolve(key, { companyName, ...params })),
+    },
+  )
   const { minutes, hours, days } = messages.common
 
   const format: Formatters = {

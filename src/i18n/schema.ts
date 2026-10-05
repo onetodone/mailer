@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
-import { expected, isLocaleTag, objectError } from '../validators'
-import type { LocaleMessages, MessagesOverrides } from './index'
+import { expected, isLocaleTag, isRecord, objectError } from '../validators'
+import type { LocaleMessages, MessagesOverrides, PluralForms } from './index'
 
 export const text = z.string({ error: expected('a string') })
 
@@ -23,6 +23,19 @@ const pluralForms = z.strictObject(
   },
   { error: objectError },
 )
+
+const textOrForms = z.string({ error: expected('a string or plural forms') })
+
+/**
+ * A text, or plural forms when the value is an object. Unlike a union, problems
+ * inside the forms keep their own paths, such as `items.one`.
+ */
+export const textOrPluralForms = z.unknown().superRefine((value, ctx) => {
+  if (value === undefined) return
+  const result = (isRecord(value) ? pluralForms : textOrForms).safeParse(value)
+  for (const { path, message } of result.error?.issues ?? [])
+    ctx.addIssue({ code: 'custom', path, message, input: value })
+}) as z.ZodType<string | Readonly<Partial<PluralForms>> | undefined>
 
 function sectionSchema(texts: object) {
   const shape = Object.fromEntries(
