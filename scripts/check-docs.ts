@@ -26,6 +26,7 @@ declare const from: string
 declare const branding: import('@onetodone/mailer').Branding
 declare const mailer: typeof import('./context.js').mailer
 declare const orderShipped: typeof import('./context.js').orderShipped
+declare const cartReminder: typeof import('./context.js').cartReminder
 declare const createMailer: typeof import('@onetodone/mailer').createMailer
 declare const defineTemplate: typeof import('@onetodone/mailer').defineTemplate
 declare const z: typeof import('zod').z
@@ -50,6 +51,16 @@ export const orderShipped = defineTemplate({
   render: ({ props, ui, t }) => ({
     subject: t('orderShipped.subject', { orderId: props.orderId }),
     body: [ui.paragraph(t('orderShipped.intro')), ui.button(t('orderShipped.button'), props.trackUrl)],
+  }),
+})
+
+export const cartReminder = defineTemplate({
+  name: 'cartReminder',
+  schema: z.object({ items: z.number() }),
+  messages: { en: { items: { one: 'You have {count} item in your cart.', other: 'You have {count} items in your cart.' } } },
+  render: ({ props, ui, t }) => ({
+    subject: t('cartReminder.items', { count: props.items }),
+    body: [ui.paragraph(t('cartReminder.items', { count: props.items }))],
   }),
 })
 
