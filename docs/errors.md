@@ -13,6 +13,8 @@ The package throws `MailerError`, which has a `code` to branch on:
 
 - Messages name the setting or prop and the problem. They never include link values, because links usually carry tokens.
 - Errors thrown by your own template or layout code pass through unchanged, as does a `MailerError` thrown by your own transport.
+- `error instanceof MailerError` holds for errors from both the ESM and the CommonJS build of the package, even when an app loads both.
+- `MailerErrorCode` may gain codes in a minor release, so give a `switch` over `error.code` a `default` branch. Existing codes keep their meaning.
 - Retries are up to your application, for example through a job queue:
 
 ```ts

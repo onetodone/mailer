@@ -284,6 +284,17 @@ export class AccountsService {
 }
 ```
 
+`Mailer` without type arguments knows only the built-in templates. With custom templates, type the mailer after the one you create, so `send` keeps their names and props:
+
+```ts
+// app-mailer.ts
+import { createMailer } from '@onetodone/mailer'
+
+export const mailer = createMailer({ transport, from, branding, templates: { orderShipped } })
+
+export type AppMailer = typeof mailer
+```
+
 ## Background jobs
 
 Queues and retries are up to your application. With [BullMQ](https://docs.bullmq.io), retry only the errors that another attempt can fix:

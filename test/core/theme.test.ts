@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { brandingSchema, resolveBranding, resolveTheme, themeSchema, type Branding } from '../../src/core/theme'
+import type { Branding } from '../../src/core/theme'
+import { brandingSchema, resolveBranding, resolveTheme, themeSchema } from '../../src/core/theme-schema'
 import { MailerError } from '../../src/errors'
 import { catchError } from '../support/catch-error'
 

@@ -174,7 +174,7 @@ Send it once the account is ready, for example after the email address is confir
 | Prop       | Type     | Description                                                                                                                |
 | ---------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `userName` | `string` | Name for the greeting. Without it, or when it is empty, the greeting has no name.                                          |
-| `ctaUrl`   | `string` | Absolute `http:` or `https:` link behind the "Get started" button, such as an onboarding page. Default: `branding.appUrl`. |
+| `startUrl` | `string` | Absolute `http:` or `https:` link behind the "Get started" button, such as an onboarding page. Default: `branding.appUrl`. |
 
 ```ts
 await mailer.send('welcome', { to: 'lizzie@example.com', props: { userName: 'Lizzie' } })

@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 import { contentIdRule, isContentId } from './core/content-id'
 import { safeUrl } from './core/html'
+import { MailerError, type MailerErrorCode } from './errors'
 import type { Attachment, MailAddress, MailAddresses } from './transports/types'
 
 // Messages are phrased as predicates ("must be …", "is required") so they read
@@ -241,4 +242,28 @@ export function isLocaleTag(value: string): boolean {
   } catch {
     return false
   }
+}
+
+function parse<T extends z.ZodType>(
+  schema: T,
+  input: unknown,
+  code: MailerErrorCode,
+  subject: string,
+  root?: string,
+): z.output<T> {
+  const result = schema.safeParse(input)
+  if (result.success) return result.data
+  const details = result.error.issues.map((issue) => {
+    const path = [...(root === undefined ? [] : [root]), ...issue.path.map(String)].join('.')
+    return path === '' ? issue.message : `${path} ${issue.message}`
+  })
+  throw new MailerError(code, `Invalid ${subject}: ${details.join('; ')}.`, { cause: result.error })
+}
+
+export function parseConfig<T extends z.ZodType>(schema: T, input: unknown, root?: string): z.output<T> {
+  return parse(schema, input, 'INVALID_CONFIG', 'mailer configuration', root)
+}
+
+export function parseOptions<T extends z.ZodType>(schema: T, input: unknown, method: string): z.output<T> {
+  return parse(schema, input, 'INVALID_OPTIONS', `${method} options`)
 }

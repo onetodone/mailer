@@ -1,5 +1,3 @@
-import type { z } from 'zod'
-
 /**
  * Machine-readable reason attached to every {@link MailerError}.
  *
@@ -14,9 +12,14 @@ import type { z } from 'zod'
  * - `UNKNOWN_TEMPLATE`: no template is registered under the requested name.
  * - `UNSAFE_URL`: a URL is not an absolute `http:` or `https:` link, or an
  *   image source is neither such a link nor a valid `cid:` reference.
+ *
+ * Codes may be added in a minor release, so a `switch` over them needs a
+ * `default` branch. Existing codes keep their meaning.
  */
 export type MailerErrorCode =
   'INVALID_CONFIG' | 'INVALID_OPTIONS' | 'INVALID_PROPS' | 'TRANSPORT_FAILED' | 'UNKNOWN_TEMPLATE' | 'UNSAFE_URL'
+
+const brand = Symbol.for('@onetodone/mailer/MailerError')
 
 /**
  * The error type thrown by the mailer. Check `code` to branch on the reason;
@@ -32,6 +35,19 @@ export type MailerErrorCode =
  * }
  */
 export class MailerError extends Error {
+  static {
+    Object.defineProperty(this.prototype, brand, { value: true })
+  }
+
+  // Checked by brand rather than the prototype chain, so errors from the ESM and CJS
+  // builds of this package match either class when both are loaded.
+  /** Whether `value` is a `MailerError`, from either the ESM or the CJS build of this package. */
+  static [Symbol.hasInstance](value: unknown): value is MailerError {
+    if (this !== MailerError) return Function.prototype[Symbol.hasInstance].call(this, value)
+    return typeof value === 'object' && value !== null && (value as { readonly [brand]?: unknown })[brand] === true
+  }
+
+  /** Always `'MailerError'`. */
   override readonly name = 'MailerError'
 
   /** Machine-readable reason for the failure. */
@@ -46,28 +62,4 @@ export class MailerError extends Error {
     super(message, options)
     this.code = code
   }
-}
-
-function parse<T extends z.ZodType>(
-  schema: T,
-  input: unknown,
-  code: MailerErrorCode,
-  subject: string,
-  root?: string,
-): z.output<T> {
-  const result = schema.safeParse(input)
-  if (result.success) return result.data
-  const details = result.error.issues.map((issue) => {
-    const path = [...(root === undefined ? [] : [root]), ...issue.path.map(String)].join('.')
-    return path === '' ? issue.message : `${path} ${issue.message}`
-  })
-  throw new MailerError(code, `Invalid ${subject}: ${details.join('; ')}.`, { cause: result.error })
-}
-
-export function parseConfig<T extends z.ZodType>(schema: T, input: unknown, root?: string): z.output<T> {
-  return parse(schema, input, 'INVALID_CONFIG', 'mailer configuration', root)
-}
-
-export function parseOptions<T extends z.ZodType>(schema: T, input: unknown, method: string): z.output<T> {
-  return parse(schema, input, 'INVALID_OPTIONS', `${method} options`)
 }

@@ -13,7 +13,7 @@ import {
   type Translate,
 } from '../../src/i18n'
 import type { TemplateRegistry } from '../../src/templates/define'
-import { withTemplateMessages } from '../../src/templates/messages'
+import { withTemplateMessages } from '../../src/templates/messages-schema'
 
 function i18n(
   locale: Locale,

@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import { defaultLayout } from '../../src/core/layout'
-import { resolveBranding } from '../../src/core/theme'
+import { resolveBranding } from '../../src/core/theme-schema'
 import { MailerError } from '../../src/errors'
 import { buildMessages, dictionaries, type Locale } from '../../src/i18n'
 import { builtInTemplates } from '../../src/templates/built-in'
@@ -562,21 +562,21 @@ describe('welcome', () => {
     expect(email.html.match(/href="https:\/\/myapp\.loc\/"/g)).toHaveLength(4)
   })
 
-  it('links the button and the fallback to ctaUrl', async () => {
-    const ctaUrl = 'https://myapp.loc/onboarding'
-    const email = await renderTemplate(builtInTemplates, 'welcome', { ctaUrl }, options())
+  it('links the button and the fallback to startUrl', async () => {
+    const startUrl = 'https://myapp.loc/onboarding'
+    const email = await renderTemplate(builtInTemplates, 'welcome', { startUrl }, options())
     expect(email.html.match(/href="https:\/\/myapp\.loc\/onboarding"/g)).toHaveLength(3)
-    expect(email.text).toContain(`Get started: ${ctaUrl}`)
+    expect(email.text).toContain(`Get started: ${startUrl}`)
   })
 
-  it('rejects a relative ctaUrl', async () => {
-    const error: unknown = await renderTemplate(builtInTemplates, 'welcome', { ctaUrl: '/start' }, options()).then(
+  it('rejects a relative startUrl', async () => {
+    const error: unknown = await renderTemplate(builtInTemplates, 'welcome', { startUrl: '/start' }, options()).then(
       () => undefined,
       (reason: unknown) => reason,
     )
     expect(error).toMatchObject({
       code: 'INVALID_PROPS',
-      message: 'Invalid props for template "welcome": ctaUrl: must be an absolute http: or https: URL.',
+      message: 'Invalid props for template "welcome": startUrl: must be an absolute http: or https: URL.',
     })
   })
 })

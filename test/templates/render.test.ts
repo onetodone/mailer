@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 import { html } from '../../src/core/html'
 import { defaultLayout, defineLayout, type LayoutContext } from '../../src/core/layout'
-import { resolveBranding } from '../../src/core/theme'
+import { resolveBranding } from '../../src/core/theme-schema'
 import { MailerError } from '../../src/errors'
 import { buildMessages } from '../../src/i18n'
 import type { AccountDeletedProps } from '../../src/templates/account-deleted'
@@ -150,7 +150,7 @@ describe('renderTemplate types', () => {
     expectTypeOf<TemplateProps<BuiltInTemplates['welcome']>>().toEqualTypeOf<WelcomeProps>()
     expectTypeOf<WelcomeProps>().toEqualTypeOf<{
       readonly userName?: string | undefined
-      readonly ctaUrl?: string | undefined
+      readonly startUrl?: string | undefined
     }>()
     expectTypeOf<TemplateProps<BuiltInTemplates['newSignIn']>>().toEqualTypeOf<NewSignInProps>()
     expectTypeOf<NewSignInProps>().toEqualTypeOf<{

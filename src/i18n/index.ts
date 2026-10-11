@@ -24,11 +24,17 @@ import { zh } from './zh'
  * `{count}` is replaced by the number; `other` is used for categories without a form.
  */
 export interface PluralForms {
+  /** Form for the `zero` category. */
   readonly zero?: string
+  /** Form for the `one` category. */
   readonly one?: string
+  /** Form for the `two` category. */
   readonly two?: string
+  /** Form for the `few` category. */
   readonly few?: string
+  /** Form for the `many` category. */
   readonly many?: string
+  /** Form for every category without its own form. */
   readonly other: string
 }
 
@@ -54,9 +60,11 @@ export interface CommonMessages {
 
 /** Texts of the `verifyEmail` template. */
 export interface VerifyEmailMessages {
+  /** Subject line. */
   readonly subject: string
   /** Inbox preview text. */
   readonly preheader: string
+  /** Heading at the top of the email. */
   readonly heading: string
   /** Paragraph under the greeting. */
   readonly intro: string
@@ -70,9 +78,11 @@ export interface VerifyEmailMessages {
 
 /** Texts of the `resetPassword` template. */
 export interface ResetPasswordMessages {
+  /** Subject line. */
   readonly subject: string
   /** Inbox preview text. */
   readonly preheader: string
+  /** Heading at the top of the email. */
   readonly heading: string
   /** Paragraph under the greeting. */
   readonly intro: string
@@ -86,9 +96,11 @@ export interface ResetPasswordMessages {
 
 /** Texts of the `passwordChanged` template. */
 export interface PasswordChangedMessages {
+  /** Subject line. */
   readonly subject: string
   /** Inbox preview text. */
   readonly preheader: string
+  /** Heading at the top of the email. */
   readonly heading: string
   /** Paragraph under the greeting. */
   readonly intro: string
@@ -108,9 +120,11 @@ export interface PasswordChangedMessages {
 
 /** Texts of the `verifyEmailChange` template. */
 export interface VerifyEmailChangeMessages {
+  /** Subject line. */
   readonly subject: string
   /** Inbox preview text. */
   readonly preheader: string
+  /** Heading at the top of the email. */
   readonly heading: string
   /** Paragraph under the greeting. */
   readonly intro: string
@@ -124,9 +138,11 @@ export interface VerifyEmailChangeMessages {
 
 /** Texts of the `emailChangeRequested` template. */
 export interface EmailChangeRequestedMessages {
+  /** Subject line. */
   readonly subject: string
   /** Inbox preview text. */
   readonly preheader: string
+  /** Heading at the top of the email. */
   readonly heading: string
   /** Paragraph under the greeting, with `{newEmail}`. */
   readonly intro: string
@@ -150,9 +166,11 @@ export interface EmailChangeRequestedMessages {
 
 /** Texts of the `emailChanged` template. */
 export interface EmailChangedMessages {
+  /** Subject line. */
   readonly subject: string
   /** Inbox preview text. */
   readonly preheader: string
+  /** Heading at the top of the email. */
   readonly heading: string
   /** Paragraph under the greeting. */
   readonly intro: string
@@ -180,6 +198,7 @@ export interface OtpCodeMessages {
   readonly subject: string
   /** Inbox preview text. The built-in texts leave out the code, as in `subject`; `{code}` is available. */
   readonly preheader: string
+  /** Heading at the top of the email. */
   readonly heading: string
   /** Paragraph above the code. */
   readonly intro: string
@@ -193,9 +212,11 @@ export interface OtpCodeMessages {
 
 /** Texts of the `magicLink` template. */
 export interface MagicLinkMessages {
+  /** Subject line. */
   readonly subject: string
   /** Inbox preview text. */
   readonly preheader: string
+  /** Heading at the top of the email. */
   readonly heading: string
   /** Paragraph under the greeting. */
   readonly intro: string
@@ -211,9 +232,11 @@ export interface MagicLinkMessages {
 
 /** Texts of the `welcome` template. */
 export interface WelcomeMessages {
+  /** Subject line. */
   readonly subject: string
   /** Inbox preview text. */
   readonly preheader: string
+  /** Heading at the top of the email. */
   readonly heading: string
   /** Paragraph under the greeting. */
   readonly intro: string
@@ -223,9 +246,11 @@ export interface WelcomeMessages {
 
 /** Texts of the `newSignIn` template. */
 export interface NewSignInMessages {
+  /** Subject line. */
   readonly subject: string
   /** Inbox preview text. */
   readonly preheader: string
+  /** Heading at the top of the email. */
   readonly heading: string
   /** Paragraph under the greeting. */
   readonly intro: string
@@ -253,9 +278,11 @@ export interface NewSignInMessages {
 
 /** Texts of the `twoFactorEnabled` template. */
 export interface TwoFactorEnabledMessages {
+  /** Subject line. */
   readonly subject: string
   /** Inbox preview text. */
   readonly preheader: string
+  /** Heading at the top of the email. */
   readonly heading: string
   /** Paragraph under the greeting. */
   readonly intro: string
@@ -275,9 +302,11 @@ export interface TwoFactorEnabledMessages {
 
 /** Texts of the `twoFactorDisabled` template. */
 export interface TwoFactorDisabledMessages {
+  /** Subject line. */
   readonly subject: string
   /** Inbox preview text. */
   readonly preheader: string
+  /** Heading at the top of the email. */
   readonly heading: string
   /** Paragraph under the greeting. */
   readonly intro: string
@@ -297,9 +326,11 @@ export interface TwoFactorDisabledMessages {
 
 /** Texts of the `accountLocked` template. */
 export interface AccountLockedMessages {
+  /** Subject line. */
   readonly subject: string
   /** Inbox preview text. */
   readonly preheader: string
+  /** Heading at the top of the email. */
   readonly heading: string
   /** Paragraph under the greeting. */
   readonly intro: string
@@ -323,9 +354,11 @@ export interface AccountLockedMessages {
 
 /** Texts of the `confirmAccountDeletion` template. */
 export interface ConfirmAccountDeletionMessages {
+  /** Subject line. */
   readonly subject: string
   /** Inbox preview text. */
   readonly preheader: string
+  /** Heading at the top of the email. */
   readonly heading: string
   /** Paragraph under the greeting. */
   readonly intro: string
@@ -341,9 +374,11 @@ export interface ConfirmAccountDeletionMessages {
 
 /** Texts of the `accountDeleted` template. */
 export interface AccountDeletedMessages {
+  /** Subject line. */
   readonly subject: string
   /** Inbox preview text. */
   readonly preheader: string
+  /** Heading at the top of the email. */
   readonly heading: string
   /** Paragraph under the greeting. */
   readonly intro: string
@@ -367,21 +402,37 @@ export interface AccountDeletedMessages {
  * you leave out fall back to English.
  */
 export interface Messages {
+  /** Texts shared by every template, the blocks and the layout. */
   readonly common: CommonMessages
+  /** Texts of the `verifyEmail` template. */
   readonly verifyEmail: VerifyEmailMessages
+  /** Texts of the `resetPassword` template. */
   readonly resetPassword: ResetPasswordMessages
+  /** Texts of the `passwordChanged` template. */
   readonly passwordChanged: PasswordChangedMessages
+  /** Texts of the `verifyEmailChange` template. */
   readonly verifyEmailChange: VerifyEmailChangeMessages
+  /** Texts of the `emailChangeRequested` template. */
   readonly emailChangeRequested: EmailChangeRequestedMessages
+  /** Texts of the `emailChanged` template. */
   readonly emailChanged: EmailChangedMessages
+  /** Texts of the `otpCode` template. */
   readonly otpCode: OtpCodeMessages
+  /** Texts of the `magicLink` template. */
   readonly magicLink: MagicLinkMessages
+  /** Texts of the `welcome` template. */
   readonly welcome: WelcomeMessages
+  /** Texts of the `newSignIn` template. */
   readonly newSignIn: NewSignInMessages
+  /** Texts of the `twoFactorEnabled` template. */
   readonly twoFactorEnabled: TwoFactorEnabledMessages
+  /** Texts of the `twoFactorDisabled` template. */
   readonly twoFactorDisabled: TwoFactorDisabledMessages
+  /** Texts of the `accountLocked` template. */
   readonly accountLocked: AccountLockedMessages
+  /** Texts of the `confirmAccountDeletion` template. */
   readonly confirmAccountDeletion: ConfirmAccountDeletionMessages
+  /** Texts of the `accountDeleted` template. */
   readonly accountDeleted: AccountDeletedMessages
 }
 

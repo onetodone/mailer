@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { createUi, joinBlocks, type Block, type Ui } from '../../src/core/blocks'
 import { html, isSafeHtml, raw } from '../../src/core/html'
-import { resolveTheme } from '../../src/core/theme'
+import { resolveTheme } from '../../src/core/theme-schema'
 import { MailerError } from '../../src/errors'
 import { catchError } from '../support/catch-error'
 
