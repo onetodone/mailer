@@ -1,5 +1,3 @@
-import { inspect } from 'node:util'
-
 import { z } from 'zod'
 
 import { describeAttachment, linkInlineImages, withContentType } from './attachments'
@@ -158,7 +156,22 @@ async function runHook<Event>(
   try {
     await hook(event)
   } catch (error) {
-    process.emitWarning(`The ${name} hook failed. ${outcome}`, { type: 'MailerWarning', detail: inspect(error) })
+    reportHookFailure(`The ${name} hook failed. ${outcome}`, error)
+  }
+}
+
+function describeError(error: unknown): string {
+  // getBuiltinModule rather than a static import of node:util, so the main entry loads without Node built-ins.
+  const util = typeof process.getBuiltinModule === 'function' ? process.getBuiltinModule('node:util') : undefined
+  if (util !== undefined) return util.inspect(error)
+  return error instanceof Error ? (error.stack ?? `${error.name}: ${error.message}`) : String(error)
+}
+
+function reportHookFailure(message: string, error: unknown): void {
+  if (typeof process !== 'undefined' && typeof process.emitWarning === 'function') {
+    process.emitWarning(message, { type: 'MailerWarning', detail: describeError(error) })
+  } else {
+    console.warn(`MailerWarning: ${message}`, error)
   }
 }
 

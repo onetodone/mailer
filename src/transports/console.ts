@@ -1,5 +1,3 @@
-import { randomUUID } from 'node:crypto'
-
 import { contentSize } from '../attachments'
 import type { MailAddress, MailAddresses, MailTransport, OutgoingAttachment, OutgoingMessage } from './types'
 
@@ -68,7 +66,7 @@ export function consoleTransport(options: ConsoleTransportOptions = {}): MailTra
   return {
     send(message) {
       log(formatMessage(message))
-      return Promise.resolve({ messageId: randomUUID() })
+      return Promise.resolve({ messageId: crypto.randomUUID() })
     },
   }
 }

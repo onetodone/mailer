@@ -1,5 +1,3 @@
-import { randomUUID } from 'node:crypto'
-
 import type { MailTransport, OutgoingMessage } from './types'
 
 /** A transport that keeps emails in memory instead of sending them. */
@@ -28,7 +26,7 @@ export function memoryTransport(): MemoryTransport {
     sent,
     send(message) {
       sent.push(message)
-      return Promise.resolve({ messageId: randomUUID() })
+      return Promise.resolve({ messageId: crypto.randomUUID() })
     },
     clear() {
       sent.length = 0

@@ -38,8 +38,10 @@ function guessContentType(filename: string, content: Uint8Array | string): strin
   return typeof content === 'string' && type.startsWith('text/') ? `${type}; charset=utf-8` : type
 }
 
+const encoder = new TextEncoder()
+
 export function contentSize(content: Uint8Array | string): number {
-  return typeof content === 'string' ? Buffer.byteLength(content) : content.byteLength
+  return typeof content === 'string' ? encoder.encode(content).byteLength : content.byteLength
 }
 
 export function withContentType({ filename, content, contentType, cid }: Attachment): OutgoingAttachment {
