@@ -5,22 +5,21 @@ import { dirname, join } from 'node:path'
 import { html, memoryTransport, type Branding, type Locale } from '@onetodone/mailer'
 import { chromium, type Browser } from 'playwright'
 
-import { branding, createSampleMailer, samples, type Sample } from './samples.ts'
+import { branding, createSampleMailer, brandLogo, samples, type Sample } from './samples.ts'
 
 const outDir = join(import.meta.dirname, '..', 'docs', 'images')
 
 // Rendered HTML references these URLs; the script swaps them for data: URIs so pages load without network.
-const logoUrl = 'https://example.com/logo.png'
+const logoUrl = brandLogo.url
 const bannerUrl = 'https://example.com/banner.png'
 
 const brands = {
   plain: { ...branding, logoUrl: undefined, logoWidth: undefined, logoHeight: undefined },
-  default: { ...branding, logoUrl, logoWidth: 123, logoHeight: 32 },
   custom: {
     ...branding,
     logoUrl,
-    logoWidth: 123,
-    logoHeight: 32,
+    logoWidth: brandLogo.width,
+    logoHeight: brandLogo.height,
     footerText: 'OneToDone · hello@onetodone.com',
     theme: { primary: '#98c2bc' },
   },
@@ -77,14 +76,14 @@ const shots: readonly Shot[] = [
     name: 'locales',
     viewport: 'desktop',
     emails: [
-      { slug: 'verify-email', brand: 'default', locale: 'en', caption: 'English' },
-      { slug: 'verify-email', brand: 'default', locale: 'de', caption: 'Deutsch' },
-      { slug: 'verify-email', brand: 'default', locale: 'uk', caption: 'Українська' },
-      { slug: 'verify-email', brand: 'default', locale: 'ja', caption: '日本語' },
+      { slug: 'verify-email', brand: 'custom', locale: 'en', caption: 'English' },
+      { slug: 'verify-email', brand: 'custom', locale: 'de', caption: 'Deutsch' },
+      { slug: 'verify-email', brand: 'custom', locale: 'uk', caption: 'Українська' },
+      { slug: 'verify-email', brand: 'custom', locale: 'ja', caption: '日本語' },
     ],
   },
   { name: 'mobile', viewport: 'mobile', emails: [{ slug: 'otp-code', brand: 'custom' }] },
-  { name: 'custom-template', viewport: 'desktop', emails: [{ slug: 'media', brand: 'default' }] },
+  { name: 'custom-template', viewport: 'desktop', emails: [{ slug: 'media', brand: 'custom' }] },
   ...featured.map((sample): Shot => ({
     name: `templates/${sample.slug}`,
     viewport: 'desktop',
@@ -216,7 +215,7 @@ figcaption { margin-top: 12px; text-align: center; font: 500 15px/1.4 Roboto, 'N
 async function main(): Promise<void> {
   const selected = selectShots(process.argv.slice(2))
   warnAboutFonts()
-  const logo = dataUri('image/png', await readFile(join(import.meta.dirname, 'assets', 'logo.png')))
+  const logo = dataUri('image/png', await readFile(brandLogo.file))
   const browser = await chromium.launch()
   try {
     for (const shot of selected) {
