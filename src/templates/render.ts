@@ -1,4 +1,5 @@
 import { createUi, joinBlocks, type Block } from '../core/blocks'
+import { textDirection } from '../core/direction'
 import type { Layout } from '../core/layout'
 import type { ResolvedBranding } from '../core/theme'
 import { MailerError } from '../errors'
@@ -61,13 +62,15 @@ export async function renderTemplate<R extends TemplateRegistry, N extends keyof
   const { branding, layout, locale, messages } = options
   const theme = branding.theme
   const { t, format } = createI18n({ locale, messages, companyName: branding.companyName, timeZone: options.timeZone })
-  const ui = createUi({ theme, messages: { linkFallback: t('common.linkFallback') } })
-  const content = template.render({ props: result.value, ui, t, format, locale, branding, theme })
+  const dir = textDirection(locale)
+  const ui = createUi({ theme, messages: { linkFallback: t('common.linkFallback') }, dir })
+  const content = template.render({ props: result.value, ui, t, format, locale, dir, branding, theme })
   const subject = content.subject.replace(/\s+/g, ' ').trim()
   const document = layout({
     branding,
     theme,
     locale,
+    dir,
     subject,
     preheader: content.preheader ?? '',
     content: joinBlocks(content.body.filter(isBlock)),

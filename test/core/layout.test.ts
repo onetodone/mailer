@@ -25,6 +25,7 @@ function context(input: Branding, overrides: Partial<LayoutContext> = {}): Layou
     branding,
     theme: branding.theme,
     locale: 'en',
+    dir: 'ltr',
     subject: 'Confirm your email',
     preheader: 'One click to finish signing up for My App',
     content: joinBlocks([
@@ -170,5 +171,61 @@ describe('defineLayout', () => {
     expect(result.html.value).toBe('<main><p>Hi</p></main>')
     expect(result.text).toBe('Hi\n\n— My App')
     expect(defineLayout(defaultLayout)).toBe(defaultLayout)
+  })
+})
+
+describe('defaultLayout right to left', () => {
+  const rtlUi = createUi({
+    theme: resolveBranding(brandingInput).theme,
+    messages: { linkFallback: 'إذا لم يعمل الزر، انسخ هذا الرابط إلى متصفحك:' },
+    dir: 'rtl',
+  })
+  const verifyUrl = 'https://myapp.loc/verify?token=abc123'
+  const rtlContext = (input: Branding = brandingInput) =>
+    context(input, {
+      locale: 'ar',
+      dir: 'rtl',
+      subject: 'رمز التحقق الخاص بك',
+      preheader: 'استخدم هذا الرمز للمتابعة في My App.',
+      content: joinBlocks([
+        rtlUi.heading('رمز التحقق الخاص بك'),
+        rtlUi.paragraph('أدخل هذا الرمز في My App للمتابعة:'),
+        rtlUi.code('123 456'),
+        rtlUi.button('تأكيد البريد الإلكتروني', verifyUrl),
+        rtlUi.linkFallback(verifyUrl),
+        rtlUi.image('https://myapp.loc/banner.png', { alt: 'لافتة', width: 534, height: 200 }),
+        rtlUi.note('إذا لم تطلب رمزًا، تجاهل هذه الرسالة.'),
+      ]),
+      messages: { footerSupport: 'أسئلة؟ راسلنا على', footerRights: 'جميع الحقوق محفوظة.' },
+    })
+
+  it('matches the snapshot', async () => {
+    const result = defaultLayout(rtlContext({ ...brandingInput, logoUrl: 'https://myapp.loc/logo.png' }))
+    await expect(result.html.toString()).toMatchFileSnapshot('./__snapshots__/layout-rtl.html')
+    await expect(result.text).toMatchFileSnapshot('./__snapshots__/layout-rtl.txt')
+  })
+
+  it('sets the direction on the document and on the content table, and aligns the card right', () => {
+    const { value } = defaultLayout(rtlContext()).html
+
+    expect(value).toContain('<html lang="ar" dir="rtl" ')
+    expect(value).toMatch(/<table role="presentation" dir="rtl" [^>]*style="max-width:600px;">/)
+    expect(value).toMatch(/border-radius:8px;text-align:right;/)
+    expect(value).not.toContain('text-align:left')
+  })
+
+  it('aligns spaced blocks right and keeps codes and links left to right', () => {
+    const { value } = defaultLayout(rtlContext()).html
+
+    expect(value.match(/<td align="right" style="padding:8px 0 24px;">/g)).toHaveLength(3)
+    expect(value).toMatch(/<td dir="ltr" style="padding:12px 14px 12px 20px;[^"]*">123 456<\/td>/)
+    expect(value).toContain(`<a href="${verifyUrl}" dir="ltr" style=`)
+  })
+
+  it('adds no direction markup left to right', () => {
+    const { value } = defaultLayout(context(brandingInput)).html
+
+    expect(value).not.toMatch(/\sdir=|\salign="right"/)
+    expect(value).toContain('text-align:left;')
   })
 })

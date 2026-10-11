@@ -1,5 +1,6 @@
 import { MailerError } from '../errors'
 import { contentIdRule, isContentId } from './content-id'
+import type { TextDirection } from './direction'
 import { html, raw as rawHtml, safeUrl, toPlainText, type SafeHtml } from './html'
 import type { Theme } from './theme'
 
@@ -125,12 +126,25 @@ function inline(content: string | SafeHtml): Block {
   return { html: html`${lines.map((line, index) => (index === 0 ? line : html`<br>${line}`))}`, text: content }
 }
 
-// Padding on a table cell is the only vertical spacing Outlook applies reliably.
-function spaced(content: SafeHtml): SafeHtml {
-  return html`<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0"><tr><td style="padding:8px 0 24px;">${content}</td></tr></table>`
-}
+export function createUi({
+  theme,
+  messages,
+  dir = 'ltr',
+}: {
+  theme: Theme
+  messages: UiMessages
+  dir?: TextDirection | undefined
+}): Ui {
+  const rtl = dir === 'rtl'
+  // Outlook on Windows aligns content in nested tables by the cell's align attribute only.
+  const align = rtl ? html` align="right"` : ''
+  // Codes and links read left to right, even inside right-to-left text.
+  const ltr = rtl ? html` dir="ltr"` : ''
 
-export function createUi({ theme, messages }: { theme: Theme; messages: UiMessages }): Ui {
+  // Padding on a table cell is the only vertical spacing Outlook applies reliably.
+  const spaced = (content: SafeHtml) =>
+    html`<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0"><tr><td${align} style="padding:8px 0 24px;">${content}</td></tr></table>`
+
   return {
     heading: (text, options = {}) => {
       const level = options.level === 2 || options.level === 3 ? options.level : 1
@@ -165,14 +179,14 @@ export function createUi({ theme, messages }: { theme: Theme; messages: UiMessag
     linkFallback: (url) => {
       const href = safeUrl(url)
       return {
-        html: html`<p style="margin:0 0 16px;font-family:${fontFamily};font-size:13px;line-height:20px;color:${theme.mutedText};mso-line-height-rule:exactly;">${messages.linkFallback}<br><a href="${href}" style="color:${theme.primary};text-decoration:underline;word-break:break-all;">${href}</a></p>`,
+        html: html`<p style="margin:0 0 16px;font-family:${fontFamily};font-size:13px;line-height:20px;color:${theme.mutedText};mso-line-height-rule:exactly;">${messages.linkFallback}<br><a href="${href}"${ltr} style="color:${theme.primary};text-decoration:underline;word-break:break-all;">${href}</a></p>`,
         text: `${messages.linkFallback}\n${href}`,
       }
     },
 
     code: (value) => ({
       html: spaced(
-        html`<table role="presentation" border="0" cellpadding="0" cellspacing="0"><tr><td style="padding:12px 14px 12px 20px;background-color:${theme.background};border:1px solid ${theme.border};border-radius:${theme.radius}px;font-family:${monoFamily};font-size:28px;line-height:36px;font-weight:700;letter-spacing:6px;color:${theme.text};mso-line-height-rule:exactly;">${value}</td></tr></table>`,
+        html`<table role="presentation" border="0" cellpadding="0" cellspacing="0"><tr><td${ltr} style="padding:12px 14px 12px 20px;background-color:${theme.background};border:1px solid ${theme.border};border-radius:${theme.radius}px;font-family:${monoFamily};font-size:28px;line-height:36px;font-weight:700;letter-spacing:6px;color:${theme.text};mso-line-height-rule:exactly;">${value}</td></tr></table>`,
       ),
       text: value,
     }),

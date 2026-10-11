@@ -1,4 +1,5 @@
 import { fontFamily, type Block } from './blocks'
+import type { TextDirection } from './direction'
 import { html, raw, type SafeHtml } from './html'
 import type { ResolvedBranding, Theme } from './theme'
 
@@ -18,6 +19,12 @@ export interface LayoutContext {
   readonly theme: Theme
   /** Locale of the email, used for the `lang` attribute. */
   readonly locale: string
+  /**
+   * Text direction of the locale: `rtl` for scripts written right to left,
+   * such as Arabic and Hebrew, otherwise `ltr`. Set it as the `dir` attribute
+   * and align text to the right when it is `rtl`.
+   */
+  readonly dir: TextDirection
   /** Email subject, used for the document title. */
   readonly subject: string
   /** Inbox preview text shown after the subject. Empty for none. */
@@ -105,13 +112,17 @@ function plainText(context: LayoutContext, year: number): string {
  * The built-in layout: a centered 600px table-based card with inline styles,
  * the logo (or company name) on top and a footer with the footer text, a
  * support link and a copyright line. Includes a hidden preheader and declares
- * light and dark color scheme support.
+ * light and dark color scheme support. Right-to-left locales get `dir="rtl"`
+ * and right-aligned content.
  */
 export const defaultLayout: Layout = (context) => {
   const { theme } = context
+  const rtl = context.dir === 'rtl'
+  // Gmail drops the attributes of <html>, so the content table repeats the direction.
+  const dir = rtl ? html` dir="rtl"` : ''
   const year = new Date().getFullYear()
   const markup = html`<!DOCTYPE html>
-<html lang="${context.locale}" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<html lang="${context.locale}"${dir} xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -132,12 +143,12 @@ ${context.preheader !== '' && html`<div style="display:none;max-height:0;max-wid
 <tr>
 <td align="center" style="padding:32px 12px;">
 <!--[if mso]><table role="presentation" width="600" border="0" cellpadding="0" cellspacing="0" align="center"><tr><td><![endif]-->
-<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="max-width:600px;">
+<table role="presentation"${dir} width="100%" border="0" cellpadding="0" cellspacing="0" style="max-width:600px;">
 <tr>
 <td align="center" style="padding:0 0 24px;">${header(context)}</td>
 </tr>
 <tr>
-<td style="padding:32px 32px 16px;background-color:${theme.surface};border:1px solid ${theme.border};border-radius:${theme.radius}px;text-align:left;font-family:${fontFamily};font-size:16px;line-height:24px;color:${theme.text};">
+<td style="padding:32px 32px 16px;background-color:${theme.surface};border:1px solid ${theme.border};border-radius:${theme.radius}px;text-align:${rtl ? 'right' : 'left'};font-family:${fontFamily};font-size:16px;line-height:24px;color:${theme.text};">
 ${context.content.html}
 </td>
 </tr>

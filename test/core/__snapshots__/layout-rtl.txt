@@ -1,0 +1,21 @@
+My App
+
+رمز التحقق الخاص بك
+
+أدخل هذا الرمز في My App للمتابعة:
+
+123 456
+
+تأكيد البريد الإلكتروني: https://myapp.loc/verify?token=abc123
+
+إذا لم يعمل الزر، انسخ هذا الرابط إلى متصفحك:
+https://myapp.loc/verify?token=abc123
+
+لافتة
+
+إذا لم تطلب رمزًا، تجاهل هذه الرسالة.
+
+--
+You received this email because you signed up for My App.
+أسئلة؟ راسلنا على support@myapp.loc
+© 2026 My App. جميع الحقوق محفوظة.
