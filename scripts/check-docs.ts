@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process'
 import { access, mkdir, mkdtemp, readdir, readFile, realpath, rename, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join, posix } from 'node:path'
+import { dirname, join, posix } from 'node:path'
 
 import ts from 'typescript'
 
@@ -19,6 +19,19 @@ interface Doc {
 }
 
 const root = join(import.meta.dirname, '..')
+// Recipes compile against third-party types, which are checked by their own authors, not by this script.
+const recipes = 'docs/recipes.md'
+const recipeModules = [
+  'better-auth',
+  'next-auth',
+  'express',
+  '@types/express',
+  'fastify',
+  '@nestjs/common',
+  'reflect-metadata',
+  'rxjs',
+  'bullmq',
+]
 const repoUrl = 'https://github.com/onetodone/mailer/blob/main/'
 const rawUrl = 'https://raw.githubusercontent.com/onetodone/mailer/main/'
 
@@ -41,6 +54,8 @@ declare const queue: { retryLater(template: string, userId: string): Promise<voi
 declare const user: { id: string; email: string }
 declare const verifyUrl: string
 declare const qrCodePng: Buffer
+declare const users: { findByEmail(email: string): Promise<{ id: string; name: string; email: string } | undefined> }
+declare const createToken: (userId: string) => Promise<string>
 `
 
 const context = `import { createMailer, defineTemplate, memoryTransport } from '@onetodone/mailer'
@@ -215,8 +230,10 @@ try {
   await mkdir(join(tmp, 'node_modules', '@onetodone'), { recursive: true })
   await mkdir(join(tmp, 'node_modules', '@types'))
   await rename(join(tmp, 'package'), join(tmp, 'node_modules', '@onetodone', 'mailer'))
-  for (const name of ['zod', 'nodemailer', 'vitest', '@types/node']) {
-    await symlink(await realpath(join(root, 'node_modules', name)), join(tmp, 'node_modules', name))
+  for (const name of ['zod', 'nodemailer', 'vitest', '@types/node', ...recipeModules]) {
+    const link = join(tmp, 'node_modules', name)
+    await mkdir(dirname(link), { recursive: true })
+    await symlink(await realpath(join(root, 'node_modules', name)), link)
   }
   await writeFile(join(tmp, 'package.json'), '{ "type": "module" }\n')
   await writeFile(join(tmp, 'globals.d.ts'), globals)
@@ -228,6 +245,7 @@ try {
     await mkdir(dir)
     for (const [index, block] of doc.blocks.entries()) {
       const name = /^\/\/ ([\w.-]+\.ts)$/.exec(block.lines[0] ?? '')?.[1] ?? `block-${String(index + 1)}.ts`
+      if (sources.has(join(dir, name))) errors.push(`${doc.path}:${String(block.line)}: another block is named ${name}`)
       const code: string[] = []
       const lines: number[] = []
       for (const [offset, line] of block.lines.entries()) {
@@ -252,7 +270,7 @@ try {
     }
   }
 
-  const program = ts.createProgram([join(tmp, 'globals.d.ts'), join(tmp, 'context.ts'), ...sources.keys()], {
+  const options: ts.CompilerOptions = {
     module: ts.ModuleKind.NodeNext,
     moduleResolution: ts.ModuleResolutionKind.NodeNext,
     target: ts.ScriptTarget.ES2022,
@@ -264,8 +282,22 @@ try {
     noUncheckedIndexedAccess: true,
     skipLibCheck: false,
     noEmit: true,
-  })
-  for (const diagnostic of ts.getPreEmitDiagnostics(program)) {
+  }
+  const shared = [join(tmp, 'globals.d.ts'), join(tmp, 'context.ts')]
+  const files = [...sources.keys()]
+  const isRecipe = (file: string) => sources.get(file)?.doc === recipes
+  const programs = [
+    ts.createProgram([...shared, ...files.filter((file) => !isRecipe(file))], options),
+    // NestJS parameter decorators need the legacy decorator semantics its users compile with.
+    ts.createProgram([...shared, ...files.filter(isRecipe)], {
+      ...options,
+      lib: ['lib.es2023.d.ts', 'lib.dom.d.ts'],
+      skipLibCheck: true,
+      experimentalDecorators: true,
+      emitDecoratorMetadata: true,
+    }),
+  ]
+  for (const diagnostic of programs.flatMap((program) => ts.getPreEmitDiagnostics(program))) {
     const message = `TS${String(diagnostic.code)}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`
     const { file, start } = diagnostic
     const source = file === undefined ? undefined : sources.get(file.fileName)
