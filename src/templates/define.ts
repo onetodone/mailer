@@ -1,4 +1,5 @@
 import type { Block, Ui } from '../core/blocks'
+import type { TextDirection } from '../core/direction'
 import type { ResolvedBranding, Theme } from '../core/theme'
 import type { Formatters, MessageKey, Translate } from '../i18n'
 import type { TemplateMessageKey, TemplateMessages, TemplatePluralKey, TemplateTexts } from './messages'
@@ -20,6 +21,13 @@ export interface TemplateRenderContext<Props, Key extends string = MessageKey, P
   readonly format: Formatters
   /** Locale of the email, such as `en` or `be`. */
   readonly locale: string
+  /**
+   * Text direction of the locale: `rtl` for scripts written right to left,
+   * such as Arabic and Hebrew, otherwise `ltr`. The `ui` blocks and the
+   * built-in layout follow it; markup of your own can use it for `dir` and
+   * `text-align`.
+   */
+  readonly dir: TextDirection
   /** Validated branding with defaults applied. */
   readonly branding: ResolvedBranding
   /** Resolved theme tokens, the same object as `branding.theme`. */

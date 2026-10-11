@@ -45,7 +45,7 @@
 | Ukrainian            | `uk`      |    ✅     |
 | Vietnamese           | `vi`      |    ❌     |
 
-✅ — built-in texts for every template. ❌ — no built-in texts: add the language through `messages`, and every key you leave out falls back to English. Arabic and Hebrew are written right to left, which the default layout does not support.
+✅ — built-in texts for every template. ❌ — no built-in texts: add the language through `messages`, and every key you leave out falls back to English. Languages written right to left, such as Arabic and Hebrew, render right to left (see [below](#right-to-left-languages)).
 
 The examples below reuse `transport`, `from` and `branding` from the [quick start](../README.md#quick-start).
 
@@ -141,3 +141,10 @@ The `Messages` type describes every key, so your editor shows what each text is 
 `Messages` is the full built-in dictionary, and it gains keys whenever built-in templates are added, in any release. A full dictionary typed as `Messages` is therefore not covered by semver. Check your own texts with `satisfies MessagesOverrides` (or type one locale as `LocaleMessages`); keys you leave out fall back to English.
 
 `Locale` lists the built-in locales and gains values whenever a built-in locale is added, in any release, so code that requires every `Locale` value (such as `Record<Locale, …>`) is not covered by semver. If you already use a locale through `messages` and it becomes built-in, your overrides still win; keys you did not override come from the built-in texts instead of English.
+
+## Right-to-left languages
+
+The direction of an email follows its locale. For a language written right to left, such as Arabic (`ar`), Hebrew (`he`), Persian (`fa`) or Urdu (`ur`), the built-in layout sets `dir="rtl"` and aligns the content to the right. Codes and links in the `ui` blocks stay left to right, so a code like `123 456` keeps its order. The plain-text version has no direction; email clients show it as the reader's client decides.
+
+Templates and layouts receive the direction as `dir` (`'ltr'` or `'rtl'`), for markup of your own (see [customization](customization.md)).
+
