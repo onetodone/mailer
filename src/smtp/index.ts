@@ -152,6 +152,21 @@ function describeFailure(error: unknown): string {
   return `SMTP delivery failed${code}: ${reason}`
 }
 
+// The codes nodemailer itself treats as transient: a lost or refused connection, or a timeout.
+const transientCodes = new Set(['ECONNECTION', 'ESOCKET', 'ETIMEDOUT'])
+
+function classifyFailure(error: unknown): { retryable?: boolean; status?: number } {
+  if (typeof error !== 'object' || error === null) return {}
+  if ('responseCode' in error && typeof error.responseCode === 'number') {
+    const status = error.responseCode
+    if (status >= 400 && status < 500) return { retryable: true, status }
+    if (status >= 500 && status < 600) return { retryable: false, status }
+    return { status }
+  }
+  if ('code' in error && typeof error.code === 'string' && transientCodes.has(error.code)) return { retryable: true }
+  return {}
+}
+
 /**
  * Creates a transport that sends emails over SMTP with nodemailer, which must
  * be installed next to this package. Pass connection settings, or a
@@ -162,9 +177,12 @@ function describeFailure(error: unknown): string {
  * regular attachments.
  *
  * Send failures reject with a {@link MailerError} with code `TRANSPORT_FAILED`
- * and nodemailer's error as `cause`. When the server accepts some recipients
- * and rejects others, the send succeeds and the result lists them in
- * `rejected`.
+ * and nodemailer's error as `cause`. When the server replied, `status` holds
+ * the SMTP reply code; `retryable` is `true` for a 4xx reply or a lost
+ * connection or timeout, and `false` for a 5xx reply.
+ *
+ * When the server accepts some recipients and rejects others, the send
+ * succeeds and the result lists them in `rejected`.
  *
  * @throws {MailerError} With code `INVALID_CONFIG` when the settings are invalid.
  *
@@ -207,7 +225,7 @@ export function smtpTransport(options: SmtpTransportOptions | NodemailerTranspor
           rejected: toAddressStrings(info.rejected),
         }
       } catch (error) {
-        throw new MailerError('TRANSPORT_FAILED', describeFailure(error), { cause: error })
+        throw new MailerError('TRANSPORT_FAILED', describeFailure(error), { cause: error, ...classifyFailure(error) })
       }
     },
     close() {

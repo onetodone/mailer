@@ -564,6 +564,8 @@ describe('transport failures', () => {
     expect(error.code).toBe('TRANSPORT_FAILED')
     expect(error.message).toBe('Email delivery failed: connection refused')
     expect(error.cause).toBe(reason)
+    expect(error.retryable).toBeUndefined()
+    expect(error.status).toBeUndefined()
   })
 
   it('wraps errors thrown synchronously and values that are not errors', async () => {
@@ -596,7 +598,9 @@ describe('transport failures', () => {
   })
 
   it('passes a MailerError from the transport through', async () => {
-    const reason = new MailerError('TRANSPORT_FAILED', 'SMTP delivery failed (ECONNREFUSED): connect refused')
+    const reason = new MailerError('TRANSPORT_FAILED', 'SMTP delivery failed (ECONNREFUSED): connect refused', {
+      retryable: true,
+    })
     const mailer = createMailer({ transport: failingTransport(() => Promise.reject(reason)), from, branding })
 
     await expect(mailer.send('passwordChanged', { to })).rejects.toBe(reason)

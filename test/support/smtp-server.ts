@@ -10,6 +10,8 @@ export interface ReceivedMail {
 export interface SmtpServerOptions {
   /** Recipients refused with a 550 reply. */
   readonly reject?: readonly string[]
+  /** Recipients refused for now with a 450 reply. */
+  readonly defer?: readonly string[]
 }
 
 export interface TestSmtpServer {
@@ -82,6 +84,8 @@ export async function startSmtpServer(options: SmtpServerOptions = {}): Promise<
           const address = envelopeAddress(args.join(' '))
           if (options.reject?.includes(address) === true) {
             reply('550 5.1.1 Mailbox unavailable')
+          } else if (options.defer?.includes(address) === true) {
+            reply('450 4.2.1 Mailbox busy, try again later')
           } else {
             to.push(address)
             reply('250 OK')

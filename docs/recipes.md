@@ -323,8 +323,8 @@ export const passwordResetWorker = new Worker<PasswordResetJob>(
     try {
       await mailer.send('resetPassword', { to: job.data.to, props: { resetUrl: job.data.resetUrl } })
     } catch (error) {
-      if (error instanceof MailerError && error.code !== 'TRANSPORT_FAILED') {
-        // Invalid props or options fail the same way on every attempt.
+      if (error instanceof MailerError && (error.code !== 'TRANSPORT_FAILED' || error.retryable === false)) {
+        // Invalid props or options, or an email the provider rejected, fail the same way on every attempt.
         throw new UnrecoverableError(error.message)
       }
       throw error

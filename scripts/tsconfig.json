@@ -6,7 +6,8 @@
     "erasableSyntaxOnly": true,
     "paths": {
       "@onetodone/mailer": ["../src/index.ts"],
-      "@onetodone/mailer/smtp": ["../src/smtp/index.ts"]
+      "@onetodone/mailer/smtp": ["../src/smtp/index.ts"],
+      "@onetodone/mailer/resend": ["../src/resend/index.ts"]
     }
   },
   "include": ["*.ts"]

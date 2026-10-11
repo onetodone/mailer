@@ -169,6 +169,17 @@ describe('smtpTransport over SMTP', () => {
     expect(error.message).toMatch(/^SMTP delivery failed \(EENVELOPE\): /)
     expect(error.cause).toBeInstanceOf(Error)
     expect(error.cause).toMatchObject({ code: 'EENVELOPE' })
+    expect(error).toMatchObject({ retryable: false, status: 550 })
+    expect(mails).toEqual([])
+  })
+
+  it('marks a temporary rejection as retryable', async () => {
+    const { port, mails } = await startServer({ defer: ['busy@example.com'] })
+    const transport = smtpTransport({ host: '127.0.0.1', port })
+
+    const error = await transportError(transport.send({ ...message, to: 'busy@example.com' }))
+
+    expect(error).toMatchObject({ retryable: true, status: 450 })
     expect(mails).toEqual([])
   })
 
@@ -182,6 +193,8 @@ describe('smtpTransport over SMTP', () => {
 
     expect(error.message).toMatch(/^SMTP delivery failed \(\w+\): .*ECONNREFUSED/)
     expect(error.cause).toBeInstanceOf(Error)
+    expect(error.retryable).toBe(true)
+    expect(error.status).toBeUndefined()
   })
 
   it('reuses pooled connections until closed', async () => {
@@ -312,6 +325,37 @@ describe('smtpTransport with a nodemailer transporter', () => {
 
     expect(error.message).toBe('SMTP delivery failed (EAUTH): Invalid login: 535 Authentication failed')
     expect(error.cause).toBe(cause)
+  })
+
+  it.each([
+    [
+      { code: 'EAUTH', responseCode: 535 },
+      { retryable: false, status: 535 },
+    ],
+    [
+      { code: 'EENVELOPE', responseCode: 452 },
+      { retryable: true, status: 452 },
+    ],
+    [
+      { code: 'EPROTOCOL', responseCode: 421 },
+      { retryable: true, status: 421 },
+    ],
+    [{ code: 'EPROTOCOL', responseCode: 354 }, { status: 354 }],
+    [{ code: 'ECONNECTION' }, { retryable: true }],
+    [{ code: 'ESOCKET' }, { retryable: true }],
+    [{ code: 'ETIMEDOUT' }, { retryable: true }],
+    [{ code: 'EMESSAGE' }, {}],
+    [{}, {}],
+  ])('classifies %j as %j', async (fields, expected) => {
+    const transporter = fakeTransporter(() => Promise.reject(Object.assign(new Error('Failed'), fields)))
+
+    const error = await transportError(smtpTransport(transporter).send(message))
+
+    expect({ retryable: error.retryable, status: error.status }).toEqual({
+      retryable: undefined,
+      status: undefined,
+      ...expected,
+    })
   })
 
   it('wraps synchronous throws and non-Error reasons', async () => {

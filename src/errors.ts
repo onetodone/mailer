@@ -22,6 +22,17 @@ export type MailerErrorCode =
 const brand = Symbol.for('@onetodone/mailer/MailerError')
 
 /**
+ * Options for the {@link MailerError} constructor: the standard `cause`, plus
+ * what a transport knows about a failed delivery.
+ */
+export interface MailerErrorOptions extends ErrorOptions {
+  /** Whether the same email may be delivered on a later attempt. Leave it out when unknown. */
+  readonly retryable?: boolean | undefined
+  /** HTTP status of the provider's API, or the SMTP reply code. Leave it out when there is none. */
+  readonly status?: number | undefined
+}
+
+/**
  * The error type thrown by the mailer. Check `code` to branch on the reason;
  * `cause` holds the underlying error when there is one.
  *
@@ -54,12 +65,31 @@ export class MailerError extends Error {
   readonly code: MailerErrorCode
 
   /**
+   * Set on `TRANSPORT_FAILED` by the built-in transports when they can tell:
+   * `true` when the same email may be delivered on a later attempt, such as
+   * after a rate limit, a server error or a lost connection; `false` when the
+   * provider rejected the email, its sender or the credentials, so a retry
+   * fails the same way. `undefined` means unknown.
+   */
+  declare readonly retryable?: boolean
+
+  /**
+   * Set on `TRANSPORT_FAILED` by the built-in transports when the provider
+   * answered: the HTTP status of its API, such as `429`, or the SMTP reply
+   * code, such as `550`.
+   */
+  declare readonly status?: number
+
+  /**
    * @param code - Machine-readable reason for the failure.
    * @param message - Human-readable description.
-   * @param options - Standard error options, such as `cause`.
+   * @param options - Standard error options, such as `cause`, plus `retryable` and `status`.
    */
-  constructor(code: MailerErrorCode, message: string, options?: ErrorOptions) {
+  constructor(code: MailerErrorCode, message: string, options?: MailerErrorOptions) {
     super(message, options)
     this.code = code
+    // Assigned only when known, so errors without them keep `code` and `name` as their only own keys.
+    if (options?.retryable !== undefined) this.retryable = options.retryable
+    if (options?.status !== undefined) this.status = options.status
   }
 }

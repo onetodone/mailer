@@ -32,4 +32,21 @@ describe('MailerError', () => {
     expect(Object.getOwnPropertySymbols(error)).toEqual([])
     expect(Object.keys(error).sort()).toEqual(['code', 'name'])
   })
+
+  it('carries retryable and status when the thrower knows them', () => {
+    const cause = new Error('429 Too Many Requests')
+    const error = new MailerError('TRANSPORT_FAILED', 'Failed.', { cause, retryable: true, status: 429 })
+
+    expect(error).toMatchObject({ code: 'TRANSPORT_FAILED', retryable: true, status: 429, cause })
+    expect(Object.keys(error).sort()).toEqual(['code', 'name', 'retryable', 'status'])
+    expect(new MailerError('TRANSPORT_FAILED', 'Failed.', { retryable: false })).toMatchObject({ retryable: false })
+  })
+
+  it('leaves retryable and status out when they are unknown', () => {
+    const error = new MailerError('TRANSPORT_FAILED', 'Failed.', { retryable: undefined, status: undefined })
+
+    expect(error.retryable).toBeUndefined()
+    expect(error.status).toBeUndefined()
+    expect(Object.keys(error).sort()).toEqual(['code', 'name'])
+  })
 })
