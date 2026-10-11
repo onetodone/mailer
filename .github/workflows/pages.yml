@@ -19,24 +19,45 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
-    name: Build
+  # The gallery shows the released package, not unreleased changes on main.
+  resolve:
+    name: Resolve ref
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    outputs:
+      ref: ${{ steps.ref.outputs.ref }}
     steps:
-      # The gallery shows the released package, not unreleased changes on main.
+      # After Release, deploy only when that run published a version, i.e. a v* tag points at its commit.
+      # An empty ref skips the build and the deploy.
       - id: ref
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
+          EVENT: ${{ github.event_name }}
           INPUT_REF: ${{ inputs.ref }}
-        run: echo "ref=${INPUT_REF:-$(gh release view --json tagName --jq .tagName)}" >> "$GITHUB_OUTPUT"
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          if [ "$EVENT" = workflow_dispatch ]; then
+            ref="${INPUT_REF:-$(gh release view --json tagName --jq .tagName)}"
+          else
+            ref="$(gh api "repos/$GH_REPO/tags" --paginate --jq ".[] | select(.commit.sha == \"$HEAD_SHA\") | .name" | grep '^v' | head -n 1 || true)"
+          fi
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          echo "Gallery ref: ${ref:-none, no version was published}"
 
+  build:
+    name: Build
+    needs: resolve
+    if: needs.resolve.outputs.ref != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ steps.ref.outputs.ref }}
+          ref: ${{ needs.resolve.outputs.ref }}
           persist-credentials: false
 
       - uses: pnpm/action-setup@v6
