@@ -114,10 +114,11 @@ const { smtpTransport } = require('@onetodone/mailer/smtp')
 - [Hooks](https://github.com/onetodone/mailer/blob/main/docs/hooks.md): `onSent` and `onError` for logging and metrics.
 - [Errors](https://github.com/onetodone/mailer/blob/main/docs/errors.md): `MailerError` codes and retries.
 - [Security](https://github.com/onetodone/mailer/blob/main/docs/security.md): escaping, link and header checks, and email client support.
+- [Versioning and support](https://github.com/onetodone/mailer/blob/main/docs/versioning.md): what counts as a breaking change, supported Node.js and TypeScript versions, and deprecations.
 
 ## Versioning
 
-The package follows [semantic versioning](https://semver.org). While the version is 0.x, breaking changes bump the minor version, so npm's default `^0.1.0` range stays within 0.1.x. Changes are listed in the [changelog](https://github.com/onetodone/mailer/blob/main/CHANGELOG.md) and in the [GitHub releases](https://github.com/onetodone/mailer/releases).
+The package follows [semantic versioning](https://semver.org). While the version is 0.x, breaking changes bump the minor version, so npm's default `^0.3.0` range stays within 0.3.x. Changes are listed in the [changelog](https://github.com/onetodone/mailer/blob/main/CHANGELOG.md) and in the [GitHub releases](https://github.com/onetodone/mailer/releases). [Versioning and support](https://github.com/onetodone/mailer/blob/main/docs/versioning.md) lists what counts as a breaking change and which Node.js and TypeScript versions are supported.
 
 ## Contributing
 
