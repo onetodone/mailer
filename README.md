@@ -96,6 +96,7 @@ const { smtpTransport } = require('@onetodone/mailer/smtp')
 - [Texts and locales](https://github.com/onetodone/mailer/blob/main/docs/locales.md): built-in languages, text overrides and your own locales.
 - [Transports](https://github.com/onetodone/mailer/blob/main/docs/transports.md): SMTP, console, memory and your own transport.
 - [Testing](https://github.com/onetodone/mailer/blob/main/docs/testing.md): tests with `memoryTransport` and `render`.
+- [Recipes](https://github.com/onetodone/mailer/blob/main/docs/recipes.md): Better Auth, Auth.js, Express, Fastify, Next.js, NestJS and background jobs.
 - [Hooks](https://github.com/onetodone/mailer/blob/main/docs/hooks.md): `onSent` and `onError` for logging and metrics.
 - [Errors](https://github.com/onetodone/mailer/blob/main/docs/errors.md): `MailerError` codes and retries.
 - [Security](https://github.com/onetodone/mailer/blob/main/docs/security.md): escaping, link and header checks, and email client support.
