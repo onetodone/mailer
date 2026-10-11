@@ -1,9 +1,9 @@
 import { createTransport } from 'nodemailer'
 import { z } from 'zod'
 
-import { MailerError, parseConfig } from '../errors'
+import { MailerError } from '../errors'
 import type { MailAddress, MailAddresses, MailTransport, OutgoingAttachment } from '../transports/types'
-import { expected, flag, nonEmptyText, objectError, port, positiveInteger } from '../validators'
+import { expected, flag, nonEmptyText, objectError, parseConfig, port, positiveInteger } from '../validators'
 
 /** SMTP connection settings for {@link smtpTransport}. */
 export interface SmtpTransportOptions {

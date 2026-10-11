@@ -3,7 +3,8 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { createUi, joinBlocks } from '../../src/core/blocks'
 import { html } from '../../src/core/html'
 import { defaultLayout, defineLayout, type LayoutContext } from '../../src/core/layout'
-import { resolveBranding, type Branding } from '../../src/core/theme'
+import type { Branding } from '../../src/core/theme'
+import { resolveBranding } from '../../src/core/theme-schema'
 
 const brandingInput: Branding = {
   companyName: 'My App',

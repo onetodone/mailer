@@ -4,9 +4,6 @@ import { z } from 'zod'
 
 import { describeAttachment, linkInlineImages, withContentType } from './attachments'
 import {
-  configSchema,
-  describeLocales,
-  knownLocales,
   type AttachmentInfo,
   type CustomTemplates,
   type MailerConfig,
@@ -14,15 +11,25 @@ import {
   type MailEvent,
   type MailSentEvent,
 } from './config'
+import { configSchema, describeLocales, knownLocales } from './config-schema'
 import { defaultLayout } from './core/layout'
-import { MailerError, parseConfig, parseOptions } from './errors'
+import { MailerError } from './errors'
 import { buildMessages, dictionaries, type Locale, type LocaleMessages, type MessagesOverrides } from './i18n'
 import { builtInTemplates, type BuiltInTemplates } from './templates/built-in'
 import type { AnyTemplate, Template, TemplateProps, TemplateRegistry } from './templates/define'
-import { templateSections, withTemplateMessages } from './templates/messages'
+import { templateSections, withTemplateMessages } from './templates/messages-schema'
 import { renderTemplate, type RenderedEmail } from './templates/render'
 import type { Attachment, MailAddresses, OutgoingMessage, SendResult } from './transports/types'
-import { attachments, describeInput, headers, isRecord, mailAddresses, objectError } from './validators'
+import {
+  attachments,
+  describeInput,
+  headers,
+  isRecord,
+  mailAddresses,
+  objectError,
+  parseConfig,
+  parseOptions,
+} from './validators'
 
 /** Built-in templates merged with custom ones; a custom template replaces a built-in one with the same name. */
 export type WithBuiltIns<Custom> = {
