@@ -1,0 +1,54 @@
+name: Bug report
+description: Something does not work as documented.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: For a security problem, do not open an issue. Follow [SECURITY.md](https://github.com/onetodone/mailer/blob/main/SECURITY.md) instead.
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      placeholder: 0.2.4
+    validations:
+      required: true
+  - type: input
+    id: runtime
+    attributes:
+      label: Node.js version and module format
+      placeholder: Node.js 22.20, ESM
+    validations:
+      required: true
+  - type: dropdown
+    id: transport
+    attributes:
+      label: Transport
+      options:
+        - SMTP (@onetodone/mailer/smtp)
+        - Console
+        - Memory
+        - Own transport
+        - Not related to sending
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: The error message or a description of the wrong result. For a layout problem, add a screenshot and the email client.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Code to reproduce
+      description: The smallest code that shows the problem. Remove passwords, tokens and real addresses.
+      render: ts
+    validations:
+      required: true

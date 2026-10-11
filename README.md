@@ -118,6 +118,10 @@ const { smtpTransport } = require('@onetodone/mailer/smtp')
 
 The package follows [semantic versioning](https://semver.org). While the version is 0.x, breaking changes bump the minor version, so npm's default `^0.1.0` range stays within 0.1.x. Changes are listed in the [changelog](https://github.com/onetodone/mailer/blob/main/CHANGELOG.md) and in the [GitHub releases](https://github.com/onetodone/mailer/releases).
 
+## Contributing
+
+Bug reports, fixes, new languages and translation fixes are welcome. See [CONTRIBUTING.md](https://github.com/onetodone/mailer/blob/main/CONTRIBUTING.md), and report security problems privately as described in [SECURITY.md](https://github.com/onetodone/mailer/blob/main/SECURITY.md).
+
 ## License
 
 [MIT](LICENSE)

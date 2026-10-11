@@ -1,0 +1,34 @@
+name: Language
+description: Add built-in texts for a language, or fix a translation.
+labels: [locale]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Request
+      options:
+        - Add a language
+        - Fix a translation
+    validations:
+      required: true
+  - type: input
+    id: language
+    attributes:
+      label: Language and code
+      placeholder: Spanish, es
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: For a fix, the current text, your wording, and why it reads better. For a new language, anything a translator should know, such as the usual form of address.
+    validations:
+      required: true
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Help
+      options:
+        - label: I am a native speaker and can review the texts.
+        - label: I can open a pull request (see "Languages" in CONTRIBUTING.md).
