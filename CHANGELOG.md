@@ -1,5 +1,15 @@
 # @onetodone/mailer
 
+## 0.2.5
+
+### Patch Changes
+
+- 05143f7: Document integrations and show every email in the README and docs.
+  
+  - Screenshots of every built-in email, and a [live preview](https://onetodone.github.io/mailer/) of every email in every built-in language.
+  - Recipes for Better Auth, Auth.js, Express, Fastify, Next.js, NestJS and BullMQ.
+  - No changes to the API or to the rendered emails.
+
 ## 0.2.4
 
 ### Patch Changes
