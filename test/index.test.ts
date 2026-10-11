@@ -181,7 +181,7 @@ describe('main entry', () => {
     expectTypeOf<EmailChangedProps>().toHaveProperty('newEmail')
     expectTypeOf<OtpCodeProps>().toHaveProperty('code')
     expectTypeOf<MagicLinkProps>().toHaveProperty('signInUrl')
-    expectTypeOf<WelcomeProps>().toHaveProperty('ctaUrl')
+    expectTypeOf<WelcomeProps>().toHaveProperty('startUrl')
     expectTypeOf<NewSignInProps>().toHaveProperty('device')
     expectTypeOf<TwoFactorEnabledProps>().toHaveProperty('changedAt')
     expectTypeOf<TwoFactorDisabledProps>().toHaveProperty('changedAt')

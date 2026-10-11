@@ -237,7 +237,7 @@ export const samples: readonly Sample[] = [
   {
     slug: 'welcome',
     template: 'welcome',
-    props: { userName: 'Lizzie', ctaUrl: 'http://fake-url.loc/get-started' },
+    props: { userName: 'Lizzie', startUrl: 'http://fake-url.loc/get-started' },
   },
   { slug: 'welcome-minimal', template: 'welcome', props: {} },
   {

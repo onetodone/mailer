@@ -1,7 +1,7 @@
 export { MailerError, type MailerErrorCode } from './errors'
 export { html, raw, safeUrl, type HtmlValue, type SafeHtml } from './core/html'
 export type { Branding, ResolvedBranding, Theme, ThemeInput } from './core/theme'
-export type { Block, HeadingOptions, ImageOptions, Ui, UiMessages } from './core/blocks'
+export type { Block, HeadingOptions, ImageOptions, Ui } from './core/blocks'
 export {
   defaultLayout,
   defineLayout,
