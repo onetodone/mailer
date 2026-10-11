@@ -1,5 +1,15 @@
 # @onetodone/mailer
 
+## 0.2.6
+
+### Patch Changes
+
+- 5d9000a: Add built-in texts in Chinese (Simplified).
+  
+  - `Locale` gains `zh`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - If you already send in Chinese (Simplified) through `messages`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+  - Thanks [@SuparvaCode](https://github.com/SuparvaCode) for the translation!
+
 ## 0.2.5
 
 ### Patch Changes
