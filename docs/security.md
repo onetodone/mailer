@@ -18,3 +18,5 @@ The HTML follows what email clients actually render:
 - a hidden preheader for the inbox preview.
 
 The layout declares support for light and dark color schemes. It is checked in Gmail (web and mobile apps), Outlook, Apple Mail and iOS Mail, in light and dark mode and on screens 320px wide.
+
+<img src="images/mobile.png" width="300" alt="The otpCode email on a phone-width screen, 375px wide">
