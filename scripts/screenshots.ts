@@ -48,7 +48,7 @@ interface Shot {
   readonly emails: readonly Email[]
 }
 
-const singleBudget = 250_000
+const singleBudget = 350_000
 const compositeBudget = 600_000
 const compositeColumn = 400
 const compositeGap = 24
@@ -88,7 +88,7 @@ const shots: readonly Shot[] = [
   ...featured.map((sample): Shot => ({
     name: `templates/${sample.slug}`,
     viewport: 'desktop',
-    emails: [{ slug: sample.slug, brand: 'default' }],
+    emails: [{ slug: sample.slug, brand: 'custom' }],
   })),
 ]
 

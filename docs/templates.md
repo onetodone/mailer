@@ -22,6 +22,8 @@ Each email has an inbox preview text, a heading, a greeting and a short explanat
 
 ## `verifyEmail`
 
+<img src="images/templates/verify-email.png" width="340" alt="The verifyEmail email in English, subject “Confirm your email”">
+
 | Prop               | Type     | Required | Description                                                                         |
 | ------------------ | -------- | -------- | ----------------------------------------------------------------------------------- |
 | `verifyUrl`        | `string` | yes      | Absolute `http:` or `https:` link that confirms the address.                        |
@@ -30,6 +32,8 @@ Each email has an inbox preview text, a heading, a greeting and a short explanat
 
 ## `resetPassword`
 
+<img src="images/templates/reset-password.png" width="340" alt="The resetPassword email in English, subject “Reset your password”">
+
 | Prop               | Type     | Required | Description                                                                         |
 | ------------------ | -------- | -------- | ----------------------------------------------------------------------------------- |
 | `resetUrl`         | `string` | yes      | Absolute `http:` or `https:` link to the page where the user sets a new password.   |
@@ -37,6 +41,8 @@ Each email has an inbox preview text, a heading, a greeting and a short explanat
 | `expiresInMinutes` | `number` | no       | How long the link works, in minutes. Without it, the email does not mention expiry. |
 
 ## `passwordChanged`
+
+<img src="images/templates/password-changed.png" width="340" alt="The passwordChanged email in English, subject “Your password was changed”">
 
 Every prop is optional, so `props` can be left out.
 
@@ -65,6 +71,8 @@ await mailer.send('passwordChanged', {
 
 ## `verifyEmailChange`
 
+<img src="images/templates/verify-email-change.png" width="340" alt="The verifyEmailChange email in English, subject “Confirm your new email”">
+
 Send it to the new address. The account keeps its current email until the link is opened.
 
 | Prop               | Type     | Required | Description                                                                         |
@@ -74,6 +82,8 @@ Send it to the new address. The account keeps its current email until the link i
 | `expiresInMinutes` | `number` | no       | How long the link works, in minutes. Without it, the email does not mention expiry. |
 
 ## `emailChangeRequested`
+
+<img src="images/templates/email-change-requested.png" width="340" alt="The emailChangeRequested email in English, subject “Email change requested”">
 
 Send it to the current address when the change is requested, so the owner can stop a change they did not make.
 
@@ -88,6 +98,8 @@ Send it to the current address when the change is requested, so the owner can st
 | `supportUrl`  | `string` | no       | Absolute `http:` or `https:` link to your support page, shown as a button when there is no `cancelUrl`. Without either, the email points to `branding.supportEmail`. |
 
 ## `emailChanged`
+
+<img src="images/templates/email-changed.png" width="340" alt="The emailChanged email in English, subject “Your email was changed”">
 
 Send it to the old address once the new one is confirmed. Every prop is optional, so `props` can be left out.
 
@@ -122,6 +134,8 @@ await mailer.send('emailChanged', {
 
 ## `otpCode`
 
+<img src="images/templates/otp-code.png" width="340" alt="The otpCode email in English, subject “Your verification code”">
+
 A one-time code for any purpose, such as sign-in, two-step verification or confirming an action.
 
 | Prop               | Type     | Required | Description                                                                                   |
@@ -141,6 +155,8 @@ The subject and the inbox preview leave out the code, because they show in notif
 
 ## `magicLink`
 
+<img src="images/templates/magic-link.png" width="340" alt="The magicLink email in English, subject “Your sign-in link”">
+
 | Prop               | Type     | Required | Description                                                                         |
 | ------------------ | -------- | -------- | ----------------------------------------------------------------------------------- |
 | `signInUrl`        | `string` | yes      | Absolute `http:` or `https:` link that signs the user in.                           |
@@ -150,6 +166,8 @@ The subject and the inbox preview leave out the code, because they show in notif
 Anyone who has the link can sign in, and the email tells the reader not to share it. Make the link work once and for a short time, such as 15 minutes.
 
 ## `welcome`
+
+<img src="images/templates/welcome.png" width="340" alt="The welcome email in English, subject “Welcome to OneToDone”">
 
 Send it once the account is ready, for example after the email address is confirmed. Every prop is optional, so `props` can be left out.
 
@@ -163,6 +181,8 @@ await mailer.send('welcome', { to: 'lizzie@example.com', props: { userName: 'Liz
 ```
 
 ## `newSignIn`
+
+<img src="images/templates/new-sign-in.png" width="340" alt="The newSignIn email in English, subject “New sign-in to your account”">
 
 Send it when someone signs in to the account, for example from a device or place the account has not used before. Every prop is optional, so `props` can be left out.
 
@@ -194,6 +214,8 @@ The email shows `device` and `location` as you pass them, for example from the u
 
 ## `twoFactorEnabled` and `twoFactorDisabled`
 
+<img src="images/templates/two-factor-enabled.png" width="340" alt="The twoFactorEnabled email in English, subject “Two-factor authentication was turned on”"> <img src="images/templates/two-factor-disabled.png" width="340" alt="The twoFactorDisabled email in English, subject “Two-factor authentication was turned off”">
+
 Send them when two-factor authentication is turned on or off for an account. Both take the same props. Every prop is optional, so `props` can be left out.
 
 | Prop         | Type     | Description                                                                                                                         |
@@ -212,6 +234,8 @@ await mailer.send('twoFactorDisabled', {
 ```
 
 ## `accountLocked`
+
+<img src="images/templates/account-locked.png" width="340" alt="The accountLocked email in English, subject “Your account is locked”">
 
 Send it when the account is locked after too many failed sign-in attempts. Every prop is optional, so `props` can be left out.
 
@@ -235,6 +259,8 @@ The email ends with advice for owners who did not try to sign in: someone may be
 
 ## `confirmAccountDeletion`
 
+<img src="images/templates/confirm-account-deletion.png" width="340" alt="The confirmAccountDeletion email in English, subject “Confirm account deletion”">
+
 Send it when a user asks to delete their account, and delete the account only once the link is opened.
 
 | Prop               | Type     | Required | Description                                                                         |
@@ -244,6 +270,8 @@ Send it when a user asks to delete their account, and delete the account only on
 | `expiresInMinutes` | `number` | no       | How long the link works, in minutes. Without it, the email does not mention expiry. |
 
 ## `accountDeleted`
+
+<img src="images/templates/account-deleted.png" width="340" alt="The accountDeleted email in English, subject “Your account was deleted”">
 
 Send it once the account is deleted. Every prop is optional, so `props` can be left out.
 

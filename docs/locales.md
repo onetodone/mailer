@@ -1,5 +1,7 @@
 # Texts and locales
 
+![The verifyEmail email in English, German, Ukrainian and Japanese](images/locales.png)
+
 | Language             |   Code    |  Built-in  |
 | -------------------- | --------- |  :------:  |
 | Arabic               | `ar`      |    ❌     |

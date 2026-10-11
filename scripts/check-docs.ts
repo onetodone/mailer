@@ -14,11 +14,13 @@ interface Doc {
   path: string
   slugs: Set<string>
   links: { line: number; target: string }[]
+  images: { line: number; target: string; alt: string }[]
   blocks: CodeBlock[]
 }
 
 const root = join(import.meta.dirname, '..')
 const repoUrl = 'https://github.com/onetodone/mailer/blob/main/'
+const rawUrl = 'https://raw.githubusercontent.com/onetodone/mailer/main/'
 
 // Names the examples use without defining them, as if they followed the quick start.
 const globals = `declare const transport: import('@onetodone/mailer').MailTransport
@@ -83,7 +85,7 @@ function slugify(heading: string): string {
 }
 
 function parse(path: string, text: string): Doc {
-  const doc: Doc = { path, slugs: new Set(), links: [], blocks: [] }
+  const doc: Doc = { path, slugs: new Set(), links: [], images: [], blocks: [] }
   const headingCounts = new Map<string, number>()
   let fence: { indent: string; block: CodeBlock | undefined } | undefined
   for (const [index, line] of text.split('\n').entries()) {
@@ -106,8 +108,18 @@ function parse(path: string, text: string): Doc {
       headingCounts.set(slug, count + 1)
       doc.slugs.add(count === 0 ? slug : `${slug}-${String(count)}`)
     }
-    for (const [, target] of line.replace(/`[^`]*`/g, '').matchAll(/\]\(([^)\s]+)/g)) {
+    const prose = line.replace(/`[^`]*`/g, '')
+    for (const [, target] of prose.matchAll(/\]\(([^)\s]+)/g)) {
       if (target !== undefined) doc.links.push({ line: index + 1, target })
+    }
+    for (const [, alt = '', target] of prose.matchAll(/!\[([^\]]*)\]\(([^)\s]+)/g)) {
+      if (target !== undefined) doc.images.push({ line: index + 1, target, alt })
+    }
+    for (const [tag] of prose.matchAll(/<img\s[^>]*>/g)) {
+      const target = /\ssrc="([^"]+)"/.exec(tag)?.[1]
+      if (target === undefined) continue
+      doc.links.push({ line: index + 1, target })
+      doc.images.push({ line: index + 1, target, alt: /\salt="([^"]*)"/.exec(tag)?.[1] ?? '' })
     }
   }
   return doc
@@ -128,12 +140,23 @@ function splitHash(target: string): [string, string | undefined] {
   return hash === -1 ? [target, undefined] : [target.slice(0, hash), target.slice(hash + 1)]
 }
 
+// The repository path a link points to, or undefined for links outside the repository.
+function repoPath(doc: Doc, target: string): string | undefined {
+  if (/^[a-z][a-z\d+.-]*:/i.test(target)) {
+    const base = [repoUrl, rawUrl].find((url) => target.startsWith(url))
+    return base === undefined ? undefined : splitHash(target.slice(base.length))[0]
+  }
+  const [file] = splitHash(target)
+  return file === '' ? doc.path : posix.join(posix.dirname(doc.path), file)
+}
+
 async function checkLink(doc: Doc, target: string): Promise<string | undefined> {
   let path: string
   let anchor: string | undefined
   if (/^[a-z][a-z\d+.-]*:/i.test(target)) {
-    if (!target.startsWith(repoUrl)) return undefined
-    ;[path, anchor] = splitHash(target.slice(repoUrl.length))
+    const base = [repoUrl, rawUrl].find((url) => target.startsWith(url))
+    if (base === undefined) return undefined
+    ;[path, anchor] = splitHash(target.slice(base.length))
   } else {
     const [file, hash] = splitHash(target)
     // README.md is also the npm page, and docs/ is not in the package.
@@ -163,6 +186,20 @@ for (const doc of docs) {
     const problem = await checkLink(doc, target)
     if (problem !== undefined) errors.push(`${doc.path}:${String(line)}: ${problem}`)
   }
+}
+const referenced = new Set<string>()
+for (const doc of docs) {
+  for (const { line, target, alt } of doc.images) {
+    if (alt.trim() === '') errors.push(`${doc.path}:${String(line)}: ${target} has no alt text`)
+    const path = repoPath(doc, target)
+    if (path !== undefined) referenced.add(path)
+  }
+}
+const images = (await readdir(join(root, 'docs', 'images'), { recursive: true }).catch(() => []))
+  .map((file) => `docs/images/${file.split('\\').join('/')}`)
+  .filter((path) => /\.(?:png|jpe?g|gif|svg|webp)$/i.test(path))
+for (const image of images.sort()) {
+  if (!referenced.has(image)) errors.push(`${image}: not used in README.md or docs/`)
 }
 const readmeLinks = new Set((await load('README.md')).links.map(({ target }) => target))
 for (const page of pages) {
@@ -250,6 +287,6 @@ if (errors.length > 0) {
   const links = docs.reduce((sum, doc) => sum + doc.links.length, 0)
   const blocks = docs.reduce((sum, doc) => sum + doc.blocks.length, 0)
   console.log(
-    `Checked ${String(docs.length)} files: ${String(links)} links and ${String(blocks)} TypeScript blocks are fine.`,
+    `Checked ${String(docs.length)} files: ${String(links)} links, ${String(images.length)} images and ${String(blocks)} TypeScript blocks are fine.`,
   )
 }

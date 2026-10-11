@@ -2,6 +2,10 @@
 
 `@onetodone/mailer` sends transactional emails from Node.js applications. Configure your branding once (logo, company name, colors, footer) and send any email with a single typed call. The package ships with ready-made templates for common account flows. Every email renders to table-based HTML that holds up across major email clients and comes with a plain-text version. Texts are localizable, built-in templates can be restyled, reworded or replaced, and your own templates get the same typed API.
 
+![Three emails sent with @onetodone/mailer: email verification, a one-time code and a new sign-in notice](https://raw.githubusercontent.com/onetodone/mailer/main/docs/images/hero.png)
+
+Screenshots of every email are in [Built-in templates](https://github.com/onetodone/mailer/blob/main/docs/templates.md).
+
 ## Features
 
 - Built-in templates for email verification, welcome emails, one-time codes, sign-in links, password reset, email address changes, security notices and account deletion.

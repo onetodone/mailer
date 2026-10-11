@@ -11,6 +11,8 @@ The examples below reuse `transport`, `from` and `branding` from the [quick star
 
 ## 1. Branding and theme
 
+![The resetPassword email twice: with the default theme and the company name in the header, and with a logo, a custom primary color and footer text](images/branding.png)
+
 ```ts
 import type { Branding } from '@onetodone/mailer'
 
@@ -106,6 +108,8 @@ A layout receives:
 It returns the full `html` document, built with the `html` tag, and the full plain-text version as `text`. The `html` tag escapes every interpolated value and inserts `content.html` as markup.
 
 ## 4. Templates
+
+<img src="images/custom-template.png" width="340" alt="A custom template with a heading, an image from an https: URL, an inline QR code image shown through cid:, and a note about an attached PDF">
 
 Create a template with `defineTemplate` and register it under `templates`. The template's `name` must match its key:
 
