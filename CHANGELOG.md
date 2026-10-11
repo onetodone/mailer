@@ -1,5 +1,58 @@
 # @onetodone/mailer
 
+## 0.3.0
+
+### Minor Changes
+
+- 5b43735: Give layouts the text direction of the email as `LayoutContext.dir`.
+  
+  - `dir` is `'rtl'` for languages written right to left, such as Arabic and Hebrew, and `'ltr'` otherwise. Set it as the `dir` attribute of your layout's markup.
+  - `dir` is required, so code that builds a `LayoutContext` by hand, such as a unit test of a custom layout, needs it too. Layouts passed to `createMailer` need no change.
+  - Migration: add `dir` where you build a `LayoutContext` yourself, for example `defaultLayout({ ...context, dir: 'ltr' })` or `{ branding, theme, locale: 'en', dir: 'ltr', subject, preheader, content, messages }`.
+- f9a5407: Remove the `UiMessages` type from the public exports.
+  
+  - No exported function or type uses it, so it described nothing users can pass or receive.
+  - Migration: if you import `UiMessages`, replace it with `{ readonly linkFallback: string }`.
+- f9a5407: Rename the `ctaUrl` prop of the `welcome` template to `startUrl`.
+  
+  - `WelcomeProps` has `startUrl` instead of `ctaUrl`: an absolute `http:` or `https:` link behind the "Get started" button, `branding.appUrl` by default. The name follows the other link props, which are named after their action (`verifyUrl`, `resetUrl`, `signInUrl`).
+  - `send` and `render` reject `ctaUrl` with `INVALID_PROPS`.
+  - Migration: replace `props: { ctaUrl }` with `props: { startUrl }` in `mailer.send('welcome', …)` and `mailer.render('welcome', …)`.
+
+### Patch Changes
+
+- f9a5407: Remove the unused `zod` import from the type declarations.
+  
+  - Type checking a project that uses the package does not load zod's declarations through it. zod stays a runtime dependency.
+  - No exported type changes.
+- f9a5407: Document the semver policy of the `MailerErrorCode` type: codes can be added in a minor release.
+  
+  - A `switch` over `error.code` needs a `default` branch. Existing codes keep their meaning.
+- f9a5407: Make `instanceof MailerError` work across the ESM and CommonJS builds.
+  
+  - When an app loads both builds, for example an ESM app with a CommonJS dependency that also uses the package, `error instanceof MailerError` holds for errors from either build.
+  - `instanceof` against your own subclass of `MailerError` matches only instances of that subclass.
+- 33827e1: Add a Resend transport: `resendTransport` from `@onetodone/mailer/resend`.
+  
+  - `resendTransport({ apiKey, baseUrl?, fetch? })` sends through the Resend API with the built-in `fetch` and needs no extra package.
+  - Every field of the email is sent, including cc, bcc, reply-to, headers and attachments. Attachments with a `cid` go out as inline images.
+  - `send` resolves with the Resend email ID as `messageId`.
+  - A failed delivery rejects with `TRANSPORT_FAILED`, with the HTTP status in `status` and Resend's error response in `cause`. `retryable` is `true` for a rate limit or quota, a conflict, a server error or a network failure, and `false` for any other 4xx.
+  - Invalid settings throw `INVALID_CONFIG`; the API key never appears in the message.
+- 33827e1: Tell retryable delivery failures from rejected emails through `MailerError.retryable` and `MailerError.status`.
+  
+  - `retryable` is `true` when the same email may be delivered on a later attempt, `false` when another attempt fails the same way, and `undefined` when unknown.
+  - `status` holds the SMTP reply code or the HTTP status of the provider's API when the provider answered.
+  - `smtpTransport` sets them on `TRANSPORT_FAILED`: a 4xx reply, a lost connection or a timeout is retryable, a 5xx reply is not.
+  - Your own transport can set them by throwing `new MailerError('TRANSPORT_FAILED', message, { cause, retryable, status })`; the `MailerErrorOptions` type describes the options.
+  - The meaning of `TRANSPORT_FAILED` is unchanged, and errors your transport throws without these fields keep them `undefined`.
+- 5b43735: Render emails in right-to-left languages, such as Arabic and Hebrew, right to left.
+  
+  - The direction follows the email's locale. For a right-to-left locale the built-in layout sets `dir="rtl"` and aligns the content to the right, and Outlook on Windows aligns buttons, codes and images to the right too.
+  - Codes from `ui.code` and the link from `ui.linkFallback` stay left to right inside right-to-left text, so `123 456` keeps its order.
+  - Templates receive the direction as `dir` (`'ltr'` or `'rtl'`) next to `locale`, for markup of their own.
+  - Emails in left-to-right languages render exactly as before.
+
 ## 0.2.6
 
 ### Patch Changes
