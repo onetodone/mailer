@@ -1,6 +1,6 @@
 # Transports
 
-A transport delivers the rendered emails. The package ships three, and you can [write your own](#your-own-transport).
+A transport delivers the rendered emails. The package ships four, and you can [write your own](#your-own-transport).
 
 ## SMTP
 
@@ -52,7 +52,38 @@ const transport = smtpTransport(
 
 Attachments with a `cid` go out as inline images next to the HTML, the others as regular attachments.
 
-A failed delivery rejects with `TRANSPORT_FAILED`, with nodemailer's error as `cause`. When the server accepts some recipients and rejects others, `send` resolves and lists them in `accepted` and `rejected`. `mailer.close()` closes the connections, including those of a transporter you passed in.
+A failed delivery rejects with `TRANSPORT_FAILED`, with nodemailer's error as `cause`. When the server replied, `status` holds the SMTP reply code. `retryable` is `true` for a 4xx reply or a lost connection or timeout, and `false` for a 5xx reply (see [retries](errors.md#retries)). When the server accepts some recipients and rejects others, `send` resolves and lists them in `accepted` and `rejected`. `mailer.close()` closes the connections, including those of a transporter you passed in.
+
+## Resend
+
+`resendTransport` sends through the [Resend](https://resend.com) API with the built-in `fetch`, so it needs no other package:
+
+```ts
+import { resendTransport } from '@onetodone/mailer/resend'
+
+const transport = resendTransport({ apiKey: process.env.RESEND_API_KEY! })
+```
+
+| Option    | Description                                                                                       |
+| --------- | ------------------------------------------------------------------------------------------------- |
+| `apiKey`  | Required. Resend API key.                                                                         |
+| `baseUrl` | Base URL of the Resend API. Default `https://api.resend.com`.                                     |
+| `fetch`   | Function that makes the HTTP request. Default: the global `fetch`. Use it for a timeout or proxy. |
+
+The `from` address must be on a domain verified in Resend. Attachments with a `cid` go out as inline images, the others as regular attachments. The result's `messageId` is the Resend email ID, which the Resend dashboard and webhooks use. The transport holds no connections, so `mailer.close()` has nothing to close.
+
+A failed delivery rejects with `TRANSPORT_FAILED`. When Resend answered, `status` holds the HTTP status, and `cause` holds Resend's error response, such as `{ statusCode: 429, name: 'rate_limit_exceeded', message: '…' }`. `retryable` is `true` for a rate limit or quota (429), a conflict (409), a server error (5xx) or a network failure, and `false` for any other 4xx, such as an invalid API key or an unverified domain (see [retries](errors.md#retries)).
+
+To give up on a slow request, pass a `fetch` with a timeout. A request that times out may still have been delivered, so a retry can send the email twice:
+
+```ts
+import { resendTransport } from '@onetodone/mailer/resend'
+
+const transport = resendTransport({
+  apiKey: process.env.RESEND_API_KEY!,
+  fetch: (url, init) => fetch(url, { ...init, signal: AbortSignal.timeout(10_000) }),
+})
+```
 
 ## Console
 
@@ -99,6 +130,6 @@ const apiTransport: MailTransport = {
 }
 ```
 
-`message` has `from`, `to`, `cc`, `bcc`, `replyTo`, `subject`, `html`, `text`, `headers` and `attachments`. Addresses keep the form the caller used: a string or a `{ name, address }` object, one or a list. Errors that are not a `MailerError` are wrapped in `TRANSPORT_FAILED`, with the original error as `cause`. Add an optional `close()` method if the transport holds connections.
+`message` has `from`, `to`, `cc`, `bcc`, `replyTo`, `subject`, `html`, `text`, `headers` and `attachments`. Addresses keep the form the caller used: a string or a `{ name, address }` object, one or a list. Errors that are not a `MailerError` are wrapped in `TRANSPORT_FAILED`, with the original error as `cause`. To tell queue workers whether another attempt can help, throw a `MailerError` with `retryable` and `status` instead (see [retries](errors.md#retries)). Add an optional `close()` method if the transport holds connections; stateless transports, such as those for HTTP APIs, leave it out.
 
 Each attachment has `filename`, `content` (a `Uint8Array` or a string to send as UTF-8), `contentType`, which is always set, and `cid` on inline images only. A transport must deliver every attachment or throw, never drop one silently. Send attachments with a `cid` inline under that Content-ID, and the others as regular attachments.

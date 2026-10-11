@@ -11,6 +11,7 @@
     "password-reset",
     "smtp",
     "nodemailer",
+    "resend",
     "i18n",
     "typescript",
     "otp",
@@ -57,6 +58,16 @@
         "types": "./dist/smtp/index.d.cts",
         "default": "./dist/smtp/index.cjs"
       }
+    },
+    "./resend": {
+      "import": {
+        "types": "./dist/resend/index.d.mts",
+        "default": "./dist/resend/index.mjs"
+      },
+      "require": {
+        "types": "./dist/resend/index.d.cts",
+        "default": "./dist/resend/index.cjs"
+      }
     }
   },
   "main": "./dist/index.cjs",
@@ -66,6 +77,9 @@
     "*": {
       "smtp": [
         "./dist/smtp/index.d.cts"
+      ],
+      "resend": [
+        "./dist/resend/index.d.cts"
       ]
     }
   },
