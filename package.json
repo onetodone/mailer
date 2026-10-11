@@ -12,7 +12,14 @@
     "smtp",
     "nodemailer",
     "i18n",
-    "typescript"
+    "typescript",
+    "otp",
+    "magic-link",
+    "html-email",
+    "email-template",
+    "better-auth",
+    "authjs",
+    "nextjs"
   ],
   "homepage": "https://github.com/onetodone/mailer#readme",
   "bugs": {

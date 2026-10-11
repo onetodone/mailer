@@ -1,10 +1,23 @@
 # Mailer from OneToDone
 
+[![npm version](https://img.shields.io/npm/v/@onetodone/mailer)](https://www.npmjs.com/package/@onetodone/mailer)
+[![npm downloads](https://img.shields.io/npm/dm/@onetodone/mailer)](https://www.npmjs.com/package/@onetodone/mailer)
+[![CI](https://github.com/onetodone/mailer/actions/workflows/ci.yml/badge.svg)](https://github.com/onetodone/mailer/actions/workflows/ci.yml)
+[![types included](https://img.shields.io/npm/types/@onetodone/mailer)](https://www.npmjs.com/package/@onetodone/mailer)
+[![license](https://img.shields.io/npm/l/@onetodone/mailer)](LICENSE)
+
 `@onetodone/mailer` sends transactional emails from Node.js applications. Configure your branding once (logo, company name, colors, footer) and send any email with a single typed call. The package ships with ready-made templates for common account flows. Every email renders to table-based HTML that holds up across major email clients and comes with a plain-text version. Texts are localizable, built-in templates can be restyled, reworded or replaced, and your own templates get the same typed API.
 
 ![Three emails sent with @onetodone/mailer: email verification, a one-time code and a new sign-in notice](https://raw.githubusercontent.com/onetodone/mailer/main/docs/images/hero.png)
 
-Screenshots of every email are in [Built-in templates](https://github.com/onetodone/mailer/blob/main/docs/templates.md).
+Screenshots of every email are in [Built-in templates](https://github.com/onetodone/mailer/blob/main/docs/templates.md). The [live preview](https://onetodone.github.io/mailer/) shows every email in every built-in language.
+
+## Why `@onetodone/mailer`
+
+- **The emails, not just the tools to build them.** Libraries such as React Email and MJML help you write email markup. This package ships the account emails themselves, already written, laid out and tested in major email clients.
+- **Ready for users in other languages.** Built-in texts come in many languages, with plural forms and dates formatted per locale.
+- **Yours to change.** Brand it from config, reword any text, or replace the layout and any template, all through the same typed API.
+- **Fits your stack.** Send over SMTP or your own transport, with [recipes](https://github.com/onetodone/mailer/blob/main/docs/recipes.md) for Better Auth, Auth.js, Express, Fastify, Next.js, NestJS and BullMQ.
 
 ## Features
 
