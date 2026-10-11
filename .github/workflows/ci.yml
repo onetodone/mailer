@@ -54,6 +54,51 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm check:docs
 
+  runtimes:
+    name: ${{ matrix.runtime == 'bun' && 'Bun' || 'Deno' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime: [bun, deno]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - if: matrix.runtime == 'bun'
+        uses: oven-sh/setup-bun@v2
+
+      - if: matrix.runtime == 'deno'
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+
+      - name: Main and Resend entries import no Node built-ins
+        run: "! grep -rlE '(from |require\\()\"node:' dist --include='*js' --exclude-dir=smtp"
+
+      - name: Install the tarball in an empty project
+        run: |
+          pnpm pack --pack-destination "$RUNNER_TEMP"
+          mkdir "$RUNNER_TEMP/smoke"
+          cd "$RUNNER_TEMP/smoke"
+          npm init -y > /dev/null
+          npm pkg set type=module
+          npm install "$RUNNER_TEMP"/onetodone-mailer-*.tgz
+          cp "$GITHUB_WORKSPACE/scripts/runtime-smoke.ts" .
+
+      - name: Smoke test
+        working-directory: ${{ runner.temp }}/smoke
+        run: ${{ matrix.runtime == 'bun' && 'bun' || 'deno run' }} runtime-smoke.ts
+
   nodemailer-min:
     name: nodemailer ${{ matrix.nodemailer }}, Node ${{ matrix.node }}
     runs-on: ubuntu-latest
