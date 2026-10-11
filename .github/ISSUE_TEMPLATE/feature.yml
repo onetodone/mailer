@@ -1,0 +1,22 @@
+name: Feature request
+description: A template, option, transport or integration you need.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you are trying to do
+      description: The email or the situation, and what is missing today.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you propose
+      description: How the API could look, for example a call to `mailer.send` or a new option.
+      render: ts
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Current workaround
+      description: How you handle it now, if at all.
