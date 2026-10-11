@@ -69,9 +69,9 @@ The built-in layout centers the email in a 600px card. The logo or company name 
 ```ts
 import { createMailer, defineLayout, html } from '@onetodone/mailer'
 
-const layout = defineLayout(({ branding, theme, locale, subject, preheader, content, messages }) => ({
+const layout = defineLayout(({ branding, theme, locale, dir, subject, preheader, content, messages }) => ({
   html: html`<!DOCTYPE html>
-<html lang="${locale}">
+<html lang="${locale}" dir="${dir}">
 <head><meta charset="utf-8"><title>${subject}</title></head>
 <body style="margin:0;background-color:${theme.background};">
 <div style="display:none;">${preheader}</div>
@@ -100,6 +100,7 @@ A layout receives:
 | `branding`  | Validated branding with defaults applied.                                   |
 | `theme`     | Theme tokens with defaults applied, the same object as `branding.theme`.    |
 | `locale`    | Locale of the email, for the `lang` attribute.                              |
+| `dir`       | Text direction of the locale, `'ltr'` or `'rtl'`, for the `dir` attribute.  |
 | `subject`   | Subject of the email, for the document title.                               |
 | `preheader` | Inbox preview text. Empty when the template has none.                       |
 | `content`   | The rendered body: `content.html` (markup) and `content.text` (plain text). |
@@ -175,6 +176,7 @@ await mailer.send('orderShipped', {
 | `t.html`   | The same texts as markup: the text and plain values are escaped, and `html` values are inserted as markup. |
 | `format`   | `format.duration(minutes)` and `format.dateTime(date, timeZone?)` for the email's locale.                  |
 | `locale`   | Locale of the email.                                                                                       |
+| `dir`      | Text direction of the locale, `'ltr'` or `'rtl'`. The `ui` blocks follow it already.                       |
 | `branding` | Validated branding with defaults applied.                                                                  |
 | `theme`    | Theme tokens with defaults applied.                                                                        |
 
