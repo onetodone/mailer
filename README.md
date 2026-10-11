@@ -35,6 +35,7 @@ Screenshots of every email are in [Built-in templates](https://github.com/onetod
 
 - Node.js 22 or later.
 - ESM or CommonJS. Type declarations are included and need TypeScript 5.4 or later.
+- Every built-in language ships in the main entry, so `locale: '<code>'` needs no setup. The entry is about 250 kB of JavaScript (47 kB gzipped); each language adds about 2 kB gzipped.
 - [nodemailer](https://nodemailer.com) 6 or later, only for SMTP delivery through `@onetodone/mailer/smtp`. Delivery through Resend with `@onetodone/mailer/resend` needs no extra package.
 
 ## Install
