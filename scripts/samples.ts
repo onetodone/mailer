@@ -48,6 +48,15 @@ export const branding: Branding = {
   footerText: 'You received this email because you signed up for OneToDone.',
 }
 
+// The OneToDone logo. Without LOGO_URL, the preview and the screenshots render with its public URL
+// and then swap it for the local file, so they work offline and before the file reaches main.
+export const brandLogo = {
+  url: 'https://raw.githubusercontent.com/onetodone/mailer/main/scripts/assets/logo.png',
+  file: join(import.meta.dirname, 'assets', 'logo.png'),
+  width: 123,
+  height: 32,
+} as const
+
 export const from: MailAddress = { name: 'OneToDone', address: 'hello@onetodone.com' }
 
 // A record keyed by Locale makes a locale missing from this list a type error.
