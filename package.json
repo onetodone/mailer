@@ -85,7 +85,8 @@
     "check:package": "pnpm build && publint && attw --pack .",
     "check:docs": "pnpm build && node scripts/check-docs.ts",
     "preview": "pnpm build && node --env-file-if-exists=.env scripts/preview.ts",
-    "send:test": "pnpm build && node --env-file-if-exists=.env scripts/send-test.ts"
+    "send:test": "pnpm build && node --env-file-if-exists=.env scripts/send-test.ts",
+    "screenshots": "pnpm build && node scripts/screenshots.ts"
   },
   "dependencies": {
     "zod": "^4.6.5"
@@ -105,13 +106,14 @@
     "@types/node": "^22",
     "eslint": "^9",
     "eslint-config-prettier": "^10.1.8",
-    "nodemailer": "^10.0.11",
-    "prettier": "^3.9.9",
-    "publint": "^0.3.24",
-    "tsdown": "^0.23.0",
+    "nodemailer": "^10.1.0",
+    "playwright": "^1.64.0",
+    "prettier": "^3.9.10",
+    "publint": "^0.3.25",
+    "tsdown": "^0.23.1",
     "typescript": "~6",
-    "typescript-eslint": "^8.70.1",
-    "vitest": "^5.0.2"
+    "typescript-eslint": "^8.71.1",
+    "vitest": "^5.0.3"
   },
   "publishConfig": {
     "access": "public",

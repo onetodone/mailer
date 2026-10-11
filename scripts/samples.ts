@@ -1,3 +1,6 @@
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
+
 import {
   createMailer,
   defineTemplate,
@@ -25,8 +28,6 @@ import {
 } from '@onetodone/mailer'
 import { z } from 'zod'
 
-import { qrLikePng, samplePdf } from './sample-files.ts'
-
 export function env(name: string): string | undefined {
   const value = process.env[name]
   return value === '' ? undefined : value
@@ -38,16 +39,16 @@ function numberEnv(name: string): number | undefined {
 }
 
 export const branding: Branding = {
-  companyName: 'MyApp',
-  appUrl: 'https://example.com',
-  supportEmail: 'support@example.com',
+  companyName: 'OneToDone',
+  appUrl: 'https://github.com/onetodone',
+  supportEmail: 'hello@onetodone.com',
   logoUrl: env('LOGO_URL'),
   logoWidth: numberEnv('LOGO_WIDTH'),
   logoHeight: numberEnv('LOGO_HEIGHT'),
-  footerText: 'You received this email because you signed up for MyApp.',
+  footerText: 'You received this email because you signed up for OneToDone.',
 }
 
-export const from: MailAddress = { name: 'MyApp', address: 'no-reply@example.com' }
+export const from: MailAddress = { name: 'OneToDone', address: 'hello@onetodone.com' }
 
 // A record keyed by Locale makes a locale missing from this list a type error.
 const builtInLocales = Object.keys({
@@ -110,14 +111,14 @@ const media = defineTemplate({
       ui.paragraph(t('media.remote')),
       ui.image(props.imageUrl, { alt: 'Sample banner', width: 534, height: 200 }),
       ui.paragraph(t('media.inline')),
-      ui.image('cid:sample-qr', { alt: 'Sample QR code', width: 198, height: 198 }),
+      ui.image('cid:sample-qr', { alt: 'Sample QR code', width: 192, height: 192 }),
       ui.note(t('media.attached')),
     ],
   }),
 })
 
-export function createSampleMailer(transport: MailTransport, sender: MailAddress = from) {
-  return createMailer({ transport, from: sender, branding, templates: { media } })
+export function createSampleMailer(transport: MailTransport, sender: MailAddress = from, brand: Branding = branding) {
+  return createMailer({ transport, from: sender, branding: brand, templates: { media } })
 }
 
 interface PropsByTemplate {
@@ -155,12 +156,12 @@ export const samples: readonly Sample[] = [
   {
     slug: 'verify-email',
     template: 'verifyEmail',
-    props: { userName: 'Lizzie', verifyUrl: 'https://example.com/verify?token=preview', expiresInMinutes: 2880 },
+    props: { userName: 'Lizzie', verifyUrl: 'http://fake-url.loc/verify?token=preview', expiresInMinutes: 2880 },
   },
   {
     slug: 'reset-password',
     template: 'resetPassword',
-    props: { userName: 'Lizzie', resetUrl: 'https://example.com/reset?token=preview', expiresInMinutes: 30 },
+    props: { userName: 'Lizzie', resetUrl: 'http://fake-url.loc/reset?token=preview', expiresInMinutes: 30 },
   },
   {
     slug: 'password-changed',
@@ -169,15 +170,19 @@ export const samples: readonly Sample[] = [
       userName: 'Lizzie',
       changedAt: new Date(),
       timeZone: 'Europe/Minsk',
-      ip: '203.0.113.42',
-      supportUrl: 'https://example.com/support',
+      ip: '0.0.0.0',
+      supportUrl: 'http://fake-url.loc/support',
     },
   },
   { slug: 'password-changed-minimal', template: 'passwordChanged', props: {} },
   {
     slug: 'verify-email-change',
     template: 'verifyEmailChange',
-    props: { userName: 'Lizzie', verifyUrl: 'https://example.com/email/verify?token=preview', expiresInMinutes: 1440 },
+    props: {
+      userName: 'Lizzie',
+      verifyUrl: 'http://fake-url.loc/email/verify?token=preview',
+      expiresInMinutes: 1440,
+    },
   },
   {
     slug: 'email-change-requested',
@@ -187,8 +192,8 @@ export const samples: readonly Sample[] = [
       newEmail: 'lizzie.new@example.com',
       requestedAt: new Date(),
       timeZone: 'Europe/Minsk',
-      ip: '203.0.113.42',
-      cancelUrl: 'https://example.com/email/cancel?token=preview',
+      ip: '0.0.0.0',
+      cancelUrl: 'http://fake-url.loc/email/cancel?token=preview',
     },
   },
   {
@@ -204,8 +209,8 @@ export const samples: readonly Sample[] = [
       newEmail: 'lizzie.new@example.com',
       changedAt: new Date(),
       timeZone: 'Europe/Minsk',
-      ip: '203.0.113.42',
-      supportUrl: 'https://example.com/support',
+      ip: '0.0.0.0',
+      supportUrl: 'http://fake-url.loc/support',
     },
   },
   { slug: 'email-changed-minimal', template: 'emailChanged', props: {} },
@@ -217,12 +222,12 @@ export const samples: readonly Sample[] = [
   {
     slug: 'magic-link',
     template: 'magicLink',
-    props: { userName: 'Lizzie', signInUrl: 'https://example.com/sign-in?token=preview', expiresInMinutes: 15 },
+    props: { userName: 'Lizzie', signInUrl: 'http://fake-url.loc/sign-in?token=preview', expiresInMinutes: 15 },
   },
   {
     slug: 'welcome',
     template: 'welcome',
-    props: { userName: 'Lizzie', ctaUrl: 'https://example.com/get-started' },
+    props: { userName: 'Lizzie', ctaUrl: 'http://fake-url.loc/get-started' },
   },
   { slug: 'welcome-minimal', template: 'welcome', props: {} },
   {
@@ -232,10 +237,10 @@ export const samples: readonly Sample[] = [
       userName: 'Lizzie',
       signedInAt: new Date(),
       timeZone: 'Europe/Minsk',
-      ip: '203.0.113.42',
+      ip: '0.0.0.0',
       device: 'Chrome on macOS',
       location: 'Minsk, Belarus',
-      secureUrl: 'https://example.com/security?token=preview',
+      secureUrl: 'http://fake-url.loc/security?token=preview',
     },
   },
   { slug: 'new-sign-in-minimal', template: 'newSignIn', props: {} },
@@ -246,14 +251,14 @@ export const samples: readonly Sample[] = [
       userName: 'Lizzie',
       changedAt: new Date(),
       timeZone: 'Europe/Minsk',
-      ip: '203.0.113.42',
-      supportUrl: 'https://example.com/support',
+      ip: '0.0.0.0',
+      supportUrl: 'http://fake-url.loc/support',
     },
   },
   {
     slug: 'two-factor-disabled',
     template: 'twoFactorDisabled',
-    props: { userName: 'Lizzie', changedAt: new Date(), timeZone: 'Europe/Minsk', ip: '203.0.113.42' },
+    props: { userName: 'Lizzie', changedAt: new Date(), timeZone: 'Europe/Minsk', ip: '0.0.0.0' },
   },
   {
     slug: 'account-locked',
@@ -262,29 +267,40 @@ export const samples: readonly Sample[] = [
       userName: 'Lizzie',
       lockedUntil: new Date(Date.now() + 30 * 60_000),
       timeZone: 'Europe/Minsk',
-      ip: '203.0.113.42',
-      unlockUrl: 'https://example.com/unlock?token=preview',
+      ip: '0.0.0.0',
+      unlockUrl: 'http://fake-url.loc/unlock?token=preview',
     },
   },
   { slug: 'account-locked-minimal', template: 'accountLocked', props: {} },
   {
     slug: 'confirm-account-deletion',
     template: 'confirmAccountDeletion',
-    props: { userName: 'Lizzie', confirmUrl: 'https://example.com/account/delete?token=preview', expiresInMinutes: 60 },
+    props: {
+      userName: 'Lizzie',
+      confirmUrl: 'http://fake-url.loc/account/delete?token=preview',
+      expiresInMinutes: 60,
+    },
   },
   {
     slug: 'account-deleted',
     template: 'accountDeleted',
-    props: { userName: 'Lizzie', supportUrl: 'https://example.com/support' },
+    props: { userName: 'Lizzie', supportUrl: 'http://fake-url.loc/support' },
   },
   { slug: 'account-deleted-minimal', template: 'accountDeleted', props: {} },
   {
     slug: 'media',
     template: 'media',
-    props: { imageUrl: env('IMAGE_URL') ?? 'https://placehold.co/1068x400/png?text=MyApp' },
+    props: { imageUrl: env('IMAGE_URL') ?? 'https://placehold.co/1068x400/png?text=Inline%20Image' },
     attachments: [
-      { filename: 'qr.png', content: qrLikePng(), cid: 'sample-qr' },
-      { filename: 'Рахунак 1042.pdf', content: samplePdf('MyApp sample invoice 1042') },
+      {
+        filename: 'qrcode.jpg',
+        content: await readFile(join(import.meta.dirname, 'assets', 'qrcode.jpg')),
+        cid: 'sample-qr',
+      },
+      {
+        filename: 'sample.pdf',
+        content: await readFile(join(import.meta.dirname, 'assets', 'sample.pdf')),
+      },
     ],
   },
 ]
