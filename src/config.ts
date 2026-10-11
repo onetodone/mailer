@@ -106,13 +106,15 @@ export interface MailerConfig<
    * Called after the transport accepted an email. `send` waits for it, but
    * its outcome never depends on the hook: when the hook throws or rejects,
    * `send` still resolves, and the failure is reported with
-   * `process.emitWarning` as a `MailerWarning`.
+   * `process.emitWarning` as a `MailerWarning`, or with `console.warn` on
+   * runtimes without it.
    */
   readonly onSent?: ((event: MailSentEvent) => unknown) | undefined
   /**
    * Called when `send` fails, before it rejects. `send` waits for it and
    * always rejects with the original error: when the hook throws or rejects,
-   * the failure is reported with `process.emitWarning` as a `MailerWarning`.
+   * the failure is reported with `process.emitWarning` as a `MailerWarning`,
+   * or with `console.warn` on runtimes without it.
    */
   readonly onError?: ((event: MailErrorEvent) => unknown) | undefined
 }

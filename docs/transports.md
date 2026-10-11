@@ -56,7 +56,7 @@ A failed delivery rejects with `TRANSPORT_FAILED`, with nodemailer's error as `c
 
 ## Resend
 
-`resendTransport` sends through the [Resend](https://resend.com) API with the built-in `fetch`, so it needs no other package:
+`resendTransport` sends through the [Resend](https://resend.com) API with the built-in `fetch`, so it needs no other package and also runs on Bun, Deno and edge runtimes:
 
 ```ts
 import { resendTransport } from '@onetodone/mailer/resend'

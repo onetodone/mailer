@@ -18,7 +18,7 @@ const mailer = createMailer({
 
 - `send` waits for the hooks, so async hooks finish before it settles.
 - A hook never changes the outcome of `send`. When `onSent` fails, `send` still resolves. When `onError` fails, `send` still rejects with the original error.
-- A failing hook is reported with `process.emitWarning` as a `MailerWarning`:
+- A failing hook is reported with `process.emitWarning` as a `MailerWarning`, or with `console.warn` on runtimes without `process.emitWarning`:
 
   ```ts
   process.on('warning', (warning) => {

@@ -326,6 +326,44 @@ describe('onError', () => {
   })
 })
 
+describe('hook failure reports on other runtimes', () => {
+  // A process object that lacks the given members, as on runtimes with partial Node compatibility.
+  function stubProcessWithout(...members: ('getBuiltinModule' | 'emitWarning')[]) {
+    const partial = Object.create(process) as Record<string, unknown>
+    for (const member of members) partial[member] = undefined
+    vi.stubGlobal('process', partial)
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('describes the error with its stack without node:util', async () => {
+    stubProcessWithout('getBuiltinModule')
+    const failure = new Error('hook broke')
+    const mailer = createMailer({ transport: memoryTransport(), from, branding, onSent: () => Promise.reject(failure) })
+
+    await mailer.send('passwordChanged', { to })
+
+    expect(emitWarning).toHaveBeenCalledWith(expect.any(String), { type: 'MailerWarning', detail: failure.stack })
+  })
+
+  it('falls back to console.warn without process.emitWarning', async () => {
+    stubProcessWithout('emitWarning')
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const failure = new Error('hook broke')
+    const mailer = createMailer({ transport: memoryTransport(), from, branding, onSent: () => Promise.reject(failure) })
+
+    await mailer.send('passwordChanged', { to })
+
+    expect(warn).toHaveBeenCalledOnce()
+    expect(warn).toHaveBeenCalledWith(
+      'MailerWarning: The onSent hook failed. The email was sent and send() resolves as usual.',
+      failure,
+    )
+  })
+})
+
 describe('hook types', () => {
   it('types the events', () => {
     createMailer({
