@@ -17,6 +17,7 @@ import { pl } from './pl'
 import { ro } from './ro'
 import { th } from './th'
 import { uk } from './uk'
+import { zh } from './zh'
 
 /**
  * Forms of one message for each `Intl.PluralRules` category of the locale.
@@ -439,6 +440,7 @@ export const dictionaries = {
   ro,
   th,
   uk,
+  zh,
 } satisfies MessageSource
 
 /**

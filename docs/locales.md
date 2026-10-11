@@ -8,7 +8,7 @@
 | Belarusian           | `be`      |    ✅     |
 | Belarusian (Latin)   | `be-Latn` |    ✅     |
 | Bulgarian            | `bg`      |    ❌     |
-| Chinese (Simplified) | `zh`      |    ❌     |
+| Chinese (Simplified) | `zh`      |    ✅     |
 | Croatian             | `hr`      |    ❌     |
 | Czech                | `cs`      |    ✅     |
 | Danish               | `da`      |    ❌     |

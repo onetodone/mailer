@@ -77,6 +77,7 @@ const builtInLocales = Object.keys({
   ro: true,
   th: true,
   uk: true,
+  zh: true,
 } satisfies Record<Locale, true>) as Locale[]
 
 function selectLocales(setting: string | undefined): Locale[] {
