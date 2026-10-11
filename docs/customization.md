@@ -107,6 +107,24 @@ A layout receives:
 
 It returns the full `html` document, built with the `html` tag, and the full plain-text version as `text`. The `html` tag escapes every interpolated value and inserts `content.html` as markup.
 
+To keep the built-in layout and change only what it receives, call `defaultLayout` from your layout. This one marks every email from a test environment:
+
+```ts
+import { createMailer, defaultLayout, defineLayout, html } from '@onetodone/mailer'
+
+const layout = defineLayout((context) =>
+  defaultLayout({
+    ...context,
+    content: {
+      html: html`<p style="margin:0 0 16px;font-weight:bold;">Test environment</p>${context.content.html}`,
+      text: `[Test environment]\n\n${context.content.text}`,
+    },
+  }),
+)
+
+const mailer = createMailer({ transport, from, branding, layout })
+```
+
 ## 4. Templates
 
 <img src="images/custom-template.png" width="340" alt="A custom template with a heading, an image from an https: URL, an inline QR code image shown through cid:, and a note about an attached PDF">
