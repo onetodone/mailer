@@ -117,6 +117,67 @@ export const auth = betterAuth({
 - With `user.changeEmail.sendChangeEmailConfirmation`, Better Auth first asks the current address to approve the change. No built-in template has that wording; [add your own](customization.md#4-templates) for it.
 - Add a database adapter and any other Better Auth settings as usual. They do not affect the email callbacks.
 
+### Organizations
+
+The [organization plugin](https://www.better-auth.com/docs/plugins/organization) sends invitations through `sendInvitationEmail` and reports membership changes through `organizationHooks`:
+
+| Better Auth callback                      | Template            |
+| ----------------------------------------- | ------------------- |
+| `sendInvitationEmail`                     | `teamInvite`        |
+| `organizationHooks.afterUpdateMemberRole` | `memberRoleChanged` |
+| `organizationHooks.afterRemoveMember`     | `memberRemoved`     |
+| `organizationHooks.afterAcceptInvitation` | `inviteAccepted`    |
+
+Add the plugin to the same `betterAuth` call:
+
+```ts
+import { betterAuth } from 'better-auth'
+import { organization } from 'better-auth/plugins'
+import { mailer } from './mailer'
+
+// Better Auth takes lifetimes in seconds, the templates in minutes.
+const invitationExpiresIn = 60 * 60 * 24 * 7
+
+export const auth = betterAuth({
+  plugins: [
+    organization({
+      invitationExpiresIn,
+      sendInvitationEmail: async ({ id, email, role, organization, inviter }) => {
+        await mailer.send('teamInvite', {
+          to: email,
+          props: {
+            inviterName: inviter.user.name,
+            inviterEmail: inviter.user.email,
+            organizationName: organization.name,
+            role,
+            acceptUrl: `https://example.com/invitations/${id}`,
+            expiresInMinutes: invitationExpiresIn / 60,
+          },
+        })
+      },
+      organizationHooks: {
+        afterUpdateMemberRole: async ({ member, previousRole, user, organization }) => {
+          await mailer.send('memberRoleChanged', {
+            to: user.email,
+            props: { userName: user.name, organizationName: organization.name, role: member.role, previousRole },
+          })
+        },
+        afterRemoveMember: async ({ user, organization }) => {
+          await mailer.send('memberRemoved', {
+            to: user.email,
+            props: { userName: user.name, organizationName: organization.name },
+          })
+        },
+      },
+    }),
+  ],
+})
+```
+
+- Better Auth does not build the invitation link. Point `acceptUrl` at a page of your app that calls `acceptInvitation` with the invitation ID.
+- Roles go into the emails as Better Auth stores them, such as `admin` or `member`. Map them to display names in the recipient's language if you need to.
+- `afterAcceptInvitation` receives the new member, not the inviter. Load the inviter by `invitation.inviterId` and send them `inviteAccepted`.
+
 ## Auth.js
 
 [Auth.js](https://authjs.dev) (NextAuth.js 5) signs users in by email through a provider of type `email`. Its `sendVerificationRequest` maps to `magicLink`:

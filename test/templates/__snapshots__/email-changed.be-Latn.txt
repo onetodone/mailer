@@ -1,0 +1,30 @@
+Subject: Email zmienieny
+
+My App
+
+Email zmienieny
+
+Vitajem, Liza!
+
+Email vašaha akaŭnta ŭ My App byŭ zmienieny.
+
+Novy email: lizzie.new@example.com
+IP-adras: 203.0.113.7
+
+Ciapier listy pra vaš akaŭnt buduć prychodzić na novy adras.
+
+Kali heta byli vy, ničoha rabić nie treba.
+
+---
+
+Kali heta byli nie vy, adrazu zviarniciesia ŭ padtrymku.
+
+Zviarnucca ŭ padtrymku: https://myapp.loc/support
+
+Kali knopka nie pracuje, skapijujcie hetu spasyłku ŭ braŭzier:
+https://myapp.loc/support
+
+--
+You received this email because you have an account at My App.
+Jość pytanni? Pišycie nam: support@myapp.loc
+© 2026 My App. Usie pravy abaronieny.

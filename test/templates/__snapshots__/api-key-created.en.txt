@@ -1,0 +1,28 @@
+Subject: A new API key was created
+
+My App
+
+A new API key was created
+
+Hi Lizzie,
+
+A new API key was created for your My App account.
+
+Name: CI deploy
+IP address: 203.0.113.7
+
+If this was you, you don't need to do anything. Keep the key secret: anyone who has it can access your account.
+
+---
+
+If it wasn't you, revoke the key and secure your account right away.
+
+Manage API keys: https://myapp.loc/settings/api-keys
+
+If the button doesn't work, copy this link into your browser:
+https://myapp.loc/settings/api-keys
+
+--
+You received this email because you have an account at My App.
+Questions? Write to us at support@myapp.loc
+© 2026 My App. All rights reserved.

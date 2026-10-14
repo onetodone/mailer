@@ -1,0 +1,28 @@
+Subject: Stvorany novy API-kluč
+
+My App
+
+Stvorany novy API-kluč
+
+Vitajem, Liza!
+
+Dla vašaha akaŭnta ŭ My App stvorany novy API-kluč.
+
+Nazva: CI deploy
+IP-adras: 203.0.113.7
+
+Kali heta byli vy, ničoha rabić nie treba. Zachoŭvajcie kluč u sakrecie: z im luby moža atrymać dostup da vašaha akaŭnta.
+
+---
+
+Kali heta byli nie vy, adrazu adklikajcie kluč i abaranicie svoj akaŭnt.
+
+Kiravać API-klučami: https://myapp.loc/settings/api-keys
+
+Kali knopka nie pracuje, skapijujcie hetu spasyłku ŭ braŭzier:
+https://myapp.loc/settings/api-keys
+
+--
+You received this email because you have an account at My App.
+Jość pytanni? Pišycie nam: support@myapp.loc
+© 2026 My App. Usie pravy abaronieny.

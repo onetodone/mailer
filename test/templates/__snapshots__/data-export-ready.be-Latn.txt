@@ -1,0 +1,27 @@
+Subject: Kopija vašych danych hatovaja
+
+My App
+
+Kopija vašych danych hatovaja
+
+Vitajem, Liza!
+
+Kopija vašych danych z My App, jakuju vy zapytvali, hatovaja da spampoŭki.
+
+Spampavać danyja: https://myapp.loc/export?token=abc123
+
+Kali knopka nie pracuje, skapijujcie hetu spasyłku ŭ braŭzier:
+https://myapp.loc/export?token=abc123
+
+Spasyłka dziejničaje 7 dzion.
+
+Fajł zmiaščaje vašy asabistyja danyja. Nikomu nie pierasyłajcie hetu spasyłku.
+
+---
+
+Kali vy nie zapytvali kopiju svaich danych, adrazu napišycie nam na support@myapp.loc.
+
+--
+You received this email because you have an account at My App.
+Jość pytanni? Pišycie nam: support@myapp.loc
+© 2026 My App. Usie pravy abaronieny.

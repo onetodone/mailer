@@ -1,0 +1,23 @@
+Subject: Z akaŭnta vydaleny kluč dostupu
+
+My App
+
+Kluč dostupu vydaleny
+
+Vitajem, Liza!
+
+Z vašaha akaŭnta ŭ My App vydaleny kluč dostupu (passkey). Uvachodzić z jaho dapamohaj bolš nielha.
+
+Kluč dostupu: YubiKey 5
+IP-adras: 203.0.113.7
+
+Kali heta byli vy, ničoha rabić nie treba.
+
+---
+
+Kali heta byli nie vy, adrazu napišycie nam na support@myapp.loc.
+
+--
+You received this email because you have an account at My App.
+Jość pytanni? Pišycie nam: support@myapp.loc
+© 2026 My App. Usie pravy abaronieny.

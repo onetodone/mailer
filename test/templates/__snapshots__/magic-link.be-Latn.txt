@@ -1,0 +1,27 @@
+Subject: Spasyłka dla ŭvachodu
+
+My App
+
+Uvachod u My App
+
+Vitajem, Liza!
+
+Nacisnicie knopku, kab uvajści ŭ akaŭnt u My App.
+
+Uvajści: https://myapp.loc/sign-in?token=abc123
+
+Kali knopka nie pracuje, skapijujcie hetu spasyłku ŭ braŭzier:
+https://myapp.loc/sign-in?token=abc123
+
+---
+
+Spasyłka dziejničaje 15 chvilin.
+
+Nikomu nie pierasyłajcie hetu spasyłku: pa joj možna ŭvajści ŭ vaš akaŭnt.
+
+Kali vy nie sprabavali ŭvajści, prosta praihnarujcie hety list.
+
+--
+You received this email because you have an account at My App.
+Jość pytanni? Pišycie nam: support@myapp.loc
+© 2026 My App. Usie pravy abaronieny.

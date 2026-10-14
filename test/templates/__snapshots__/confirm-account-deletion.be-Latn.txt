@@ -1,0 +1,27 @@
+Subject: Pacvierdzicie vydalennie akaŭnta
+
+My App
+
+Pacvierdzicie vydalennie akaŭnta
+
+Vitajem, Liza!
+
+My atrymali zapyt na vydalennie vašaha akaŭnta ŭ My App. Nacisnicie knopku, kab pacvierdzić vydalennie.
+
+Pasla vydalennia akaŭnt i vašy danyja nielha budzie adnavić.
+
+Vydalić akaŭnt: https://myapp.loc/account/delete?token=abc123
+
+Kali knopka nie pracuje, skapijujcie hetu spasyłku ŭ braŭzier:
+https://myapp.loc/account/delete?token=abc123
+
+---
+
+Spasyłka dziejničaje 1 hadzinu.
+
+Kali vy hetaha nie prasili, prosta praihnarujcie hety list — akaŭnt nie budzie vydaleny.
+
+--
+You received this email because you have an account at My App.
+Jość pytanni? Pišycie nam: support@myapp.loc
+© 2026 My App. Usie pravy abaronieny.

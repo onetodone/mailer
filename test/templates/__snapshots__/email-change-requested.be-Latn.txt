@@ -1,0 +1,27 @@
+Subject: Zapyt na zmienu email
+
+My App
+
+Zapyt na zmienu email
+
+Vitajem, Liza!
+
+My atrymali zapyt zmianić email vašaha akaŭnta ŭ My App na lizzie.new@example.com.
+
+IP-adras: 203.0.113.7
+
+Kali heta byli vy, pacvierdzicie zmienu ŭ liście, jaki my dasłali na lizzie.new@example.com.
+
+---
+
+Kali heta byli nie vy, admianicie zmienu i zadajcie novy parol.
+
+Admianić zmienu: https://myapp.loc/email/cancel?token=abc123
+
+Kali knopka nie pracuje, skapijujcie hetu spasyłku ŭ braŭzier:
+https://myapp.loc/email/cancel?token=abc123
+
+--
+You received this email because you have an account at My App.
+Jość pytanni? Pišycie nam: support@myapp.loc
+© 2026 My App. Usie pravy abaronieny.

@@ -1,0 +1,19 @@
+Subject: Tom Lee accepted your invitation
+
+My App
+
+Your invitation was accepted
+
+Hi Lizzie,
+
+Tom Lee accepted your invitation and joined Acme Design.
+
+View members: https://myapp.loc/org/members
+
+If the button doesn't work, copy this link into your browser:
+https://myapp.loc/org/members
+
+--
+You received this email because you have an account at My App.
+Questions? Write to us at support@myapp.loc
+© 2026 My App. All rights reserved.

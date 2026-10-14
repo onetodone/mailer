@@ -1,0 +1,34 @@
+Subject: Vykarystany reziervovy kod
+
+My App
+
+Vykarystany reziervovy kod
+
+Vitajem, Liza!
+
+Dla ŭvachodu ŭ vaš akaŭnt u My App vykarystany reziervovy kod. Kožny kod dziejničaje tolki adzin raz.
+
+Pryłada: Chrome on macOS
+IP-adras: 203.0.113.7
+Zastałosia reziervovych kodaŭ: 3
+
+Novy nabor reziervovych kodaŭ možna stvaryć u luby čas.
+
+Stvaryć novyja kody: https://myapp.loc/security/recovery-codes
+
+Kali knopka nie pracuje, skapijujcie hetu spasyłku ŭ braŭzier:
+https://myapp.loc/security/recovery-codes
+
+---
+
+Kali heta byli nie vy, mahčyma, vašy reziervovyja kody jość u kahości jašče. Adrazu abaranicie svoj akaŭnt.
+
+Abaranić akaŭnt: https://myapp.loc/security?token=abc123
+
+Kali knopka nie pracuje, skapijujcie hetu spasyłku ŭ braŭzier:
+https://myapp.loc/security?token=abc123
+
+--
+You received this email because you have an account at My App.
+Jość pytanni? Pišycie nam: support@myapp.loc
+© 2026 My App. Usie pravy abaronieny.
