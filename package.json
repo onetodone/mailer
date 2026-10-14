@@ -20,7 +20,8 @@
     "email-template",
     "better-auth",
     "authjs",
-    "nextjs"
+    "nextjs",
+    "nestjs"
   ],
   "homepage": "https://onetodone.github.io/mailer/",
   "bugs": {
@@ -68,6 +69,16 @@
         "types": "./dist/resend/index.d.cts",
         "default": "./dist/resend/index.cjs"
       }
+    },
+    "./nestjs": {
+      "import": {
+        "types": "./dist/nestjs/index.d.mts",
+        "default": "./dist/nestjs/index.mjs"
+      },
+      "require": {
+        "types": "./dist/nestjs/index.d.cts",
+        "default": "./dist/nestjs/index.cjs"
+      }
     }
   },
   "main": "./dist/index.cjs",
@@ -80,6 +91,9 @@
       ],
       "resend": [
         "./dist/resend/index.d.cts"
+      ],
+      "nestjs": [
+        "./dist/nestjs/index.d.cts"
       ]
     }
   },
@@ -91,7 +105,7 @@
   "engines": {
     "node": ">=22"
   },
-  "packageManager": "pnpm@12.6.0",
+  "packageManager": "pnpm@12.11.2",
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch --sourcemap",
@@ -110,12 +124,16 @@
     "screenshots": "pnpm build && node scripts/screenshots.ts"
   },
   "dependencies": {
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   },
   "peerDependencies": {
+    "@nestjs/common": ">=10",
     "nodemailer": ">=6"
   },
   "peerDependenciesMeta": {
+    "@nestjs/common": {
+      "optional": true
+    },
     "nodemailer": {
       "optional": true
     }
@@ -124,7 +142,10 @@
     "@arethetypeswrong/cli": "^0.18.5",
     "@changesets/cli": "^3.0.3",
     "@eslint/js": "^9.39.5",
-    "@nestjs/common": "^12.1.2",
+    "@nestjs/common": "^12.1.3",
+    "@nestjs/config": "^12.0.1",
+    "@nestjs/core": "^12.1.3",
+    "@nestjs/testing": "^12.1.3",
     "@types/express": "^5.0.6",
     "@types/node": "^22",
     "better-auth": "^1.7.7",
@@ -132,7 +153,7 @@
     "eslint": "^9",
     "eslint-config-prettier": "^10.1.8",
     "express": "^5.3.0",
-    "fastify": "^5.12.5",
+    "fastify": "^5.12.7",
     "next-auth": "5.0.0-beta.32",
     "nodemailer": "^10.1.0",
     "playwright": "^1.64.0",
@@ -142,8 +163,8 @@
     "rxjs": "^7.8.2",
     "tsdown": "^0.23.1",
     "typescript": "~6",
-    "typescript-eslint": "^8.71.1",
-    "vitest": "^5.0.3"
+    "typescript-eslint": "^8.71.2",
+    "vitest": "^5.0.4"
   },
   "publishConfig": {
     "access": "public",

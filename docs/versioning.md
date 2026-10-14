@@ -11,14 +11,14 @@ Every release is listed in the [changelog](https://github.com/onetodone/mailer/b
 
 ## Public API
 
-The public API is everything exported from `@onetodone/mailer`, `@onetodone/mailer/smtp` and `@onetodone/mailer/resend`: functions, classes, types, options and error codes, with the behavior these docs describe. Files inside the package that these entries do not export, such as the chunks in `dist`, are internal and may change in any release.
+The public API is everything exported from `@onetodone/mailer`, `@onetodone/mailer/smtp`, `@onetodone/mailer/resend` and `@onetodone/mailer/nestjs`: functions, classes, types, options and error codes, with the behavior these docs describe. Files inside the package that these entries do not export, such as the chunks in `dist`, are internal and may change in any release.
 
 Breaking changes include:
 
 - removing or renaming an export, an option, a template or a template prop;
 - making an optional option or prop required, or narrowing the values it accepts;
 - changing the meaning of an error code;
-- dropping a Node.js version or raising the lowest supported nodemailer version.
+- dropping a Node.js version or raising the lowest supported nodemailer or NestJS version.
 
 These changes are not breaking and come in minor or patch releases:
 
@@ -36,11 +36,12 @@ These changes are not breaking and come in minor or patch releases:
 
 - The type declarations need TypeScript 5.4 or later. They compile with `strict`, `exactOptionalPropertyTypes` and `skipLibCheck: false`.
 - The minimum TypeScript version is raised only in a minor release, and the changelog says so.
-- The declarations do not reference zod or nodemailer types, so the versions of those packages in your project do not affect type checking.
+- The declarations do not reference zod or nodemailer types, so the versions of those packages in your project do not affect type checking. Only `@onetodone/mailer/nestjs` references `@nestjs/common` types.
 
 ## Dependencies
 
 - nodemailer is an optional peer dependency, needed only for `@onetodone/mailer/smtp`. Versions 6 and later are supported, and CI tests both 6.0.0 and the latest version. Raising the lowest supported version is a breaking change.
+- `@nestjs/common` is an optional peer dependency, needed only for `@onetodone/mailer/nestjs`. Versions 10 and later are supported. Raising the lowest supported version is a breaking change.
 - zod is a regular dependency used for validation inside the package. Props schemas for your own templates can use any [Standard Schema](https://standardschema.dev) library.
 
 ## Deprecations

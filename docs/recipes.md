@@ -1,6 +1,6 @@
 # Recipes
 
-Ready-made wiring for auth libraries, frameworks and job queues. Every recipe imports one shared mailer module, like the one from the [quick start](../README.md#quick-start):
+Ready-made wiring for auth libraries, frameworks and job queues. Most recipes import one shared mailer module, like the one from the [quick start](../README.md#quick-start):
 
 ```ts
 // mailer.ts
@@ -240,43 +240,49 @@ export const mailer = (globalForMailer.mailer ??= createMailer({ transport, from
 
 ## NestJS
 
-Provide the mailer from a global module and close it on shutdown:
+`@onetodone/mailer/nestjs` provides `MailerModule` and `MailerService`. It needs `@nestjs/common` 10 or later. Import the module once in your root module, with settings read from `ConfigService`:
 
 ```ts
-// mailer.module.ts
-import { Global, Inject, Injectable, Module, type OnApplicationShutdown } from '@nestjs/common'
-import { createMailer, type Mailer } from '@onetodone/mailer'
+// app.module.ts
+import { Module } from '@nestjs/common'
+import { ConfigModule, ConfigService } from '@nestjs/config'
+import { MailerModule } from '@onetodone/mailer/nestjs'
+import { smtpTransport } from '@onetodone/mailer/smtp'
 
-export const MAILER = Symbol('MAILER')
-
-@Injectable()
-class MailerShutdown implements OnApplicationShutdown {
-  constructor(@Inject(MAILER) private readonly mailer: Mailer) {}
-
-  async onApplicationShutdown() {
-    await this.mailer.close()
-  }
-}
-
-@Global()
 @Module({
-  providers: [{ provide: MAILER, useFactory: () => createMailer({ transport, from, branding }) }, MailerShutdown],
-  exports: [MAILER],
+  imports: [
+    ConfigModule.forRoot(),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        transport: smtpTransport({
+          host: config.getOrThrow<string>('SMTP_HOST'),
+          port: 465,
+          secure: true,
+          auth: { user: config.getOrThrow<string>('SMTP_USER'), pass: config.getOrThrow<string>('SMTP_PASS') },
+        }),
+        from: config.getOrThrow<string>('MAIL_FROM'),
+        branding,
+      }),
+    }),
+  ],
 })
-export class MailerModule {}
+export class AppModule {}
 ```
 
-Import `MailerModule` once in your root module, call `app.enableShutdownHooks()` in `main.ts`, and inject the mailer where you need it:
+`MailerModule.forRoot({ transport, from, branding })` takes the settings directly. Both accept every `createMailer` setting, and invalid settings stop the application at startup with `INVALID_CONFIG`. The module is global, so every module can inject `MailerService`; pass `isGlobal: false` to import it where you need it instead.
+
+Inject `MailerService` by class:
 
 ```ts
 // accounts.service.ts
-import { Inject, Injectable } from '@nestjs/common'
-import type { Mailer } from '@onetodone/mailer'
-import { MAILER } from './mailer.module'
+import { Injectable } from '@nestjs/common'
+import { MailerService } from '@onetodone/mailer/nestjs'
 
 @Injectable()
 export class AccountsService {
-  constructor(@Inject(MAILER) private readonly mailer: Mailer) {}
+  constructor(private readonly mailer: MailerService) {}
 
   async sendPasswordReset(email: string, resetUrl: string) {
     await this.mailer.send('resetPassword', { to: email, props: { resetUrl, expiresInMinutes: 60 } })
@@ -284,16 +290,36 @@ export class AccountsService {
 }
 ```
 
-`Mailer` without type arguments knows only the built-in templates. With custom templates, type the mailer after the one you create, so `send` keeps their names and props:
+`MailerService` closes the transport, such as an SMTP pool, on `app.close()`. Call `app.enableShutdownHooks()` in `main.ts` so a `SIGTERM` closes it too.
+
+`MailerService` without type arguments knows the built-in templates and locales. With custom templates or locales added through `messages`, pass them as type arguments, so `send` checks their names and props:
 
 ```ts
-// app-mailer.ts
-import { createMailer } from '@onetodone/mailer'
-
-export const mailer = createMailer({ transport, from, branding, templates: { orderShipped } })
-
-export type AppMailer = typeof mailer
+// mail-templates.ts
+export const templates = { orderShipped }
 ```
+
+```ts
+// orders.service.ts
+import { Injectable } from '@nestjs/common'
+import { MailerService } from '@onetodone/mailer/nestjs'
+import { templates } from './mail-templates'
+
+@Injectable()
+export class OrdersService {
+  constructor(private readonly mailer: MailerService<typeof templates, 'sk'>) {}
+
+  async shipped(email: string, orderId: string) {
+    await this.mailer.send('orderShipped', {
+      to: email,
+      locale: 'sk',
+      props: { orderId, trackUrl: `https://example.com/orders/${orderId}` },
+    })
+  }
+}
+```
+
+Register the same templates in the module with `templates` in `forRoot` or in the object `useFactory` returns. In unit tests, construct the service around a mailer with the memory transport, without the module: `new MailerService(createMailer({ transport: memoryTransport(), from, branding }))`. See [testing](testing.md).
 
 ## Background jobs
 
