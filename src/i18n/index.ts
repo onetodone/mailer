@@ -6,16 +6,21 @@ import { be } from './be'
 import { cs } from './cs'
 import { de } from './de'
 import { en } from './en'
+import { es } from './es'
 import { et } from './et'
 import { fr } from './fr'
 import { it } from './it'
 import { ja } from './ja'
 import { ka } from './ka'
+import { ko } from './ko'
 import { lt } from './lt'
 import { lv } from './lv'
+import { nl } from './nl'
 import { pl } from './pl'
+import { pt } from './pt'
 import { ro } from './ro'
 import { th } from './th'
+import { tr } from './tr'
 import { uk } from './uk'
 import { zh } from './zh'
 
@@ -914,16 +919,21 @@ export const dictionaries = {
   be,
   cs,
   de,
+  es,
   et,
   fr,
   it,
   ja,
   ka,
+  ko,
   lt,
   lv,
+  nl,
   pl,
+  pt,
   ro,
   th,
+  tr,
   uk,
   zh,
 } satisfies MessageSource

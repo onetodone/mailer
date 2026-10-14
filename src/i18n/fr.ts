@@ -1,6 +1,5 @@
 import type { Messages } from './index'
 
-// A no-break space (\u00a0) goes before «?», «!» and «:». `many` covers millions: «1 000 000 de minutes».
 export const fr: Messages = {
   common: {
     greeting: 'Bonjour {name},',

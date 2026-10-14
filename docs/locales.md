@@ -12,7 +12,7 @@
 | Croatian             | `hr`      |    ❌     |
 | Czech                | `cs`      |    ✅     |
 | Danish               | `da`      |    ❌     |
-| Dutch                | `nl`      |    ❌     |
+| Dutch                | `nl`      |    ✅     |
 | English (default)    | `en`      |    ✅     |
 | Estonian             | `et`      |    ✅     |
 | Finnish              | `fi`      |    ❌     |
@@ -27,21 +27,21 @@
 | Italian              | `it`      |    ✅     |
 | Japanese             | `ja`      |    ✅     |
 | Kazakh               | `kk`      |    ❌     |
-| Korean               | `ko`      |    ❌     |
+| Korean               | `ko`      |    ✅     |
 | Latvian              | `lv`      |    ✅     |
 | Lithuanian           | `lt`      |    ✅     |
 | Norwegian            | `nb`      |    ❌     |
 | Polish               | `pl`      |    ✅     |
-| Portuguese           | `pt`      |    ❌     |
+| Portuguese           | `pt`      |    ✅     |
 | Romanian             | `ro`      |    ✅     |
 | Russian              | `ru`      |    ❌     |
 | Serbian              | `sr`      |    ❌     |
 | Slovak               | `sk`      |    ❌     |
 | Slovenian            | `sl`      |    ❌     |
-| Spanish              | `es`      |    ❌     |
+| Spanish              | `es`      |    ✅     |
 | Swedish              | `sv`      |    ❌     |
 | Thai                 | `th`      |    ✅     |
-| Turkish              | `tr`      |    ❌     |
+| Turkish              | `tr`      |    ✅     |
 | Ukrainian            | `uk`      |    ✅     |
 | Vietnamese           | `vi`      |    ❌     |
 
@@ -100,7 +100,7 @@ await mailer.send('verifyEmail', {
   props: { verifyUrl: 'https://example.com/verify?token=abc123' },
 })
 
-await mailer.render('passwordChanged', { locale: 'nl' }) // type error: "nl" is not a locale of this mailer
+await mailer.render('passwordChanged', { locale: 'sv' }) // type error: "sv" is not a locale of this mailer
 ```
 
 Plural forms (`common.minutes`, `common.hours`, `common.days`) take one text per [plural category](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules/select) of the locale: `zero`, `one`, `two`, `few`, `many` and `other`. `{count}` is replaced by the number. A category without a text uses `other`.
