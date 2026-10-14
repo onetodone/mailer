@@ -28,6 +28,7 @@ const recipeModules = [
   '@types/express',
   'fastify',
   '@nestjs/common',
+  '@nestjs/config',
   'reflect-metadata',
   'rxjs',
   'bullmq',

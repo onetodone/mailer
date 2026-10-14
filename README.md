@@ -17,7 +17,7 @@ Screenshots of every email are in [Built-in templates](https://github.com/onetod
 - **The emails, not just the tools to build them.** Libraries such as React Email and MJML help you write email markup. This package ships the account emails themselves, already written, laid out and tested in major email clients.
 - **Ready for users in other languages.** Built-in texts come in many languages, with plural forms and dates formatted per locale.
 - **Yours to change.** Brand it from config, reword any text, or replace the layout and any template, all through the same typed API.
-- **Fits your stack.** Send over SMTP, through Resend or with your own transport, with [recipes](https://github.com/onetodone/mailer/blob/main/docs/recipes.md) for Better Auth, Auth.js, Express, Fastify, Next.js, NestJS and BullMQ.
+- **Fits your stack.** Send over SMTP, through Resend or with your own transport. A NestJS module is included, and [recipes](https://github.com/onetodone/mailer/blob/main/docs/recipes.md) cover Better Auth, Auth.js, Express, Fastify, Next.js, NestJS and BullMQ.
 
 ## Features
 
@@ -37,6 +37,7 @@ Screenshots of every email are in [Built-in templates](https://github.com/onetod
 - ESM or CommonJS. Type declarations are included and need TypeScript 5.4 or later.
 - Every built-in language ships in the main entry, so `locale: '<code>'` needs no setup. The entry is about 250 kB of JavaScript (47 kB gzipped); each language adds about 2 kB gzipped.
 - [nodemailer](https://nodemailer.com) 6 or later, only for SMTP delivery through `@onetodone/mailer/smtp`. Delivery through Resend with `@onetodone/mailer/resend` needs no extra package.
+- [NestJS](https://nestjs.com) 10 or later, only for the module in `@onetodone/mailer/nestjs`.
 
 ## Install
 
