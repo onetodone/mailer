@@ -11,7 +11,7 @@ The examples below reuse `transport`, `from` and `branding` from the [quick star
 
 ## 1. Branding and theme
 
-![The resetPassword email twice: with the default theme and the company name in the header, and with a logo, a custom primary color and footer text](images/branding.png)
+![The resetPassword email twice: with the default theme and the company name in the header, and with a logo, custom brand colors and footer text](images/branding.png)
 
 ```ts
 import type { Branding } from '@onetodone/mailer'

@@ -14,15 +14,15 @@ const logoUrl = brandLogo.url
 const bannerUrl = 'https://example.com/banner.png'
 
 const brands = {
-  plain: { ...branding, logoUrl: undefined, logoWidth: undefined, logoHeight: undefined },
-  custom: {
+  plain: {
     ...branding,
-    logoUrl,
-    logoWidth: brandLogo.width,
-    logoHeight: brandLogo.height,
-    footerText: 'OneToDone · hello@onetodone.com',
-    theme: { primary: '#98c2bc' },
+    logoUrl: undefined,
+    logoWidth: undefined,
+    logoHeight: undefined,
+    footerText: undefined,
+    theme: undefined,
   },
+  custom: { ...branding, logoUrl, logoWidth: brandLogo.width, logoHeight: brandLogo.height },
 } satisfies Record<string, Branding>
 
 type Brand = keyof typeof brands
@@ -69,7 +69,7 @@ const shots: readonly Shot[] = [
     viewport: 'desktop',
     emails: [
       { slug: 'reset-password', brand: 'plain', caption: 'Default theme' },
-      { slug: 'reset-password', brand: 'custom', caption: 'Logo, primary color and footer text' },
+      { slug: 'reset-password', brand: 'custom', caption: 'Logo, brand colors and footer text' },
     ],
   },
   {
