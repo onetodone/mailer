@@ -16,7 +16,7 @@ const branding = resolveBranding({
 })
 const messages = buildMessages()
 const locales = Object.keys(dictionaries) as Locale[]
-const userNames: Partial<Record<Locale, string>> = { be: 'Ліза' }
+const userNames: Partial<Record<Locale, string>> = { be: 'Ліза', 'be-Latn': 'Liza' }
 const verifyUrl = 'https://myapp.loc/verify?token=abc123'
 const resetUrl = 'https://myapp.loc/reset?token=abc123'
 const supportUrl = 'https://myapp.loc/support'
@@ -28,6 +28,14 @@ const code = 'K7Q2M9XW'
 const secureUrl = 'https://myapp.loc/security?token=abc123'
 const unlockUrl = 'https://myapp.loc/unlock?token=abc123'
 const confirmUrl = 'https://myapp.loc/account/delete?token=abc123'
+const acceptUrl = 'https://myapp.loc/invite?token=abc123'
+const membersUrl = 'https://myapp.loc/org/members'
+const organizationUrl = 'https://myapp.loc/org'
+const regenerateUrl = 'https://myapp.loc/security/recovery-codes'
+const manageUrl = 'https://myapp.loc/settings/api-keys'
+const downloadUrl = 'https://myapp.loc/export?token=abc123'
+const policyUrl = 'https://myapp.loc/terms'
+const organizationName = 'Acme Design'
 
 function options(locale: Locale = 'en', extra: Partial<RenderTemplateOptions> = {}): RenderTemplateOptions {
   return { branding, layout: defaultLayout, locale, messages: messages[locale], ...extra }
@@ -188,6 +196,210 @@ const snapshotCases: [file: string, render: (locale: Locale) => Promise<Rendered
     (locale) =>
       renderTemplate(builtInTemplates, 'accountDeleted', { userName: userNames[locale] ?? 'Lizzie' }, options(locale)),
   ],
+  [
+    'team-invite',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'teamInvite',
+        {
+          userName: userNames[locale] ?? 'Lizzie',
+          inviterName: 'Anna Novak',
+          inviterEmail: 'anna@example.com',
+          organizationName,
+          role: 'Editor',
+          acceptUrl,
+          expiresInMinutes: 10080,
+        },
+        options(locale),
+      ),
+  ],
+  [
+    'user-invite',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'userInvite',
+        { userName: userNames[locale] ?? 'Lizzie', inviterName: 'Anna Novak', acceptUrl, expiresInMinutes: 4320 },
+        options(locale),
+      ),
+  ],
+  [
+    'invite-accepted',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'inviteAccepted',
+        { userName: userNames[locale] ?? 'Lizzie', memberName: 'Tom Lee', organizationName, membersUrl },
+        options(locale),
+      ),
+  ],
+  [
+    'member-role-changed',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'memberRoleChanged',
+        {
+          userName: userNames[locale] ?? 'Lizzie',
+          organizationName,
+          role: 'Admin',
+          previousRole: 'Editor',
+          changedByName: 'Anna Novak',
+          organizationUrl,
+        },
+        options(locale),
+      ),
+  ],
+  [
+    'member-removed',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'memberRemoved',
+        { userName: userNames[locale] ?? 'Lizzie', organizationName, removedByName: 'Anna Novak' },
+        options(locale),
+      ),
+  ],
+  [
+    'ownership-received',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'ownershipReceived',
+        { userName: userNames[locale] ?? 'Lizzie', organizationName, previousOwnerName: 'Anna Novak', organizationUrl },
+        options(locale),
+      ),
+  ],
+  [
+    'ownership-transferred',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'ownershipTransferred',
+        {
+          userName: userNames[locale] ?? 'Lizzie',
+          organizationName,
+          newOwnerName: 'Tom Lee',
+          newRole: 'Admin',
+          ip: '203.0.113.7',
+          supportUrl,
+        },
+        options(locale),
+      ),
+  ],
+  [
+    'passkey-added',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'passkeyAdded',
+        {
+          userName: userNames[locale] ?? 'Lizzie',
+          passkeyName: 'iPhone',
+          device: 'Safari on iOS',
+          ip: '203.0.113.7',
+          secureUrl,
+        },
+        options(locale),
+      ),
+  ],
+  [
+    'passkey-removed',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'passkeyRemoved',
+        { userName: userNames[locale] ?? 'Lizzie', passkeyName: 'YubiKey 5', ip: '203.0.113.7' },
+        options(locale),
+      ),
+  ],
+  [
+    'recovery-code-used',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'recoveryCodeUsed',
+        {
+          userName: userNames[locale] ?? 'Lizzie',
+          device: 'Chrome on macOS',
+          ip: '203.0.113.7',
+          remainingCodes: 3,
+          regenerateUrl,
+          secureUrl,
+        },
+        options(locale),
+      ),
+  ],
+  [
+    'api-key-created',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'apiKeyCreated',
+        { userName: userNames[locale] ?? 'Lizzie', keyName: 'CI deploy', ip: '203.0.113.7', manageUrl },
+        options(locale),
+      ),
+  ],
+  [
+    'account-unlocked',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'accountUnlocked',
+        { userName: userNames[locale] ?? 'Lizzie', supportUrl },
+        options(locale),
+      ),
+  ],
+  [
+    'data-export-ready',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'dataExportReady',
+        { userName: userNames[locale] ?? 'Lizzie', downloadUrl, expiresInMinutes: 10080 },
+        options(locale),
+      ),
+  ],
+  [
+    'policy-updated',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'policyUpdated',
+        {
+          userName: userNames[locale] ?? 'Lizzie',
+          policy: 'terms',
+          policyUrl,
+          changes: ['Clearer rules for shared workspaces', 'A new section on refunds'],
+        },
+        options(locale),
+      ),
+  ],
+]
+
+// Their required dates would put ICU output into the snapshots.
+const datedCases: [file: string, render: (locale: Locale) => Promise<RenderedEmail>][] = [
+  [
+    'api-key-expiring',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'apiKeyExpiring',
+        { userName: userNames[locale] ?? 'Lizzie', keyName: 'CI deploy', expiresAt: changedAt, manageUrl },
+        options(locale),
+      ),
+  ],
+  [
+    'inactive-account-warning',
+    (locale) =>
+      renderTemplate(
+        builtInTemplates,
+        'inactiveAccountWarning',
+        { userName: userNames[locale] ?? 'Lizzie', deletionDate: changedAt, lastSignInAt: changedAt },
+        options(locale),
+      ),
+  ],
 ]
 
 beforeAll(() => {
@@ -199,7 +411,7 @@ afterAll(() => {
   vi.useRealTimers()
 })
 
-describe.each<Locale>(['en', 'be'])('built-in templates (%s)', (locale) => {
+describe.each<Locale>(['en', 'be-Latn'])('built-in templates (%s)', (locale) => {
   it.each(snapshotCases)('%s matches the snapshot', async (file, render) => {
     const email = await render(locale)
     await expect(email.html).toMatchFileSnapshot(`./__snapshots__/${file}.${locale}.html`)
@@ -210,7 +422,7 @@ describe.each<Locale>(['en', 'be'])('built-in templates (%s)', (locale) => {
 })
 
 describe.each(locales)('built-in templates in every locale (%s)', (locale) => {
-  it.each(snapshotCases)('%s renders with every placeholder filled', async (_file, render) => {
+  it.each([...snapshotCases, ...datedCases])('%s renders with every placeholder filled', async (_file, render) => {
     const email = await render(locale)
     for (const part of [email.subject, email.html, email.text]) {
       expect(part).not.toBe('')
@@ -838,6 +1050,496 @@ describe('accountDeleted', () => {
     expect(error).toMatchObject({
       code: 'INVALID_PROPS',
       message: `Invalid props for template "accountDeleted": ${detail}.`,
+    })
+  })
+})
+
+async function propsError(template: keyof typeof builtInTemplates, props: Record<string, unknown>): Promise<unknown> {
+  return renderTemplate(builtInTemplates, template, props as never, options()).then(
+    () => undefined,
+    (reason: unknown) => reason,
+  )
+}
+
+describe('teamInvite', () => {
+  it('names the inviter by name and email address', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      'teamInvite',
+      { inviterName: 'Anna', inviterEmail: 'anna@example.com', organizationName, acceptUrl },
+      options(),
+    )
+    expect(email.subject).toBe('Join Acme Design on My App')
+    expect(email.text).toContain('Anna (anna@example.com) invited you to join Acme Design on My App.')
+    expect(email.html.match(/href="https:\/\/myapp\.loc\/invite\?token=abc123"/g)).toHaveLength(3)
+    expect(email.text).toContain(`Accept invitation: ${acceptUrl}`)
+  })
+
+  it('names the inviter by email address alone, or not at all', async () => {
+    const byEmail = await renderTemplate(
+      builtInTemplates,
+      'teamInvite',
+      { inviterName: ' ', inviterEmail: 'anna@example.com', organizationName, acceptUrl },
+      options(),
+    )
+    expect(byEmail.text).toContain('anna@example.com invited you to join Acme Design on My App.')
+    const anonymous = await renderTemplate(builtInTemplates, 'teamInvite', { organizationName, acceptUrl }, options())
+    expect(anonymous.text).toContain("You've been invited to join Acme Design on My App.")
+  })
+
+  it('shows the role and the expiry only when given', async () => {
+    const without = await renderTemplate(builtInTemplates, 'teamInvite', { organizationName, acceptUrl }, options())
+    expect(without.text).not.toContain('Role:')
+    expect(without.text).not.toContain('expires')
+    const withBoth = await renderTemplate(
+      builtInTemplates,
+      'teamInvite',
+      { organizationName, acceptUrl, role: 'Editor', expiresInMinutes: 10080 },
+      options(),
+    )
+    expect(withBoth.text).toContain('Role: Editor')
+    expect(withBoth.text).toContain('The invitation expires in 7 days.')
+  })
+
+  it('escapes the organization and inviter names', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      'teamInvite',
+      { inviterName: '<b>Anna</b>', organizationName: 'A & B', acceptUrl },
+      options(),
+    )
+    expect(email.html).not.toContain('<b>Anna</b>')
+    expect(email.html).toContain('&lt;b&gt;Anna&lt;/b&gt; invited you to join A &amp; B')
+  })
+
+  it.each<[string, Record<string, unknown>, string]>([
+    ['a missing organization name', { acceptUrl }, 'organizationName: is required'],
+    ['an empty organization name', { organizationName: ' ', acceptUrl }, 'organizationName: must not be empty'],
+    ['a missing accept URL', { organizationName }, 'acceptUrl: is required'],
+    [
+      'a zero expiry',
+      { organizationName, acceptUrl, expiresInMinutes: 0 },
+      'expiresInMinutes: must be a positive integer',
+    ],
+  ])('rejects %s', async (_case, props, detail) => {
+    const error = await propsError('teamInvite', props)
+    expect(error).toBeInstanceOf(MailerError)
+    expect(error).toMatchObject({
+      code: 'INVALID_PROPS',
+      message: `Invalid props for template "teamInvite": ${detail}.`,
+    })
+  })
+})
+
+describe('userInvite', () => {
+  it('says an account was created and links the button to the accept URL', async () => {
+    const email = await renderTemplate(builtInTemplates, 'userInvite', { inviterName: 'Anna', acceptUrl }, options())
+    expect(email.subject).toBe("You're invited to My App")
+    expect(email.text).toContain('Anna invited you to My App and created an account for you.')
+    expect(email.text).toContain('Accept the invitation to set your password and start using My App.')
+    expect(email.html.match(/href="https:\/\/myapp\.loc\/invite\?token=abc123"/g)).toHaveLength(3)
+  })
+
+  it('works without an inviter', async () => {
+    const email = await renderTemplate(builtInTemplates, 'userInvite', { acceptUrl }, options('be'))
+    expect(email.text).toContain('Вас запрасілі ў My App. Для вас ужо створаны акаўнт.')
+  })
+
+  it('rejects a relative accept URL', async () => {
+    expect(await propsError('userInvite', { acceptUrl: '/invite' })).toMatchObject({
+      code: 'INVALID_PROPS',
+      message: 'Invalid props for template "userInvite": acceptUrl: must be an absolute http: or https: URL.',
+    })
+  })
+})
+
+describe('inviteAccepted', () => {
+  it('names the member and the organization', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      'inviteAccepted',
+      { memberName: 'Tom', organizationName, membersUrl },
+      options(),
+    )
+    expect(email.subject).toBe('Tom accepted your invitation')
+    expect(email.text).toContain('Tom accepted your invitation and joined Acme Design.')
+    expect(email.text).toContain(`View members: ${membersUrl}`)
+  })
+
+  it('names the app without an organization and has no button without a members URL', async () => {
+    const email = await renderTemplate(builtInTemplates, 'inviteAccepted', { memberName: 'tom@example.com' }, options())
+    expect(email.text).toContain('tom@example.com accepted your invitation and joined My App.')
+    expect(email.text).not.toContain('View members')
+  })
+
+  it('rejects a missing member name', async () => {
+    expect(await propsError('inviteAccepted', {})).toMatchObject({
+      code: 'INVALID_PROPS',
+      message: 'Invalid props for template "inviteAccepted": memberName: is required.',
+    })
+  })
+})
+
+describe('memberRoleChanged', () => {
+  it('lists the new role, the previous role and who changed it', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      'memberRoleChanged',
+      { organizationName, role: 'Admin', previousRole: 'Editor', changedByName: 'Anna', organizationUrl },
+      options(),
+    )
+    expect(email.subject).toBe('Your role in Acme Design was changed')
+    expect(email.text).toContain('New role: Admin\nPrevious role: Editor\nChanged by: Anna')
+    expect(email.text).toContain(`Go to Acme Design: ${organizationUrl}`)
+    expect(email.text).toContain('If you have questions about this change, ask an admin of Acme Design.')
+  })
+
+  it('shows only the new role and no button without the optional props', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      'memberRoleChanged',
+      { organizationName, role: 'Viewer' },
+      options(),
+    )
+    expect(email.text).toContain('New role: Viewer\n')
+    expect(email.text).not.toContain('Previous role:')
+    expect(email.text).not.toContain('Changed by:')
+    expect(email.text).not.toContain('Go to Acme Design')
+  })
+
+  it('rejects a missing role', async () => {
+    expect(await propsError('memberRoleChanged', { organizationName })).toMatchObject({
+      code: 'INVALID_PROPS',
+      message: 'Invalid props for template "memberRoleChanged": role: is required.',
+    })
+  })
+})
+
+describe('memberRemoved', () => {
+  it('says who removed the member and that the account stays', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      'memberRemoved',
+      { organizationName, removedByName: 'Anna' },
+      options(),
+    )
+    expect(email.subject).toBe('You were removed from Acme Design')
+    expect(email.text).toContain('You no longer have access to Acme Design on My App.\n\nRemoved by: Anna')
+    expect(email.text).toContain('Your My App account stays active.')
+    expect(email.text).toContain('If you think this is a mistake, contact an admin of Acme Design.')
+  })
+
+  it('leaves out who removed the member when unknown', async () => {
+    const email = await renderTemplate(builtInTemplates, 'memberRemoved', { organizationName }, options())
+    expect(email.text).not.toContain('Removed by:')
+  })
+
+  it('rejects an unknown prop', async () => {
+    expect(await propsError('memberRemoved', { organizationName, supportUrl })).toMatchObject({
+      code: 'INVALID_PROPS',
+      message: 'Invalid props for template "memberRemoved": has unknown key "supportUrl".',
+    })
+  })
+})
+
+describe('ownershipReceived', () => {
+  it('names the previous owner and links to the organization', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      'ownershipReceived',
+      { organizationName, previousOwnerName: 'Anna', organizationUrl },
+      options(),
+    )
+    expect(email.subject).toBe("You're now the owner of Acme Design")
+    expect(email.text).toContain('Anna transferred ownership of Acme Design on My App to you.')
+    expect(email.text).toContain(`Go to Acme Design: ${organizationUrl}`)
+  })
+
+  it('works without the previous owner and the URL', async () => {
+    const email = await renderTemplate(builtInTemplates, 'ownershipReceived', { organizationName }, options())
+    expect(email.text).toContain('Ownership of Acme Design on My App was transferred to you.')
+    expect(email.text).not.toContain('Go to Acme Design')
+  })
+})
+
+describe('ownershipTransferred', () => {
+  it('names the new owner and lists the new role, time and IP address', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      'ownershipTransferred',
+      { organizationName, newOwnerName: 'Tom', newRole: 'Admin', transferredAt: changedAt, ip: '203.0.113.7' },
+      options(),
+    )
+    expect(email.text).toContain("transferred to Tom, so you're no longer its owner.")
+    const line = lineStartingWith(email.text, 'When: ')
+    expect(line).toContain('UTC')
+    expect(email.text).toContain(`Your role: Admin\n${line}\nIP address: 203.0.113.7`)
+  })
+
+  it('points to the support address without a support URL', async () => {
+    const email = await renderTemplate(builtInTemplates, 'ownershipTransferred', { organizationName }, options())
+    expect(email.text).toContain('was transferred to another member')
+    expect(email.html).toContain('<a href="mailto:support@myapp.loc"')
+  })
+})
+
+describe.each(['passkeyAdded', 'passkeyRemoved'] as const)('%s', (template) => {
+  it('lists the passkey, time, device and IP address in order', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      template,
+      { passkeyName: 'iPhone', changedAt, device: 'Safari on iOS', ip: '203.0.113.7' },
+      options(),
+    )
+    const line = lineStartingWith(email.text, 'When: ')
+    expect(email.text).toContain(`Passkey: iPhone\n${line}\nDevice: Safari on iOS\nIP address: 203.0.113.7`)
+  })
+
+  it('links the secure button and replaces support with it', async () => {
+    const email = await renderTemplate(builtInTemplates, template, { secureUrl, supportUrl }, options())
+    expect(email.text).toContain(`Secure your account: ${secureUrl}`)
+    expect(email.text).not.toContain('Contact support')
+  })
+
+  it('points to support without a secure URL', async () => {
+    const withUrl = await renderTemplate(builtInTemplates, template, { supportUrl }, options())
+    expect(withUrl.text).toContain(`Contact support: ${supportUrl}`)
+    const withAddress = await renderTemplate(builtInTemplates, template, {}, options())
+    expect(withAddress.text).toContain("If it wasn't you, write to us right away at support@myapp.loc.")
+  })
+})
+
+describe('recoveryCodeUsed', () => {
+  it('shows how many codes are left and offers new ones', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      'recoveryCodeUsed',
+      { remainingCodes: 3, regenerateUrl },
+      options(),
+    )
+    expect(email.text).toContain('Recovery codes left: 3')
+    expect(email.text).toContain(
+      `You can generate a new set of recovery codes at any time.\n\nGenerate new codes: ${regenerateUrl}`,
+    )
+    expect(email.text).not.toContain('You have no recovery codes left.')
+  })
+
+  it('asks for new codes when none are left', async () => {
+    const withUrl = await renderTemplate(
+      builtInTemplates,
+      'recoveryCodeUsed',
+      { remainingCodes: 0, regenerateUrl },
+      options(),
+    )
+    expect(withUrl.text).toContain('Recovery codes left: 0')
+    expect(withUrl.text).toMatch(/You have no recovery codes left\.[^\n]*\n\nGenerate new codes: /)
+    const withoutUrl = await renderTemplate(builtInTemplates, 'recoveryCodeUsed', { remainingCodes: 0 }, options())
+    expect(withoutUrl.text).toContain('You have no recovery codes left.')
+    expect(withoutUrl.text).not.toContain('Generate new codes')
+  })
+
+  it('says nothing about codes without remainingCodes and regenerateUrl', async () => {
+    const email = await renderTemplate(builtInTemplates, 'recoveryCodeUsed', {}, options())
+    expect(email.text).not.toContain('Recovery codes left')
+    expect(email.text).not.toContain('Generate new codes')
+    expect(email.text).toContain('someone may have your recovery codes. Write to us right away at support@myapp.loc.')
+  })
+
+  it('links the secure button and replaces support with it', async () => {
+    const email = await renderTemplate(builtInTemplates, 'recoveryCodeUsed', { secureUrl, supportUrl }, options())
+    expect(email.text).toContain(`Secure your account right away.\n\nSecure your account: ${secureUrl}`)
+    expect(email.text).not.toContain('Contact support')
+  })
+
+  it.each<[string, Record<string, unknown>, string]>([
+    ['a negative count', { remainingCodes: -1 }, 'remainingCodes: must be a non-negative integer'],
+    ['a fractional count', { remainingCodes: 1.5 }, 'remainingCodes: must be a non-negative integer'],
+    [
+      'a relative regenerate URL',
+      { regenerateUrl: '/codes' },
+      'regenerateUrl: must be an absolute http: or https: URL',
+    ],
+  ])('rejects %s', async (_case, props, detail) => {
+    expect(await propsError('recoveryCodeUsed', props)).toMatchObject({
+      code: 'INVALID_PROPS',
+      message: `Invalid props for template "recoveryCodeUsed": ${detail}.`,
+    })
+  })
+})
+
+describe('apiKeyCreated', () => {
+  it('lists the name, creation and expiry times and IP address in order', async () => {
+    const expiresAt = new Date('2027-05-04T09:30:00Z')
+    const email = await renderTemplate(
+      builtInTemplates,
+      'apiKeyCreated',
+      { keyName: 'CI deploy', createdAt: changedAt, expiresAt, ip: '203.0.113.7' },
+      options(),
+    )
+    const created = lineStartingWith(email.text, 'When: ')
+    const expires = lineStartingWith(email.text, 'Expires: ')
+    expect(expires).toContain('2027')
+    expect(email.text).toContain(`Name: CI deploy\n${created}\n${expires}\nIP address: 203.0.113.7`)
+  })
+
+  it('links the manage button and replaces support with it', async () => {
+    const email = await renderTemplate(builtInTemplates, 'apiKeyCreated', { manageUrl, supportUrl }, options())
+    expect(email.text).toContain(
+      `If it wasn't you, revoke the key and secure your account right away.\n\nManage API keys: ${manageUrl}`,
+    )
+    expect(email.text).not.toContain('Contact support')
+  })
+
+  it('points to support without a manage URL', async () => {
+    const email = await renderTemplate(builtInTemplates, 'apiKeyCreated', {}, options())
+    expect(email.text).toContain("If it wasn't you, write to us right away at support@myapp.loc.")
+  })
+
+  it('rejects the key itself', async () => {
+    expect(await propsError('apiKeyCreated', { key: 'sk_live_123' })).toMatchObject({
+      code: 'INVALID_PROPS',
+      message: 'Invalid props for template "apiKeyCreated": has unknown key "key".',
+    })
+  })
+})
+
+describe('apiKeyExpiring', () => {
+  it('shows the expiry and links the manage button', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      'apiKeyExpiring',
+      { keyName: 'CI deploy', expiresAt: changedAt, timeZone: 'Europe/Minsk', manageUrl },
+      options(),
+    )
+    expect(email.subject).toBe('Your API key expires soon')
+    expect(lineStartingWith(email.text, 'Expires: ')).toMatch(/12:30.*GMT\+3/)
+    expect(email.text).toContain(`Manage API keys: ${manageUrl}`)
+  })
+
+  it('has no button without a manage URL', async () => {
+    const email = await renderTemplate(builtInTemplates, 'apiKeyExpiring', { expiresAt: changedAt }, options())
+    expect(email.text).not.toContain('Name:')
+    expect(email.text).not.toContain('Manage API keys')
+  })
+
+  it('rejects a missing expiry', async () => {
+    expect(await propsError('apiKeyExpiring', {})).toMatchObject({
+      code: 'INVALID_PROPS',
+      message: 'Invalid props for template "apiKeyExpiring": expiresAt: is required.',
+    })
+  })
+})
+
+describe('accountUnlocked', () => {
+  it('links the sign-in button to the app URL by default', async () => {
+    const email = await renderTemplate(builtInTemplates, 'accountUnlocked', {}, options())
+    expect(email.subject).toBe('Your account is unlocked')
+    expect(email.text).toContain('Sign in: https://myapp.loc/')
+    expect(email.text).toContain("Still can't sign in? Write to us at support@myapp.loc.")
+  })
+
+  it('links the sign-in and support buttons to their URLs', async () => {
+    const email = await renderTemplate(builtInTemplates, 'accountUnlocked', { signInUrl, supportUrl }, options())
+    expect(email.text).toContain(`Sign in: ${signInUrl}`)
+    expect(email.text).toContain(`Contact support: ${supportUrl}`)
+  })
+})
+
+describe('dataExportReady', () => {
+  it('links the download button and mentions expiry only with expiresInMinutes', async () => {
+    const without = await renderTemplate(builtInTemplates, 'dataExportReady', { downloadUrl }, options())
+    expect(without.text).toContain(`Download your data: ${downloadUrl}`)
+    expect(without.text).not.toContain('expires')
+    expect(without.text).toContain("Don't share the link with anyone.")
+    const withExpiry = await renderTemplate(
+      builtInTemplates,
+      'dataExportReady',
+      { downloadUrl, expiresInMinutes: 10080 },
+      options('be'),
+    )
+    expect(withExpiry.text).toContain('Спасылка дзейнічае 7 дзён.')
+  })
+
+  it('rejects a missing download URL', async () => {
+    expect(await propsError('dataExportReady', {})).toMatchObject({
+      code: 'INVALID_PROPS',
+      message: 'Invalid props for template "dataExportReady": downloadUrl: is required.',
+    })
+  })
+})
+
+describe('inactiveAccountWarning', () => {
+  it('shows the deletion date and links the sign-in button to the app URL by default', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      'inactiveAccountWarning',
+      { deletionDate: changedAt },
+      options(),
+    )
+    expect(lineStartingWith(email.text, 'Deletion date: ')).toContain('2026')
+    expect(email.text).not.toContain('Last sign-in:')
+    expect(email.text).toContain('Sign in: https://myapp.loc/')
+  })
+
+  it('shows the last sign-in and links the button to signInUrl', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      'inactiveAccountWarning',
+      { deletionDate: changedAt, lastSignInAt: new Date('2025-01-02T03:04:00Z'), signInUrl },
+      options(),
+    )
+    expect(lineStartingWith(email.text, 'Last sign-in: ')).toContain('2025')
+    expect(email.text).toContain(`Sign in: ${signInUrl}`)
+  })
+
+  it('rejects a missing deletion date', async () => {
+    expect(await propsError('inactiveAccountWarning', {})).toMatchObject({
+      code: 'INVALID_PROPS',
+      message: 'Invalid props for template "inactiveAccountWarning": deletionDate: is required.',
+    })
+  })
+})
+
+describe('policyUpdated', () => {
+  it('uses the terms of service texts and lists the changes', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      'policyUpdated',
+      { policy: 'terms', policyUrl, changes: ['Clearer rules', '<b>Refunds</b>'] },
+      options(),
+    )
+    expect(email.subject).toBe('Updates to our Terms of Service')
+    expect(email.text).toContain("What's changing:\n• Clearer rules\n• <b>Refunds</b>")
+    expect(email.html).toContain('• &lt;b&gt;Refunds&lt;/b&gt;')
+    expect(email.text).toContain(`Read the Terms of Service: ${policyUrl}`)
+    expect(email.text).toContain('you agree to the updated terms.')
+  })
+
+  it('uses the privacy policy texts and shows when the changes take effect', async () => {
+    const email = await renderTemplate(
+      builtInTemplates,
+      'policyUpdated',
+      { policy: 'privacy', policyUrl, effectiveAt: changedAt },
+      options(),
+    )
+    expect(email.subject).toBe('Updates to our Privacy Policy')
+    expect(lineStartingWith(email.text, 'Effective from: ')).toContain('2026')
+    expect(email.text).not.toContain("What's changing:")
+    expect(email.text).toContain("You don't need to do anything.")
+  })
+
+  it.each<[string, Record<string, unknown>, string]>([
+    ['an unknown policy', { policy: 'cookies', policyUrl }, 'policy: must be "terms" or "privacy", received "cookies"'],
+    [
+      'changes that are not an array',
+      { policy: 'terms', policyUrl, changes: 'All' },
+      'changes: must be an array of strings, received "All"',
+    ],
+    ['an empty change', { policy: 'terms', policyUrl, changes: [' '] }, 'changes.0: must not be empty'],
+  ])('rejects %s', async (_case, props, detail) => {
+    expect(await propsError('policyUpdated', props)).toMatchObject({
+      code: 'INVALID_PROPS',
+      message: `Invalid props for template "policyUpdated": ${detail}.`,
     })
   })
 })

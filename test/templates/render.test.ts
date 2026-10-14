@@ -8,20 +8,36 @@ import { MailerError } from '../../src/errors'
 import { buildMessages } from '../../src/i18n'
 import type { AccountDeletedProps } from '../../src/templates/account-deleted'
 import type { AccountLockedProps } from '../../src/templates/account-locked'
+import type { AccountUnlockedProps } from '../../src/templates/account-unlocked'
+import type { ApiKeyCreatedProps } from '../../src/templates/api-key-created'
+import type { ApiKeyExpiringProps } from '../../src/templates/api-key-expiring'
 import { builtInTemplates, type BuiltInTemplates } from '../../src/templates/built-in'
 import type { ConfirmAccountDeletionProps } from '../../src/templates/confirm-account-deletion'
+import type { DataExportReadyProps } from '../../src/templates/data-export-ready'
 import { defineTemplate, type TemplateProps, type TemplateRegistry } from '../../src/templates/define'
 import type { EmailChangeRequestedProps } from '../../src/templates/email-change-requested'
 import type { EmailChangedProps } from '../../src/templates/email-changed'
+import type { InactiveAccountWarningProps } from '../../src/templates/inactive-account-warning'
+import type { InviteAcceptedProps } from '../../src/templates/invite-accepted'
 import type { MagicLinkProps } from '../../src/templates/magic-link'
+import type { MemberRemovedProps } from '../../src/templates/member-removed'
+import type { MemberRoleChangedProps } from '../../src/templates/member-role-changed'
 import type { NewSignInProps } from '../../src/templates/new-sign-in'
 import type { OtpCodeProps } from '../../src/templates/otp-code'
+import type { OwnershipReceivedProps } from '../../src/templates/ownership-received'
+import type { OwnershipTransferredProps } from '../../src/templates/ownership-transferred'
+import type { PasskeyAddedProps } from '../../src/templates/passkey-added'
+import type { PasskeyRemovedProps } from '../../src/templates/passkey-removed'
 import type { PasswordChangedProps } from '../../src/templates/password-changed'
+import type { PolicyUpdatedProps } from '../../src/templates/policy-updated'
+import type { RecoveryCodeUsedProps } from '../../src/templates/recovery-code-used'
 import { renderTemplate, type RenderedEmail, type RenderTemplateOptions } from '../../src/templates/render'
 import type { ResetPasswordProps } from '../../src/templates/reset-password'
 import type { StandardSchemaV1 } from '../../src/templates/standard-schema'
+import type { TeamInviteProps } from '../../src/templates/team-invite'
 import type { TwoFactorDisabledProps } from '../../src/templates/two-factor-disabled'
 import type { TwoFactorEnabledProps } from '../../src/templates/two-factor-enabled'
+import type { UserInviteProps } from '../../src/templates/user-invite'
 import type { VerifyEmailProps } from '../../src/templates/verify-email'
 import type { VerifyEmailChangeProps } from '../../src/templates/verify-email-change'
 import type { WelcomeProps } from '../../src/templates/welcome'
@@ -189,6 +205,33 @@ describe('renderTemplate types', () => {
       readonly userName?: string | undefined
       readonly supportUrl?: string | undefined
     }>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['teamInvite']>>().toEqualTypeOf<TeamInviteProps>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['userInvite']>>().toEqualTypeOf<UserInviteProps>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['inviteAccepted']>>().toEqualTypeOf<InviteAcceptedProps>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['memberRoleChanged']>>().toEqualTypeOf<MemberRoleChangedProps>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['memberRemoved']>>().toEqualTypeOf<MemberRemovedProps>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['ownershipReceived']>>().toEqualTypeOf<OwnershipReceivedProps>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['ownershipTransferred']>>().toEqualTypeOf<OwnershipTransferredProps>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['passkeyAdded']>>().toEqualTypeOf<PasskeyAddedProps>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['passkeyRemoved']>>().toEqualTypeOf<PasskeyRemovedProps>()
+    expectTypeOf<PasskeyRemovedProps>().toEqualTypeOf<PasskeyAddedProps>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['recoveryCodeUsed']>>().toEqualTypeOf<RecoveryCodeUsedProps>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['apiKeyCreated']>>().toEqualTypeOf<ApiKeyCreatedProps>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['apiKeyExpiring']>>().toEqualTypeOf<ApiKeyExpiringProps>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['accountUnlocked']>>().toEqualTypeOf<AccountUnlockedProps>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['dataExportReady']>>().toEqualTypeOf<DataExportReadyProps>()
+    expectTypeOf<
+      TemplateProps<BuiltInTemplates['inactiveAccountWarning']>
+    >().toEqualTypeOf<InactiveAccountWarningProps>()
+    expectTypeOf<TemplateProps<BuiltInTemplates['policyUpdated']>>().toEqualTypeOf<PolicyUpdatedProps>()
+    expectTypeOf<PolicyUpdatedProps>().toEqualTypeOf<{
+      readonly userName?: string | undefined
+      readonly policy: 'terms' | 'privacy'
+      readonly policyUrl: string
+      readonly effectiveAt?: Date | undefined
+      readonly timeZone?: string | undefined
+      readonly changes?: readonly string[] | undefined
+    }>()
     expectTypeOf(renderTemplate<{ note: typeof note }, 'note'>)
       .parameter(2)
       .toEqualTypeOf<{ text: string; show: boolean }>()
@@ -200,7 +243,7 @@ describe('renderTemplate', () => {
     const error = await rejection(renderUnchecked(builtInTemplates, 'orderShipped', {}, options))
     expect(error.code).toBe('UNKNOWN_TEMPLATE')
     expect(error.message).toBe(
-      'Unknown template "orderShipped". Available templates: verifyEmail, resetPassword, passwordChanged, verifyEmailChange, emailChangeRequested, emailChanged, otpCode, magicLink, welcome, newSignIn, twoFactorEnabled, twoFactorDisabled, accountLocked, confirmAccountDeletion, accountDeleted.',
+      'Unknown template "orderShipped". Available templates: verifyEmail, resetPassword, passwordChanged, verifyEmailChange, emailChangeRequested, emailChanged, otpCode, magicLink, welcome, newSignIn, twoFactorEnabled, twoFactorDisabled, accountLocked, confirmAccountDeletion, accountDeleted, teamInvite, userInvite, inviteAccepted, memberRoleChanged, memberRemoved, ownershipReceived, ownershipTransferred, passkeyAdded, passkeyRemoved, recoveryCodeUsed, apiKeyCreated, apiKeyExpiring, accountUnlocked, dataExportReady, inactiveAccountWarning, policyUpdated.',
     )
     const inherited = await rejection(renderUnchecked(builtInTemplates, 'toString', {}, options))
     expect(inherited.code).toBe('UNKNOWN_TEMPLATE')

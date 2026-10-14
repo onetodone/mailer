@@ -1,0 +1,23 @@
+Subject: A passkey was removed from your account
+
+My App
+
+A passkey was removed
+
+Hi Lizzie,
+
+A passkey was removed from your My App account. It can no longer be used to sign in.
+
+Passkey: YubiKey 5
+IP address: 203.0.113.7
+
+If this was you, you don't need to do anything.
+
+---
+
+If it wasn't you, write to us right away at support@myapp.loc.
+
+--
+You received this email because you have an account at My App.
+Questions? Write to us at support@myapp.loc
+© 2026 My App. All rights reserved.

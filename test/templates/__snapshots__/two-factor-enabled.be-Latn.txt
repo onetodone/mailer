@@ -1,0 +1,27 @@
+Subject: Dvuchfaktarnaja aŭtentyfikacyja ŭklučana
+
+My App
+
+Dvuchfaktarnaja aŭtentyfikacyja ŭklučana
+
+Vitajem, Liza!
+
+Dla vašaha akaŭnta ŭ My App ŭklučana dvuchfaktarnaja aŭtentyfikacyja. Ciapier dla ŭvachodu, akramia parola, spatrebicca jašče adzin krok.
+
+IP-adras: 203.0.113.7
+
+Kali heta byli vy, ničoha rabić nie treba.
+
+---
+
+Kali heta byli nie vy, adrazu zviarniciesia ŭ padtrymku.
+
+Zviarnucca ŭ padtrymku: https://myapp.loc/support
+
+Kali knopka nie pracuje, skapijujcie hetu spasyłku ŭ braŭzier:
+https://myapp.loc/support
+
+--
+You received this email because you have an account at My App.
+Jość pytanni? Pišycie nam: support@myapp.loc
+© 2026 My App. Usie pravy abaronieny.

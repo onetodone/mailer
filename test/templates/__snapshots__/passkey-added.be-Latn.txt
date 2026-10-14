@@ -1,0 +1,29 @@
+Subject: Da akaŭnta dadadzieny kluč dostupu
+
+My App
+
+Kluč dostupu dadadzieny
+
+Vitajem, Liza!
+
+Da vašaha akaŭnta ŭ My App dadadzieny kluč dostupu (passkey). Ciapier z jaho dapamohaj možna ŭvachodzić u akaŭnt.
+
+Kluč dostupu: iPhone
+Pryłada: Safari on iOS
+IP-adras: 203.0.113.7
+
+Kali heta byli vy, ničoha rabić nie treba.
+
+---
+
+Kali heta byli nie vy, adrazu vydalicie hety kluč i abaranicie svoj akaŭnt.
+
+Abaranić akaŭnt: https://myapp.loc/security?token=abc123
+
+Kali knopka nie pracuje, skapijujcie hetu spasyłku ŭ braŭzier:
+https://myapp.loc/security?token=abc123
+
+--
+You received this email because you have an account at My App.
+Jość pytanni? Pišycie nam: support@myapp.loc
+© 2026 My App. Usie pravy abaronieny.

@@ -1,0 +1,29 @@
+Subject: Novy ŭvachod u akaŭnt
+
+My App
+
+Novy ŭvachod u akaŭnt
+
+Vitajem, Liza!
+
+My zaŭvažyli novy ŭvachod u vaš akaŭnt u My App.
+
+Pryłada: Chrome on macOS
+Miescaznachodžannie: Berlin, Germany
+IP-adras: 203.0.113.7
+
+Kali heta byli vy, ničoha rabić nie treba.
+
+---
+
+Kali heta byli nie vy, adrazu abaranicie svoj akaŭnt.
+
+Abaranić akaŭnt: https://myapp.loc/security?token=abc123
+
+Kali knopka nie pracuje, skapijujcie hetu spasyłku ŭ braŭzier:
+https://myapp.loc/security?token=abc123
+
+--
+You received this email because you have an account at My App.
+Jość pytanni? Pišycie nam: support@myapp.loc
+© 2026 My App. Usie pravy abaronieny.

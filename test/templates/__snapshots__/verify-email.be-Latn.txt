@@ -1,0 +1,25 @@
+Subject: Pacvierdzicie email
+
+My App
+
+Pacvierdzicie email
+
+Vitajem, Liza!
+
+Dziakuj za rehistracyju ŭ My App! Pacvierdzicie adras pošty, kab aktyvavać akaŭnt.
+
+Pacvierdzić email: https://myapp.loc/verify?token=abc123
+
+Kali knopka nie pracuje, skapijujcie hetu spasyłku ŭ braŭzier:
+https://myapp.loc/verify?token=abc123
+
+---
+
+Spasyłka dziejničaje 24 hadziny.
+
+Kali vy nie rehistravalisia ŭ My App, prosta praihnarujcie hety list.
+
+--
+You received this email because you have an account at My App.
+Jość pytanni? Pišycie nam: support@myapp.loc
+© 2026 My App. Usie pravy abaronieny.

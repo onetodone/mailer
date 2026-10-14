@@ -20,6 +20,14 @@ const signInUrl = 'https://myapp.loc/sign-in?token=abc123'
 const secureUrl = 'https://myapp.loc/security?token=abc123'
 const unlockUrl = 'https://myapp.loc/unlock?token=abc123'
 const confirmUrl = 'https://myapp.loc/account/delete?token=abc123'
+const acceptUrl = 'https://myapp.loc/invite?token=abc123'
+const membersUrl = 'https://myapp.loc/org/members'
+const organizationUrl = 'https://myapp.loc/org'
+const regenerateUrl = 'https://myapp.loc/security/recovery-codes'
+const manageUrl = 'https://myapp.loc/settings/api-keys'
+const downloadUrl = 'https://myapp.loc/export?token=abc123'
+const policyUrl = 'https://myapp.loc/terms'
+const organizationName = 'Acme Design'
 
 const orderShipped = defineTemplate({
   name: 'orderShipped',
@@ -56,7 +64,7 @@ describe('built-in templates through the memory transport', () => {
     footerText: 'You received this email because you have an account at My App.',
     theme: { primary: '#3b82f6' },
   }
-  const userNames = { en: 'Lizzie', be: 'Ліза' }
+  const userNames = { en: 'Lizzie', 'be-Latn': 'Liza' }
   const cases: [file: string, send: (mailer: Mailer, locale: keyof typeof userNames) => Promise<unknown>][] = [
     [
       'verify-email',
@@ -199,6 +207,172 @@ describe('built-in templates through the memory transport', () => {
           props: { userName: userNames[locale] },
         }),
     ],
+    [
+      'team-invite',
+      (mailer, locale) =>
+        mailer.send('teamInvite', {
+          to,
+          locale,
+          props: {
+            userName: userNames[locale],
+            inviterName: 'Anna Novak',
+            inviterEmail: 'anna@example.com',
+            organizationName,
+            role: 'Editor',
+            acceptUrl,
+            expiresInMinutes: 10080,
+          },
+        }),
+    ],
+    [
+      'user-invite',
+      (mailer, locale) =>
+        mailer.send('userInvite', {
+          to,
+          locale,
+          props: { userName: userNames[locale], inviterName: 'Anna Novak', acceptUrl, expiresInMinutes: 4320 },
+        }),
+    ],
+    [
+      'invite-accepted',
+      (mailer, locale) =>
+        mailer.send('inviteAccepted', {
+          to,
+          locale,
+          props: { userName: userNames[locale], memberName: 'Tom Lee', organizationName, membersUrl },
+        }),
+    ],
+    [
+      'member-role-changed',
+      (mailer, locale) =>
+        mailer.send('memberRoleChanged', {
+          to,
+          locale,
+          props: {
+            userName: userNames[locale],
+            organizationName,
+            role: 'Admin',
+            previousRole: 'Editor',
+            changedByName: 'Anna Novak',
+            organizationUrl,
+          },
+        }),
+    ],
+    [
+      'member-removed',
+      (mailer, locale) =>
+        mailer.send('memberRemoved', {
+          to,
+          locale,
+          props: { userName: userNames[locale], organizationName, removedByName: 'Anna Novak' },
+        }),
+    ],
+    [
+      'ownership-received',
+      (mailer, locale) =>
+        mailer.send('ownershipReceived', {
+          to,
+          locale,
+          props: { userName: userNames[locale], organizationName, previousOwnerName: 'Anna Novak', organizationUrl },
+        }),
+    ],
+    [
+      'ownership-transferred',
+      (mailer, locale) =>
+        mailer.send('ownershipTransferred', {
+          to,
+          locale,
+          props: {
+            userName: userNames[locale],
+            organizationName,
+            newOwnerName: 'Tom Lee',
+            newRole: 'Admin',
+            ip: '203.0.113.7',
+            supportUrl,
+          },
+        }),
+    ],
+    [
+      'passkey-added',
+      (mailer, locale) =>
+        mailer.send('passkeyAdded', {
+          to,
+          locale,
+          props: {
+            userName: userNames[locale],
+            passkeyName: 'iPhone',
+            device: 'Safari on iOS',
+            ip: '203.0.113.7',
+            secureUrl,
+          },
+        }),
+    ],
+    [
+      'passkey-removed',
+      (mailer, locale) =>
+        mailer.send('passkeyRemoved', {
+          to,
+          locale,
+          props: { userName: userNames[locale], passkeyName: 'YubiKey 5', ip: '203.0.113.7' },
+        }),
+    ],
+    [
+      'recovery-code-used',
+      (mailer, locale) =>
+        mailer.send('recoveryCodeUsed', {
+          to,
+          locale,
+          props: {
+            userName: userNames[locale],
+            device: 'Chrome on macOS',
+            ip: '203.0.113.7',
+            remainingCodes: 3,
+            regenerateUrl,
+            secureUrl,
+          },
+        }),
+    ],
+    [
+      'api-key-created',
+      (mailer, locale) =>
+        mailer.send('apiKeyCreated', {
+          to,
+          locale,
+          props: { userName: userNames[locale], keyName: 'CI deploy', ip: '203.0.113.7', manageUrl },
+        }),
+    ],
+    [
+      'account-unlocked',
+      (mailer, locale) =>
+        mailer.send('accountUnlocked', {
+          to,
+          locale,
+          props: { userName: userNames[locale], supportUrl },
+        }),
+    ],
+    [
+      'data-export-ready',
+      (mailer, locale) =>
+        mailer.send('dataExportReady', {
+          to,
+          locale,
+          props: { userName: userNames[locale], downloadUrl, expiresInMinutes: 10080 },
+        }),
+    ],
+    [
+      'policy-updated',
+      (mailer, locale) =>
+        mailer.send('policyUpdated', {
+          to,
+          locale,
+          props: {
+            userName: userNames[locale],
+            policy: 'terms',
+            policyUrl,
+            changes: ['Clearer rules for shared workspaces', 'A new section on refunds'],
+          },
+        }),
+    ],
   ]
 
   beforeAll(() => {
@@ -210,7 +384,7 @@ describe('built-in templates through the memory transport', () => {
     vi.useRealTimers()
   })
 
-  describe.each(['en', 'be'] as const)('%s', (locale) => {
+  describe.each(['en', 'be-Latn'] as const)('%s', (locale) => {
     it.each(cases)('sends %s as rendered in the template snapshots', async (file, send) => {
       const transport = memoryTransport()
       const mailer = createMailer({ transport, from, branding: snapshotBranding })
@@ -274,6 +448,22 @@ describe('custom templates', () => {
       | 'accountLocked'
       | 'confirmAccountDeletion'
       | 'accountDeleted'
+      | 'teamInvite'
+      | 'userInvite'
+      | 'inviteAccepted'
+      | 'memberRoleChanged'
+      | 'memberRemoved'
+      | 'ownershipReceived'
+      | 'ownershipTransferred'
+      | 'passkeyAdded'
+      | 'passkeyRemoved'
+      | 'recoveryCodeUsed'
+      | 'apiKeyCreated'
+      | 'apiKeyExpiring'
+      | 'accountUnlocked'
+      | 'dataExportReady'
+      | 'inactiveAccountWarning'
+      | 'policyUpdated'
       | 'orderShipped'
     >()
     const check = async () => {

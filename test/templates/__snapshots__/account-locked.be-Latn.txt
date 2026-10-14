@@ -1,0 +1,27 @@
+Subject: Akaŭnt zabłakavany
+
+My App
+
+Akaŭnt zabłakavany
+
+Vitajem, Liza!
+
+My zabłakavali vaš akaŭnt u My App pasla niekalkich niaŭdałych sprob uvachodu.
+
+IP-adras: 203.0.113.7
+
+Kab adrazu razbłakavać akaŭnt, nacisnicie knopku.
+
+Razbłakavać akaŭnt: https://myapp.loc/unlock?token=abc123
+
+Kali knopka nie pracuje, skapijujcie hetu spasyłku ŭ braŭzier:
+https://myapp.loc/unlock?token=abc123
+
+---
+
+Kali heta byli nie vy, mahčyma, niechta sprabuje padabrać vaš parol. Jak tolki znoŭ zmožacie ŭvajści, zadajcie novy parol.
+
+--
+You received this email because you have an account at My App.
+Jość pytanni? Pišycie nam: support@myapp.loc
+© 2026 My App. Usie pravy abaronieny.

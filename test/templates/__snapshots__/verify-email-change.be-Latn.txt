@@ -1,0 +1,25 @@
+Subject: Pacvierdzicie novy email
+
+My App
+
+Pacvierdzicie novy email
+
+Vitajem, Liza!
+
+Vy paprasili vykarystoŭvać hety adras dla akaŭnta ŭ My App. Pacvierdzicie jaho, kab zaviaršyć zmienu. Da taho času ŭ akaŭncie zastajecca raniejšy adras.
+
+Pacvierdzić novy email: https://myapp.loc/verify?token=abc123
+
+Kali knopka nie pracuje, skapijujcie hetu spasyłku ŭ braŭzier:
+https://myapp.loc/verify?token=abc123
+
+---
+
+Spasyłka dziejničaje 24 hadziny.
+
+Kali vy hetaha nie prasili, prosta praihnarujcie hety list — ničoha nie zmienicca.
+
+--
+You received this email because you have an account at My App.
+Jość pytanni? Pišycie nam: support@myapp.loc
+© 2026 My App. Usie pravy abaronieny.

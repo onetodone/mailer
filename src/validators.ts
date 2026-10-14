@@ -50,6 +50,11 @@ export const positiveInteger = z
   .int({ error: 'must be a positive integer' })
   .positive({ error: 'must be a positive integer' })
 
+export const nonNegativeInteger = z
+  .number({ error: expected('a non-negative integer') })
+  .int({ error: 'must be a non-negative integer' })
+  .min(0, { error: 'must be a non-negative integer' })
+
 export const nonEmptyText = z
   .string({ error: expected('a string') })
   .trim()

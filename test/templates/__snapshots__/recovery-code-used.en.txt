@@ -1,0 +1,34 @@
+Subject: A recovery code was used
+
+My App
+
+A recovery code was used
+
+Hi Lizzie,
+
+A recovery code was used to sign in to your My App account. Each code works only once.
+
+Device: Chrome on macOS
+IP address: 203.0.113.7
+Recovery codes left: 3
+
+You can generate a new set of recovery codes at any time.
+
+Generate new codes: https://myapp.loc/security/recovery-codes
+
+If the button doesn't work, copy this link into your browser:
+https://myapp.loc/security/recovery-codes
+
+---
+
+If it wasn't you, someone may have your recovery codes. Secure your account right away.
+
+Secure your account: https://myapp.loc/security?token=abc123
+
+If the button doesn't work, copy this link into your browser:
+https://myapp.loc/security?token=abc123
+
+--
+You received this email because you have an account at My App.
+Questions? Write to us at support@myapp.loc
+© 2026 My App. All rights reserved.

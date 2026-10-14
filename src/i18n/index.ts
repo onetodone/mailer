@@ -392,6 +392,408 @@ export interface AccountDeletedMessages {
   readonly notYouEmail: string
 }
 
+/** Texts of the `teamInvite` template. */
+export interface TeamInviteMessages {
+  /** Subject line, with `{organizationName}`. */
+  readonly subject: string
+  /** Inbox preview text, with `{organizationName}`. */
+  readonly preheader: string
+  /** Heading at the top of the email, with `{organizationName}`. */
+  readonly heading: string
+  /** Paragraph under the greeting, with `{inviter}` and `{organizationName}`. */
+  readonly intro: string
+  /** Paragraph under the greeting without an inviter, with `{organizationName}`. */
+  readonly introAnonymous: string
+  /** Role on joining, with `{role}`. */
+  readonly role: string
+  /** Button label. */
+  readonly button: string
+  /** Expiry note, with `{duration}` such as "7 days". */
+  readonly expires: string
+  /** Note for recipients who did not expect the invitation. */
+  readonly ignore: string
+}
+
+/** Texts of the `userInvite` template. */
+export interface UserInviteMessages {
+  /** Subject line. */
+  readonly subject: string
+  /** Inbox preview text. */
+  readonly preheader: string
+  /** Heading at the top of the email. */
+  readonly heading: string
+  /** Paragraph under the greeting, with `{inviter}`. */
+  readonly intro: string
+  /** Paragraph under the greeting without an inviter. */
+  readonly introAnonymous: string
+  /** What accepting the invitation does, above the button. */
+  readonly setUp: string
+  /** Button label. */
+  readonly button: string
+  /** Expiry note, with `{duration}` such as "7 days". */
+  readonly expires: string
+  /** Note for recipients who did not expect the invitation. */
+  readonly ignore: string
+}
+
+/** Texts of the `inviteAccepted` template. */
+export interface InviteAcceptedMessages {
+  /** Subject line, with `{memberName}`. */
+  readonly subject: string
+  /** Inbox preview text, with `{memberName}`. */
+  readonly preheader: string
+  /** Heading at the top of the email. */
+  readonly heading: string
+  /** Paragraph under the greeting, with `{memberName}` and `{organizationName}`. */
+  readonly intro: string
+  /** Paragraph under the greeting without an organization, with `{memberName}`. */
+  readonly introApp: string
+  /** Button label. */
+  readonly button: string
+}
+
+/** Texts of the `memberRoleChanged` template. */
+export interface MemberRoleChangedMessages {
+  /** Subject line, with `{organizationName}`. */
+  readonly subject: string
+  /** Inbox preview text, with `{organizationName}`. */
+  readonly preheader: string
+  /** Heading at the top of the email. */
+  readonly heading: string
+  /** Paragraph under the greeting, with `{organizationName}`. */
+  readonly intro: string
+  /** The new role, with `{role}`. */
+  readonly role: string
+  /** The role before the change, with `{previousRole}`. */
+  readonly previousRole: string
+  /** Who changed the role, with `{changedBy}`. */
+  readonly changedBy: string
+  /** Button label, with `{organizationName}`. */
+  readonly button: string
+  /** Where to ask about the change, with `{organizationName}`. */
+  readonly questions: string
+}
+
+/** Texts of the `memberRemoved` template. */
+export interface MemberRemovedMessages {
+  /** Subject line, with `{organizationName}`. */
+  readonly subject: string
+  /** Inbox preview text, with `{organizationName}`. */
+  readonly preheader: string
+  /** Heading at the top of the email, with `{organizationName}`. */
+  readonly heading: string
+  /** Paragraph under the greeting, with `{organizationName}`. */
+  readonly intro: string
+  /** Who removed the member, with `{removedBy}`. */
+  readonly removedBy: string
+  /** What happens to the member's own account. */
+  readonly account: string
+  /** Where to turn if the removal is a mistake, with `{organizationName}`. */
+  readonly mistake: string
+}
+
+/** Texts of the `ownershipReceived` template. */
+export interface OwnershipReceivedMessages {
+  /** Subject line, with `{organizationName}`. */
+  readonly subject: string
+  /** Inbox preview text, with `{organizationName}`. */
+  readonly preheader: string
+  /** Heading at the top of the email, with `{organizationName}`. */
+  readonly heading: string
+  /** Paragraph under the greeting, with `{previousOwner}` and `{organizationName}`. */
+  readonly intro: string
+  /** Paragraph under the greeting without a previous owner, with `{organizationName}`. */
+  readonly introAnonymous: string
+  /** What the owner can do, with `{organizationName}`. */
+  readonly owner: string
+  /** Button label, with `{organizationName}`. */
+  readonly button: string
+}
+
+/** Texts of the `ownershipTransferred` template. */
+export interface OwnershipTransferredMessages {
+  /** Subject line, with `{organizationName}`. */
+  readonly subject: string
+  /** Inbox preview text, with `{organizationName}`. */
+  readonly preheader: string
+  /** Heading at the top of the email. */
+  readonly heading: string
+  /** Paragraph under the greeting, with `{organizationName}` and `{newOwner}`. */
+  readonly intro: string
+  /** Paragraph under the greeting without a new owner, with `{organizationName}`. */
+  readonly introAnonymous: string
+  /** The recipient's role after the transfer, with `{role}`. */
+  readonly newRole: string
+  /** Time of the transfer, with `{date}`. */
+  readonly transferredAt: string
+  /** IP address of the transfer, with `{ip}`. */
+  readonly ip: string
+  /** Reassurance for the former owner who made the transfer. */
+  readonly ifYou: string
+  /** Call to action when the former owner did not make the transfer, followed by the support button. */
+  readonly notYou: string
+  /** Support button label. */
+  readonly button: string
+  /** Call to action without a support URL, with `{email}` as a link to the support address. */
+  readonly notYouEmail: string
+}
+
+/** Texts of the `passkeyAdded` template. */
+export interface PasskeyAddedMessages {
+  /** Subject line. */
+  readonly subject: string
+  /** Inbox preview text. */
+  readonly preheader: string
+  /** Heading at the top of the email. */
+  readonly heading: string
+  /** Paragraph under the greeting. */
+  readonly intro: string
+  /** Name of the passkey, with `{passkeyName}`. */
+  readonly passkey: string
+  /** Time of the change, with `{date}`. */
+  readonly changedAt: string
+  /** Device or browser of the change, with `{device}`. */
+  readonly device: string
+  /** IP address of the change, with `{ip}`. */
+  readonly ip: string
+  /** Reassurance for the account owner who made the change. */
+  readonly ifYou: string
+  /** Call to action when the owner did not make the change, followed by the secure-account button. */
+  readonly notYouSecure: string
+  /** Secure-account button label. */
+  readonly secureButton: string
+  /** Call to action without a secure-account URL, followed by the support button. */
+  readonly notYou: string
+  /** Support button label. */
+  readonly button: string
+  /** Call to action without a secure-account or support URL, with `{email}` as a link to the support address. */
+  readonly notYouEmail: string
+}
+
+/** Texts of the `passkeyRemoved` template. */
+export interface PasskeyRemovedMessages {
+  /** Subject line. */
+  readonly subject: string
+  /** Inbox preview text. */
+  readonly preheader: string
+  /** Heading at the top of the email. */
+  readonly heading: string
+  /** Paragraph under the greeting. */
+  readonly intro: string
+  /** Name of the passkey, with `{passkeyName}`. */
+  readonly passkey: string
+  /** Time of the change, with `{date}`. */
+  readonly changedAt: string
+  /** Device or browser of the change, with `{device}`. */
+  readonly device: string
+  /** IP address of the change, with `{ip}`. */
+  readonly ip: string
+  /** Reassurance for the account owner who made the change. */
+  readonly ifYou: string
+  /** Call to action when the owner did not make the change, followed by the secure-account button. */
+  readonly notYouSecure: string
+  /** Secure-account button label. */
+  readonly secureButton: string
+  /** Call to action without a secure-account URL, followed by the support button. */
+  readonly notYou: string
+  /** Support button label. */
+  readonly button: string
+  /** Call to action without a secure-account or support URL, with `{email}` as a link to the support address. */
+  readonly notYouEmail: string
+}
+
+/** Texts of the `recoveryCodeUsed` template. */
+export interface RecoveryCodeUsedMessages {
+  /** Subject line. */
+  readonly subject: string
+  /** Inbox preview text. */
+  readonly preheader: string
+  /** Heading at the top of the email. */
+  readonly heading: string
+  /** Paragraph under the greeting. */
+  readonly intro: string
+  /** Time of the sign-in, with `{date}`. */
+  readonly usedAt: string
+  /** Device or browser of the sign-in, with `{device}`. */
+  readonly device: string
+  /** IP address of the sign-in, with `{ip}`. */
+  readonly ip: string
+  /** Number of unused codes, with `{count}`. */
+  readonly remaining: string
+  /** Request to generate new codes when none are left. */
+  readonly noneLeft: string
+  /** Paragraph above the generate-codes button while codes are left. */
+  readonly regenerate: string
+  /** Generate-codes button label. */
+  readonly regenerateButton: string
+  /** Call to action when the owner did not sign in, followed by the secure-account button. */
+  readonly notYouSecure: string
+  /** Secure-account button label. */
+  readonly secureButton: string
+  /** Call to action without a secure-account URL, followed by the support button. */
+  readonly notYou: string
+  /** Support button label. */
+  readonly button: string
+  /** Call to action without a secure-account or support URL, with `{email}` as a link to the support address. */
+  readonly notYouEmail: string
+}
+
+/** Texts of the `apiKeyCreated` template. */
+export interface ApiKeyCreatedMessages {
+  /** Subject line. */
+  readonly subject: string
+  /** Inbox preview text. */
+  readonly preheader: string
+  /** Heading at the top of the email. */
+  readonly heading: string
+  /** Paragraph under the greeting. */
+  readonly intro: string
+  /** Name of the key, with `{keyName}`. */
+  readonly keyName: string
+  /** Time the key was created, with `{date}`. */
+  readonly createdAt: string
+  /** Time the key expires, with `{date}`. */
+  readonly expiresAt: string
+  /** IP address the key was created from, with `{ip}`. */
+  readonly ip: string
+  /** Reassurance and advice for the account owner who created the key. */
+  readonly ifYou: string
+  /** Call to action when the owner did not create the key, followed by the manage-keys button. */
+  readonly notYouRevoke: string
+  /** Manage-keys button label. */
+  readonly manageButton: string
+  /** Call to action without a manage-keys URL, followed by the support button. */
+  readonly notYou: string
+  /** Support button label. */
+  readonly button: string
+  /** Call to action without a manage-keys or support URL, with `{email}` as a link to the support address. */
+  readonly notYouEmail: string
+}
+
+/** Texts of the `apiKeyExpiring` template. */
+export interface ApiKeyExpiringMessages {
+  /** Subject line. */
+  readonly subject: string
+  /** Inbox preview text. */
+  readonly preheader: string
+  /** Heading at the top of the email. */
+  readonly heading: string
+  /** Paragraph under the greeting. */
+  readonly intro: string
+  /** Name of the key, with `{keyName}`. */
+  readonly keyName: string
+  /** Time the key expires, with `{date}`. */
+  readonly expiresAt: string
+  /** What happens on expiry and how to avoid it. */
+  readonly renew: string
+  /** Button label. */
+  readonly button: string
+  /** Note for owners who no longer use the key. */
+  readonly unused: string
+}
+
+/** Texts of the `accountUnlocked` template. */
+export interface AccountUnlockedMessages {
+  /** Subject line. */
+  readonly subject: string
+  /** Inbox preview text. */
+  readonly preheader: string
+  /** Heading at the top of the email. */
+  readonly heading: string
+  /** Paragraph under the greeting. */
+  readonly intro: string
+  /** Time of the unlock, with `{date}`. */
+  readonly unlockedAt: string
+  /** Sign-in button label. */
+  readonly signInButton: string
+  /** Advice for owners who did not make the failed sign-in attempts. */
+  readonly advice: string
+  /** Offer of help, followed by the support button. */
+  readonly help: string
+  /** Support button label. */
+  readonly button: string
+  /** Offer of help without a support URL, with `{email}` as a link to the support address. */
+  readonly helpEmail: string
+}
+
+/** Texts of the `dataExportReady` template. */
+export interface DataExportReadyMessages {
+  /** Subject line. */
+  readonly subject: string
+  /** Inbox preview text. */
+  readonly preheader: string
+  /** Heading at the top of the email. */
+  readonly heading: string
+  /** Paragraph under the greeting. */
+  readonly intro: string
+  /** Download button label. */
+  readonly downloadButton: string
+  /** Expiry note, with `{duration}` such as "7 days". */
+  readonly expires: string
+  /** Warning not to share the link. */
+  readonly doNotShare: string
+  /** Call to action when the owner did not ask for the export, followed by the support button. */
+  readonly notYou: string
+  /** Support button label. */
+  readonly button: string
+  /** Call to action without a support URL, with `{email}` as a link to the support address. */
+  readonly notYouEmail: string
+}
+
+/** Texts of the `inactiveAccountWarning` template. */
+export interface InactiveAccountWarningMessages {
+  /** Subject line. */
+  readonly subject: string
+  /** Inbox preview text. */
+  readonly preheader: string
+  /** Heading at the top of the email. */
+  readonly heading: string
+  /** Paragraph under the greeting. */
+  readonly intro: string
+  /** Time of the deletion, with `{date}`. */
+  readonly deletionDate: string
+  /** Time of the last sign-in, with `{date}`. */
+  readonly lastSignInAt: string
+  /** How to keep the account, above the button. */
+  readonly keep: string
+  /** Button label. */
+  readonly button: string
+  /** Note for owners who no longer need the account. */
+  readonly noAction: string
+}
+
+/** Texts of the `policyUpdated` template. */
+export interface PolicyUpdatedMessages {
+  /** Subject line for the terms of service. */
+  readonly termsSubject: string
+  /** Inbox preview text for the terms of service. */
+  readonly termsPreheader: string
+  /** Heading for the terms of service. */
+  readonly termsHeading: string
+  /** Paragraph under the greeting for the terms of service. */
+  readonly termsIntro: string
+  /** Button label for the terms of service. */
+  readonly termsButton: string
+  /** Closing note for the terms of service. */
+  readonly termsAgree: string
+  /** Subject line for the privacy policy. */
+  readonly privacySubject: string
+  /** Inbox preview text for the privacy policy. */
+  readonly privacyPreheader: string
+  /** Heading for the privacy policy. */
+  readonly privacyHeading: string
+  /** Paragraph under the greeting for the privacy policy. */
+  readonly privacyIntro: string
+  /** Button label for the privacy policy. */
+  readonly privacyButton: string
+  /** Closing note for the privacy policy. */
+  readonly privacyNoAction: string
+  /** When the changes take effect, with `{date}`. */
+  readonly effectiveAt: string
+  /** Lead-in above the list of changes. */
+  readonly changes: string
+}
+
 /**
  * Every text of the built-in templates, the blocks and the layout for one locale.
  *
@@ -434,6 +836,38 @@ export interface Messages {
   readonly confirmAccountDeletion: ConfirmAccountDeletionMessages
   /** Texts of the `accountDeleted` template. */
   readonly accountDeleted: AccountDeletedMessages
+  /** Texts of the `teamInvite` template. */
+  readonly teamInvite: TeamInviteMessages
+  /** Texts of the `userInvite` template. */
+  readonly userInvite: UserInviteMessages
+  /** Texts of the `inviteAccepted` template. */
+  readonly inviteAccepted: InviteAcceptedMessages
+  /** Texts of the `memberRoleChanged` template. */
+  readonly memberRoleChanged: MemberRoleChangedMessages
+  /** Texts of the `memberRemoved` template. */
+  readonly memberRemoved: MemberRemovedMessages
+  /** Texts of the `ownershipReceived` template. */
+  readonly ownershipReceived: OwnershipReceivedMessages
+  /** Texts of the `ownershipTransferred` template. */
+  readonly ownershipTransferred: OwnershipTransferredMessages
+  /** Texts of the `passkeyAdded` template. */
+  readonly passkeyAdded: PasskeyAddedMessages
+  /** Texts of the `passkeyRemoved` template. */
+  readonly passkeyRemoved: PasskeyRemovedMessages
+  /** Texts of the `recoveryCodeUsed` template. */
+  readonly recoveryCodeUsed: RecoveryCodeUsedMessages
+  /** Texts of the `apiKeyCreated` template. */
+  readonly apiKeyCreated: ApiKeyCreatedMessages
+  /** Texts of the `apiKeyExpiring` template. */
+  readonly apiKeyExpiring: ApiKeyExpiringMessages
+  /** Texts of the `accountUnlocked` template. */
+  readonly accountUnlocked: AccountUnlockedMessages
+  /** Texts of the `dataExportReady` template. */
+  readonly dataExportReady: DataExportReadyMessages
+  /** Texts of the `inactiveAccountWarning` template. */
+  readonly inactiveAccountWarning: InactiveAccountWarningMessages
+  /** Texts of the `policyUpdated` template. */
+  readonly policyUpdated: PolicyUpdatedMessages
 }
 
 type StringKeys<T> = { [K in keyof T]: T[K] extends string ? K : never }[keyof T] & string

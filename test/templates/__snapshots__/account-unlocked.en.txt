@@ -1,0 +1,30 @@
+Subject: Your account is unlocked
+
+My App
+
+Your account is unlocked
+
+Hi Lizzie,
+
+Your My App account is unlocked, and you can sign in again.
+
+Sign in: https://myapp.loc/
+
+If the button doesn't work, copy this link into your browser:
+https://myapp.loc/
+
+If the failed sign-in attempts weren't yours, choose a new password once you're signed in.
+
+---
+
+Still can't sign in? Contact support.
+
+Contact support: https://myapp.loc/support
+
+If the button doesn't work, copy this link into your browser:
+https://myapp.loc/support
+
+--
+You received this email because you have an account at My App.
+Questions? Write to us at support@myapp.loc
+© 2026 My App. All rights reserved.

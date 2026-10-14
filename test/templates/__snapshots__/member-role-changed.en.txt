@@ -1,0 +1,27 @@
+Subject: Your role in Acme Design was changed
+
+My App
+
+Your role was changed
+
+Hi Lizzie,
+
+Your role in Acme Design on My App was changed.
+
+New role: Admin
+Previous role: Editor
+Changed by: Anna Novak
+
+Go to Acme Design: https://myapp.loc/org
+
+If the button doesn't work, copy this link into your browser:
+https://myapp.loc/org
+
+---
+
+If you have questions about this change, ask an admin of Acme Design.
+
+--
+You received this email because you have an account at My App.
+Questions? Write to us at support@myapp.loc
+© 2026 My App. All rights reserved.

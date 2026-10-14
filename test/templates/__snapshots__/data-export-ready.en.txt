@@ -1,0 +1,27 @@
+Subject: Your data export is ready
+
+My App
+
+Your data export is ready
+
+Hi Lizzie,
+
+The copy of your My App data that you asked for is ready to download.
+
+Download your data: https://myapp.loc/export?token=abc123
+
+If the button doesn't work, copy this link into your browser:
+https://myapp.loc/export?token=abc123
+
+The link expires in 7 days.
+
+The file contains your personal data. Don't share the link with anyone.
+
+---
+
+If you didn't ask for a copy of your data, write to us right away at support@myapp.loc.
+
+--
+You received this email because you have an account at My App.
+Questions? Write to us at support@myapp.loc
+© 2026 My App. All rights reserved.

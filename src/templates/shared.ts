@@ -4,7 +4,16 @@ import type { MessageKey, Translate } from '../i18n'
 import { optionalText } from '../validators'
 import type { TemplateRenderContext } from './define'
 
-export const userName = optionalText.optional().transform((value) => (value === '' ? undefined : value))
+/** Optional text where an empty or blank value counts as missing, such as a name the app may not have. */
+export const optionalName = optionalText.optional().transform((value) => (value === '' ? undefined : value))
+
+export const userName = optionalName
+
+/** A person as the email shows them: the name, the email address, or both as `name (email)`. */
+export function person(name: string | undefined, email: string | undefined): string | undefined {
+  if (name === undefined) return email
+  return email === undefined ? name : `${name} (${email})`
+}
 
 export function greeting(ui: Ui, t: Translate, name: string | undefined): Block {
   return ui.paragraph(name === undefined ? t('common.greetingAnonymous') : t('common.greeting', { name }))
