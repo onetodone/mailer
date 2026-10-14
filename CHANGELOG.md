@@ -1,5 +1,41 @@
 # @onetodone/mailer
 
+## 0.3.3
+
+### Patch Changes
+
+- ce62da9: Add built-in templates for data exports, inactive accounts and policy updates: `dataExportReady`, `inactiveAccountWarning` and `policyUpdated`.
+  
+  - `dataExportReady` sends the download link for a copy of the user's data, such as for a GDPR request. Props: `downloadUrl` (required), `userName`, `expiresInMinutes`, `supportUrl`.
+  - `inactiveAccountWarning` warns that an inactive account will be deleted unless the owner signs in. Props: `deletionDate` (required), `userName`, `lastSignInAt`, `timeZone`, `signInUrl` (default `branding.appUrl`).
+  - `policyUpdated` announces changes to the terms of service (`policy: 'terms'`) or the privacy policy (`policy: 'privacy'`). Props: `policy` and `policyUrl` (required), `userName`, `effectiveAt`, `timeZone`, `changes` (a list of short summaries in the recipient's language).
+  - Texts in every built-in locale; prop types `DataExportReadyProps`, `InactiveAccountWarningProps`, `PolicyUpdatedProps`.
+- ce62da9: Add built-in security notices for passkeys, recovery codes, API keys and unlocked accounts: `passkeyAdded`, `passkeyRemoved`, `recoveryCodeUsed`, `apiKeyCreated`, `apiKeyExpiring` and `accountUnlocked`.
+  
+  - `passkeyAdded` and `passkeyRemoved` take the same optional props: `userName`, `passkeyName`, `changedAt`, `timeZone`, `ip`, `device`, `secureUrl`, `supportUrl`.
+  - `recoveryCodeUsed` reports a sign-in with a two-factor recovery code. `remainingCodes` shows how many are left, and at `0` the email asks for new ones; `regenerateUrl` adds a button for that. Other optional props: `userName`, `usedAt`, `timeZone`, `ip`, `device`, `secureUrl`, `supportUrl`.
+  - `apiKeyCreated` reports a new API key or personal access token, with a way to revoke it through `manageUrl`. Optional props: `userName`, `keyName`, `createdAt`, `expiresAt`, `timeZone`, `ip`, `manageUrl`, `supportUrl`. Neither API key template takes the key itself.
+  - `apiKeyExpiring` reminds the owner to replace a key before it expires. Props: `expiresAt` (required), `userName`, `keyName`, `timeZone`, `manageUrl`.
+  - `accountUnlocked` is the counterpart of `accountLocked`. Optional props: `userName`, `unlockedAt`, `timeZone`, `signInUrl` (default `branding.appUrl`), `supportUrl`.
+  - Texts in every built-in locale; prop types `PasskeyAddedProps`, `PasskeyRemovedProps`, `RecoveryCodeUsedProps`, `ApiKeyCreatedProps`, `ApiKeyExpiringProps`, `AccountUnlockedProps`.
+- ce62da9: Fix four spellings in the Belarusian Latin (`be-Latn`) texts to match standard Łacinka.
+  
+  - `parola` instead of `parolia` in `resetPassword`, `twoFactorEnabled` and `twoFactorDisabled`; `liście` instead of `liscie` in `emailChangeRequested`; `Pryłada` instead of `Prylada` in `newSignIn`; `niaŭdałych` instead of `niaŭdalych` in `accountLocked`.
+  - If you override these texts through `messages`, your overrides still win.
+- ce62da9: Add built-in templates for invitations: `teamInvite`, `userInvite` and `inviteAccepted`.
+  
+  - `teamInvite` invites someone to an organization, team or workspace in your app. Props: `organizationName` and `acceptUrl` (required), `userName`, `inviterName`, `inviterEmail`, `role`, `expiresInMinutes`.
+  - `userInvite` invites someone to an account created for them, such as by an admin, where they set a password through `acceptUrl` (required). Other props: `userName`, `inviterName`, `inviterEmail`, `expiresInMinutes`.
+  - `inviteAccepted` tells the person who sent an invitation that it was accepted. Props: `memberName` (required), `userName`, `organizationName`, `membersUrl`.
+  - Texts in every built-in locale; prop types `TeamInviteProps`, `UserInviteProps`, `InviteAcceptedProps`.
+- ce62da9: Add built-in templates for organization members: `memberRoleChanged`, `memberRemoved`, `ownershipReceived` and `ownershipTransferred`.
+  
+  - `memberRoleChanged` tells a member about their new role. Props: `organizationName` and `role` (required), `userName`, `previousRole`, `changedByName`, `organizationUrl`.
+  - `memberRemoved` tells a member they were removed and that their own account stays active. Props: `organizationName` (required), `userName`, `removedByName`.
+  - `ownershipReceived` goes to the new owner of an organization. Props: `organizationName` (required), `userName`, `previousOwnerName`, `organizationUrl`.
+  - `ownershipTransferred` goes to the former owner, with what to do if they did not make the transfer. Props: `organizationName` (required), `userName`, `newOwnerName`, `newRole`, `transferredAt`, `timeZone`, `ip`, `supportUrl`.
+  - Texts in every built-in locale; prop types `MemberRoleChangedProps`, `MemberRemovedProps`, `OwnershipReceivedProps`, `OwnershipTransferredProps`.
+
 ## 0.3.2
 
 ### Patch Changes
