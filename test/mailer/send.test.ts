@@ -27,7 +27,7 @@ const regenerateUrl = 'https://myapp.loc/security/recovery-codes'
 const manageUrl = 'https://myapp.loc/settings/api-keys'
 const downloadUrl = 'https://myapp.loc/export?token=abc123'
 const policyUrl = 'https://myapp.loc/terms'
-const organizationName = 'Acme Design'
+const organizationName = 'Example Organization'
 
 const orderShipped = defineTemplate({
   name: 'orderShipped',

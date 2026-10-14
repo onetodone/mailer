@@ -1,12 +1,12 @@
-Subject: Join Acme Design on My App
+Subject: Join Example Organization on My App
 
 My App
 
-Join Acme Design
+Join Example Organization
 
 Hi Lizzie,
 
-Anna Novak (anna@example.com) invited you to join Acme Design on My App.
+Anna Novak (anna@example.com) invited you to join Example Organization on My App.
 
 Role: Editor
 

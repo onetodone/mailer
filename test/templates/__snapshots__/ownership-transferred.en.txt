@@ -1,4 +1,4 @@
-Subject: Ownership of Acme Design was transferred
+Subject: Ownership of Example Organization was transferred
 
 My App
 
@@ -6,7 +6,7 @@ Ownership was transferred
 
 Hi Lizzie,
 
-Ownership of Acme Design on My App was transferred to Tom Lee, so you're no longer its owner.
+Ownership of Example Organization on My App was transferred to Tom Lee, so you're no longer its owner.
 
 Your role: Admin
 IP address: 203.0.113.7
