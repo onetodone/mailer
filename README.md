@@ -21,7 +21,7 @@ Screenshots of every email are in [Built-in templates](https://github.com/onetod
 
 ## Features
 
-- Built-in templates for email verification, welcome emails, one-time codes, sign-in links, password reset, email address changes, security notices and account deletion.
+- Built-in templates for email verification, welcome emails, one-time codes, sign-in links, password reset, email address changes, security notices (new sign-ins, two-factor authentication, passkeys, recovery codes, API keys, locked accounts), invitations and organization membership, data exports, policy updates and account deletion.
 - One call to send an email. Template names autocomplete, and props are checked at compile time and validated at runtime.
 - Branding from configuration: logo, company name, colors, footer text and support address.
 - Built-in texts in [many languages](https://github.com/onetodone/mailer/blob/main/docs/locales.md). Override any text, or add a locale that falls back to English key by key. Right-to-left languages, such as Arabic and Hebrew, render right to left.
@@ -35,7 +35,7 @@ Screenshots of every email are in [Built-in templates](https://github.com/onetod
 
 - Node.js 22 or later. The main entry and the Resend transport also run on Bun, Deno and edge runtimes such as Cloudflare Workers, with no Node.js compatibility flags. SMTP delivery needs Node.js.
 - ESM or CommonJS. Type declarations are included and need TypeScript 5.4 or later.
-- Every built-in language ships in the main entry, so `locale: '<code>'` needs no setup. The entry is about 250 kB of JavaScript (47 kB gzipped); each language adds about 2 kB gzipped.
+- Every built-in language ships in the main entry, so `locale: '<code>'` needs no setup. The entry is about 500 kB of JavaScript (83 kB gzipped); each language adds about 4 kB gzipped.
 - [nodemailer](https://nodemailer.com) 6 or later, only for SMTP delivery through `@onetodone/mailer/smtp`. Delivery through Resend with `@onetodone/mailer/resend` needs no extra package.
 - [NestJS](https://nestjs.com) 10 or later, only for the module in `@onetodone/mailer/nestjs`.
 
