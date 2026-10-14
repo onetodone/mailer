@@ -1,6 +1,5 @@
 import type { Messages } from './index'
 
-// Durations are in the accusative case: «Link wygaśnie za 1 godzinę».
 export const pl: Messages = {
   common: {
     greeting: 'Cześć {name},',

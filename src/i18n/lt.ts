@@ -1,6 +1,5 @@
 import type { Messages } from './index'
 
-// Durations are in the accusative case: «Nuoroda galioja 1 valandą».
 export const lt: Messages = {
   common: {
     greeting: 'Sveiki, {name}!',

@@ -1,6 +1,5 @@
 import type { Messages } from './index'
 
-// Durations are in the accusative case: «Spasyłka dziejničaje 1 chvilinu».
 export const beLatn: Messages = {
   common: {
     greeting: 'Vitajem, {name}!',

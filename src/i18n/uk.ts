@@ -1,6 +1,5 @@
 import type { Messages } from './index'
 
-// Durations are in the accusative case: «Посилання діє 1 хвилину».
 export const uk: Messages = {
   common: {
     greeting: 'Вітаємо, {name}!',

@@ -1,6 +1,5 @@
 import type { Messages } from './index'
 
-// `many` covers millions: «1.000.000 di minuti».
 export const it: Messages = {
   common: {
     greeting: 'Ciao {name},',

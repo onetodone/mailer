@@ -1,6 +1,5 @@
 import type { Messages } from './index'
 
-// Durations are in the genitive case before «განმავლობაში»: «24 საათის განმავლობაში».
 export const ka: Messages = {
   common: {
     greeting: 'გამარჯობა, {name}!',

@@ -1,6 +1,5 @@
 import type { Messages } from './index'
 
-// Durations are in the accusative case: «Der Link ist 2 Tage gültig».
 export const de: Messages = {
   common: {
     greeting: 'Hallo {name},',

@@ -3,19 +3,33 @@ import type { BuiltInTemplates } from '../templates/built-in'
 import type { TemplateSections } from '../templates/messages'
 import { beLatn } from './be-Latn'
 import { be } from './be'
+import { bg } from './bg'
 import { cs } from './cs'
+import { da } from './da'
 import { de } from './de'
 import { en } from './en'
+import { es } from './es'
 import { et } from './et'
+import { fi } from './fi'
 import { fr } from './fr'
+import { hr } from './hr'
 import { it } from './it'
 import { ja } from './ja'
 import { ka } from './ka'
+import { kk } from './kk'
+import { ko } from './ko'
 import { lt } from './lt'
 import { lv } from './lv'
+import { nb } from './nb'
+import { nl } from './nl'
 import { pl } from './pl'
+import { pt } from './pt'
 import { ro } from './ro'
+import { sl } from './sl'
+import { sr } from './sr'
+import { sv } from './sv'
 import { th } from './th'
+import { tr } from './tr'
 import { uk } from './uk'
 import { zh } from './zh'
 
@@ -912,18 +926,32 @@ export const dictionaries = {
   en,
   'be-Latn': beLatn,
   be,
+  bg,
   cs,
+  da,
   de,
+  es,
   et,
+  fi,
   fr,
+  hr,
   it,
   ja,
   ka,
+  kk,
+  ko,
   lt,
   lv,
+  nb,
+  nl,
   pl,
+  pt,
   ro,
+  sl,
+  sr,
+  sv,
   th,
+  tr,
   uk,
   zh,
 } satisfies MessageSource

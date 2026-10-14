@@ -1,6 +1,5 @@
 import type { Messages } from './index'
 
-// Durations are in the accusative case: «Platnost odkazu vyprší za 1 hodinu».
 export const cs: Messages = {
   common: {
     greeting: 'Dobrý den, {name},',

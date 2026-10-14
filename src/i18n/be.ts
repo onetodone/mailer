@@ -1,6 +1,5 @@
 import type { Messages } from './index'
 
-// Durations are in the accusative case: «Спасылка дзейнічае 1 хвіліну».
 export const be: Messages = {
   common: {
     greeting: 'Вітаем, {name}!',

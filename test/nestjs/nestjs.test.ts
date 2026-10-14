@@ -212,7 +212,7 @@ describe('@onetodone/mailer/nestjs', () => {
         // @ts-expect-error: ping needs props.name
         void mailer.render('ping', { props: {} })
         // @ts-expect-error: unknown locale
-        void mailer.render('passwordChanged', { locale: 'nl' })
+        void mailer.render('passwordChanged', { locale: 'hu' })
         // @ts-expect-error: the default service knows only the built-in templates
         void new MailerService(createMailer({ transport: memoryTransport(), from, branding })).render('ping')
       }
