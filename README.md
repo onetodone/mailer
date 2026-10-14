@@ -35,7 +35,7 @@ Screenshots of every email are in [Built-in templates](https://github.com/onetod
 
 - Node.js 22 or later. The main entry and the Resend transport also run on Bun, Deno and edge runtimes such as Cloudflare Workers, with no Node.js compatibility flags. SMTP delivery needs Node.js.
 - ESM or CommonJS. Type declarations are included and need TypeScript 5.4 or later.
-- Every built-in language ships in the main entry, so `locale: '<code>'` needs no setup. The entry is about 610 kB of JavaScript (100 kB gzipped); each language adds about 4 kB gzipped.
+- Every built-in language ships in the main entry, so `locale: '<code>'` needs no setup. The entry is about 830 kB of JavaScript (130 kB gzipped); each language adds about 4 kB gzipped.
 - [nodemailer](https://nodemailer.com) 6 or later, only for SMTP delivery through `@onetodone/mailer/smtp`. Delivery through Resend with `@onetodone/mailer/resend` needs no extra package.
 - [NestJS](https://nestjs.com) 10 or later, only for the module in `@onetodone/mailer/nestjs`.
 

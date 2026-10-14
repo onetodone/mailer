@@ -558,19 +558,19 @@ describe('texts and locales', () => {
 
   it('rejects a locale without texts', async () => {
     const mailer = createMailer({ transport: memoryTransport(), from, branding, messages: { sk: {} } })
-    const sendError = await mailerRejection(mailer.send('passwordChanged', { to, locale: 'sv' as never }))
+    const sendError = await mailerRejection(mailer.send('passwordChanged', { to, locale: 'hu' as never }))
     expect(sendError.code).toBe('INVALID_OPTIONS')
     expect(sendError.message).toBe(
-      'Invalid send options: locale must be one of "en", "be-Latn", "be", "cs", "de", "es", "et", "fr", "it", "ja", "ka", "ko", "lt", "lv", "nl", "pl", "pt", "ro", "th", "tr", "uk", "zh", "sk", received "sv".',
+      'Invalid send options: locale must be one of "en", "be-Latn", "be", "bg", "cs", "da", "de", "es", "et", "fi", "fr", "hr", "it", "ja", "ka", "kk", "ko", "lt", "lv", "nb", "nl", "pl", "pt", "ro", "sl", "sr", "sv", "th", "tr", "uk", "zh", "sk", received "hu".',
     )
-    const renderError = await mailerRejection(mailer.render('passwordChanged', { locale: 'sv' as never }))
+    const renderError = await mailerRejection(mailer.render('passwordChanged', { locale: 'hu' as never }))
     expect(renderError.code).toBe('INVALID_OPTIONS')
     expect(renderError.message).toBe(
-      'Invalid render options: locale must be one of "en", "be-Latn", "be", "cs", "de", "es", "et", "fr", "it", "ja", "ka", "ko", "lt", "lv", "nl", "pl", "pt", "ro", "th", "tr", "uk", "zh", "sk", received "sv".',
+      'Invalid render options: locale must be one of "en", "be-Latn", "be", "bg", "cs", "da", "de", "es", "et", "fi", "fr", "hr", "it", "ja", "ka", "kk", "ko", "lt", "lv", "nb", "nl", "pl", "pt", "ro", "sl", "sr", "sv", "th", "tr", "uk", "zh", "sk", received "hu".',
     )
     const check = async () => {
-      // @ts-expect-error: "sv" has no texts
-      await mailer.send('passwordChanged', { to, locale: 'sv' })
+      // @ts-expect-error: "hu" has no texts
+      await mailer.send('passwordChanged', { to, locale: 'hu' })
     }
     expect(check).toBeTypeOf('function')
   })
