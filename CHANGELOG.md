@@ -1,5 +1,68 @@
 # @onetodone/mailer
 
+## 0.3.4
+
+### Patch Changes
+
+- 1ac4e0f: Add built-in texts in Bulgarian.
+  
+  - `Locale` gains `bg`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - If you already send in Bulgarian through `messages`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+- 1ac4e0f: Add built-in texts in Danish.
+  
+  - `Locale` gains `da`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - If you already send in Danish through `messages`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+- 1ac4e0f: Add built-in texts in Spanish.
+  
+  - `Locale` gains `es`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - If you already send in Spanish through `messages`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+- 1ac4e0f: Add built-in texts in Finnish.
+  
+  - `Locale` gains `fi`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - If you already send in Finnish through `messages`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+- 1ac4e0f: Add built-in texts in Croatian.
+  
+  - `Locale` gains `hr`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - If you already send in Croatian through `messages`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+- 1ac4e0f: Add built-in texts in Kazakh.
+  
+  - `Locale` gains `kk`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - If you already send in Kazakh through `messages`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+- 1ac4e0f: Add built-in texts in Korean.
+  
+  - `Locale` gains `ko`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - If you already send in Korean through `messages`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+- 1ac4e0f: Add built-in texts in Norwegian (Bokmål).
+  
+  - `Locale` gains `nb`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - If you already send in Norwegian (Bokmål) through `messages`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+- 1ac4e0f: Add built-in texts in Dutch.
+  
+  - `Locale` gains `nl`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - If you already send in Dutch through `messages`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+- 1ac4e0f: Add built-in texts in Portuguese.
+  
+  - `Locale` gains `pt`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - The texts are in Brazilian Portuguese and address the reader as «você».
+  - If you already send in Portuguese through `messages` under `pt`, your overrides still win, and the keys you leave out come from the built-in texts instead of English. A tag such as `pt-BR` or `pt-PT` in `messages` stays a separate locale and does not use the `pt` texts.
+- 1ac4e0f: Add built-in texts in Slovenian.
+  
+  - `Locale` gains `sl`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - If you already send in Slovenian through `messages`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+- 1ac4e0f: Add built-in texts in Serbian.
+  
+  - `Locale` gains `sr`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - The texts are in Cyrillic script. A tag such as `sr-Latn` in `messages` stays a separate locale and does not use the `sr` texts.
+  - If you already send in Serbian through `messages` under `sr`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+- 1ac4e0f: Add built-in texts in Swedish.
+  
+  - `Locale` gains `sv`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - If you already send in Swedish through `messages`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+- 1ac4e0f: Add built-in texts in Turkish.
+  
+  - `Locale` gains `tr`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - If you already send in Turkish through `messages`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+
 ## 0.3.3
 
 ### Patch Changes
