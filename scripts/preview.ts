@@ -108,7 +108,20 @@ main { display: flex; flex-direction: column; min-width: 0; }
 .meta strong { flex: 1 1 100%; }
 #files { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; }
 iframe { flex: 1; width: 100%; border: 0; background: #fff; }
-@media (max-width: 720px) { body { height: auto; } .layout { grid-template-columns: 1fr; } nav { border-right: 0; border-bottom: 1px solid var(--line); max-height: 40vh; } iframe { flex: none; height: 80vh; } }
+#menu, .backdrop { display: none; }
+@media (max-width: 720px) {
+  body { height: auto; }
+  header { padding-right: 4.25rem; }
+  .layout { grid-template-columns: 1fr; }
+  #menu { display: flex; align-items: center; justify-content: center; position: fixed; top: 0.75rem; right: 0.75rem; z-index: 3; width: 2.75rem; height: 2.75rem; padding: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--text); box-shadow: 0 2px 8px #0f172a33; cursor: pointer; }
+  #menu[aria-expanded="true"] .open, #menu[aria-expanded="false"] .close { display: none; }
+  nav { position: fixed; top: 4rem; right: 0.75rem; left: 0.75rem; z-index: 2; max-height: calc(100dvh - 4.75rem); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px #0f172a40; }
+  nav:not(.open) { display: none; }
+  nav { overscroll-behavior: contain; }
+  html:has(nav.open) { overflow: hidden; }
+  .backdrop:not([hidden]) { display: block; position: fixed; inset: 0; z-index: 1; background: #0f172a66; }
+  iframe { flex: none; height: 80vh; }
+}
 </style>
 </head>
 <body>
@@ -116,9 +129,14 @@ iframe { flex: 1; width: 100%; border: 0; background: #fff; }
 <h1>Email preview</h1>
 <p>Every sample email of <a href="https://www.npmjs.com/package/@onetodone/mailer">@onetodone/mailer</a> in every built-in locale, rendered with sample data.</p>
 <label>Locale <select id="locale">${options}</select></label>
+<button id="menu" type="button" aria-label="Templates" aria-controls="templates" aria-expanded="false">
+<svg class="open" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+<svg class="close" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+</button>
 </header>
+<div class="backdrop" hidden></div>
 <div class="layout">
-<nav><ul>${nav}</ul></nav>
+<nav id="templates"><ul>${nav}</ul></nav>
 <main>
 <div class="meta"><strong id="subject">${first?.subjects[firstLocale] ?? ''}</strong><a id="html" href="${first?.slug ?? ''}.${firstLocale}.html">HTML</a><a id="text" href="${first?.slug ?? ''}.${firstLocale}.txt">Plain text</a><span id="files"></span></div>
 <iframe name="viewer" title="Email" src="${first?.slug ?? ''}.${firstLocale}.html"></iframe>
@@ -129,7 +147,26 @@ iframe { flex: 1; width: 100%; border: 0; background: #fff; }
 const entries = JSON.parse(document.getElementById('data').textContent)
 const select = document.getElementById('locale')
 const frame = document.querySelector('iframe')
+const nav = document.getElementById('templates')
+const menu = document.getElementById('menu')
+const backdrop = document.querySelector('.backdrop')
 let current = entries[0]?.slug
+
+function toggleMenu(open) {
+  nav.classList.toggle('open', open)
+  backdrop.hidden = !open
+  menu.setAttribute('aria-expanded', String(open))
+  if (open) nav.querySelector('a[aria-current="true"]')?.scrollIntoView({ block: 'nearest' })
+}
+
+menu.addEventListener('click', () => toggleMenu(!nav.classList.contains('open')))
+backdrop.addEventListener('click', () => toggleMenu(false))
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && nav.classList.contains('open')) {
+    toggleMenu(false)
+    menu.focus()
+  }
+})
 
 function show(slug, locale) {
   const entry = entries.find((item) => item.slug === slug) ?? entries[0]
@@ -154,6 +191,7 @@ for (const link of document.querySelectorAll('nav a')) {
   link.addEventListener('click', (event) => {
     event.preventDefault()
     show(link.dataset.slug, select.value)
+    toggleMenu(false)
   })
 }
 select.addEventListener('change', () => show(current, select.value))
