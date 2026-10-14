@@ -313,7 +313,7 @@ await mailer.send('accountDeleted', { to: 'lizzie@example.com', props: { userNam
 
 ## `teamInvite`
 
-<img src="images/templates/team-invite.png" width="340" alt="The teamInvite email in English, subject “Join Acme Design on OneToDone”">
+<img src="images/templates/team-invite.png" width="340" alt="The teamInvite email in English, subject “Join Example Organization on OneToDone”">
 
 Send it when someone invites a person to join an organization, team or workspace in your app. The recipient may not have an account yet.
 
@@ -332,7 +332,7 @@ await mailer.send('teamInvite', {
   to: 'tom@example.com',
   props: {
     inviterName: 'Lizzie',
-    organizationName: 'Acme Design',
+    organizationName: 'Example Organization',
     role: 'Editor',
     acceptUrl: 'https://example.com/invitations/abc123',
     expiresInMinutes: 7 * 24 * 60,
@@ -369,7 +369,7 @@ Send it to the person who sent an invitation once it is accepted.
 
 ## `memberRoleChanged`
 
-<img src="images/templates/member-role-changed.png" width="340" alt="The memberRoleChanged email in English, subject “Your role in Acme Design was changed”">
+<img src="images/templates/member-role-changed.png" width="340" alt="The memberRoleChanged email in English, subject “Your role in Example Organization was changed”">
 
 Send it to a member whose role in an organization, team or workspace changed. The email ends by pointing to the organization's admins for questions.
 
@@ -384,7 +384,7 @@ Send it to a member whose role in an organization, team or workspace changed. Th
 
 ## `memberRemoved`
 
-<img src="images/templates/member-removed.png" width="340" alt="The memberRemoved email in English, subject “You were removed from Acme Design”">
+<img src="images/templates/member-removed.png" width="340" alt="The memberRemoved email in English, subject “You were removed from Example Organization”">
 
 Send it to a member removed from an organization, team or workspace. The email says that the member's own account stays active and points to the organization's admins if it is a mistake.
 
@@ -398,7 +398,7 @@ If removing the last membership deletes the account in your app, change `memberR
 
 ## `ownershipReceived`
 
-<img src="images/templates/ownership-received.png" width="340" alt="The ownershipReceived email in English, subject “You're now the owner of Acme Design”">
+<img src="images/templates/ownership-received.png" width="340" alt="The ownershipReceived email in English, subject “You're now the owner of Example Organization”">
 
 Send it to the new owner when ownership of an organization, team or workspace is transferred.
 
@@ -411,7 +411,7 @@ Send it to the new owner when ownership of an organization, team or workspace is
 
 ## `ownershipTransferred`
 
-<img src="images/templates/ownership-transferred.png" width="340" alt="The ownershipTransferred email in English, subject “Ownership of Acme Design was transferred”">
+<img src="images/templates/ownership-transferred.png" width="340" alt="The ownershipTransferred email in English, subject “Ownership of Example Organization was transferred”">
 
 Send it to the former owner, so they can act if they did not make the transfer.
 
@@ -431,11 +431,11 @@ A transfer uses both:
 ```ts
 await mailer.send('ownershipReceived', {
   to: 'tom@example.com',
-  props: { organizationName: 'Acme Design', previousOwnerName: 'Lizzie' },
+  props: { organizationName: 'Example Organization', previousOwnerName: 'Lizzie' },
 })
 await mailer.send('ownershipTransferred', {
   to: 'lizzie@example.com',
-  props: { organizationName: 'Acme Design', newOwnerName: 'Tom', newRole: 'Admin', transferredAt: new Date() },
+  props: { organizationName: 'Example Organization', newOwnerName: 'Tom', newRole: 'Admin', transferredAt: new Date() },
 })
 ```
 

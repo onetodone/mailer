@@ -1,16 +1,16 @@
-Subject: Ciapier vy ŭładalnik Acme Design
+Subject: Ciapier vy ŭładalnik Example Organization
 
 My App
 
-Ciapier vy ŭładalnik Acme Design
+Ciapier vy ŭładalnik Example Organization
 
 Vitajem, Liza!
 
-Anna Novak pieradaje vam prava ŭładalnika Acme Design u My App.
+Anna Novak pieradaje vam prava ŭładalnika Example Organization u My App.
 
-Jak uładalnik, vy całkam kirujecie Acme Design, u tym liku ŭdzielnikami i naładami.
+Jak uładalnik, vy całkam kirujecie Example Organization, u tym liku ŭdzielnikami i naładami.
 
-Pierajści ŭ Acme Design: https://myapp.loc/org
+Pierajści ŭ Example Organization: https://myapp.loc/org
 
 Kali knopka nie pracuje, skapijujcie hetu spasyłku ŭ braŭzier:
 https://myapp.loc/org

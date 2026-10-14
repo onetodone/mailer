@@ -1,12 +1,12 @@
-Subject: Vas vydalili z Acme Design
+Subject: Vas vydalili z Example Organization
 
 My App
 
-Vas vydalili z Acme Design
+Vas vydalili z Example Organization
 
 Vitajem, Liza!
 
-U vas bolš niama dostupu da Acme Design u My App.
+U vas bolš niama dostupu da Example Organization u My App.
 
 Chto vydaliŭ: Anna Novak
 
@@ -14,7 +14,7 @@ Vaš akaŭnt u My App zastajecca aktyŭnym.
 
 ---
 
-Kali vy ličycie, što heta pamyłka, zviarniciesia da administratara Acme Design.
+Kali vy ličycie, što heta pamyłka, zviarniciesia da administratara Example Organization.
 
 --
 You received this email because you have an account at My App.

@@ -35,7 +35,7 @@ const regenerateUrl = 'https://myapp.loc/security/recovery-codes'
 const manageUrl = 'https://myapp.loc/settings/api-keys'
 const downloadUrl = 'https://myapp.loc/export?token=abc123'
 const policyUrl = 'https://myapp.loc/terms'
-const organizationName = 'Acme Design'
+const organizationName = 'Example Organization'
 
 function options(locale: Locale = 'en', extra: Partial<RenderTemplateOptions> = {}): RenderTemplateOptions {
   return { branding, layout: defaultLayout, locale, messages: messages[locale], ...extra }
@@ -1069,8 +1069,8 @@ describe('teamInvite', () => {
       { inviterName: 'Anna', inviterEmail: 'anna@example.com', organizationName, acceptUrl },
       options(),
     )
-    expect(email.subject).toBe('Join Acme Design on My App')
-    expect(email.text).toContain('Anna (anna@example.com) invited you to join Acme Design on My App.')
+    expect(email.subject).toBe('Join Example Organization on My App')
+    expect(email.text).toContain('Anna (anna@example.com) invited you to join Example Organization on My App.')
     expect(email.html.match(/href="https:\/\/myapp\.loc\/invite\?token=abc123"/g)).toHaveLength(3)
     expect(email.text).toContain(`Accept invitation: ${acceptUrl}`)
   })
@@ -1082,9 +1082,9 @@ describe('teamInvite', () => {
       { inviterName: ' ', inviterEmail: 'anna@example.com', organizationName, acceptUrl },
       options(),
     )
-    expect(byEmail.text).toContain('anna@example.com invited you to join Acme Design on My App.')
+    expect(byEmail.text).toContain('anna@example.com invited you to join Example Organization on My App.')
     const anonymous = await renderTemplate(builtInTemplates, 'teamInvite', { organizationName, acceptUrl }, options())
-    expect(anonymous.text).toContain("You've been invited to join Acme Design on My App.")
+    expect(anonymous.text).toContain("You've been invited to join Example Organization on My App.")
   })
 
   it('shows the role and the expiry only when given', async () => {
@@ -1162,7 +1162,7 @@ describe('inviteAccepted', () => {
       options(),
     )
     expect(email.subject).toBe('Tom accepted your invitation')
-    expect(email.text).toContain('Tom accepted your invitation and joined Acme Design.')
+    expect(email.text).toContain('Tom accepted your invitation and joined Example Organization.')
     expect(email.text).toContain(`View members: ${membersUrl}`)
   })
 
@@ -1188,10 +1188,10 @@ describe('memberRoleChanged', () => {
       { organizationName, role: 'Admin', previousRole: 'Editor', changedByName: 'Anna', organizationUrl },
       options(),
     )
-    expect(email.subject).toBe('Your role in Acme Design was changed')
+    expect(email.subject).toBe('Your role in Example Organization was changed')
     expect(email.text).toContain('New role: Admin\nPrevious role: Editor\nChanged by: Anna')
-    expect(email.text).toContain(`Go to Acme Design: ${organizationUrl}`)
-    expect(email.text).toContain('If you have questions about this change, ask an admin of Acme Design.')
+    expect(email.text).toContain(`Go to Example Organization: ${organizationUrl}`)
+    expect(email.text).toContain('If you have questions about this change, ask an admin of Example Organization.')
   })
 
   it('shows only the new role and no button without the optional props', async () => {
@@ -1204,7 +1204,7 @@ describe('memberRoleChanged', () => {
     expect(email.text).toContain('New role: Viewer\n')
     expect(email.text).not.toContain('Previous role:')
     expect(email.text).not.toContain('Changed by:')
-    expect(email.text).not.toContain('Go to Acme Design')
+    expect(email.text).not.toContain('Go to Example Organization')
   })
 
   it('rejects a missing role', async () => {
@@ -1223,10 +1223,10 @@ describe('memberRemoved', () => {
       { organizationName, removedByName: 'Anna' },
       options(),
     )
-    expect(email.subject).toBe('You were removed from Acme Design')
-    expect(email.text).toContain('You no longer have access to Acme Design on My App.\n\nRemoved by: Anna')
+    expect(email.subject).toBe('You were removed from Example Organization')
+    expect(email.text).toContain('You no longer have access to Example Organization on My App.\n\nRemoved by: Anna')
     expect(email.text).toContain('Your My App account stays active.')
-    expect(email.text).toContain('If you think this is a mistake, contact an admin of Acme Design.')
+    expect(email.text).toContain('If you think this is a mistake, contact an admin of Example Organization.')
   })
 
   it('leaves out who removed the member when unknown', async () => {
@@ -1250,15 +1250,15 @@ describe('ownershipReceived', () => {
       { organizationName, previousOwnerName: 'Anna', organizationUrl },
       options(),
     )
-    expect(email.subject).toBe("You're now the owner of Acme Design")
-    expect(email.text).toContain('Anna transferred ownership of Acme Design on My App to you.')
-    expect(email.text).toContain(`Go to Acme Design: ${organizationUrl}`)
+    expect(email.subject).toBe("You're now the owner of Example Organization")
+    expect(email.text).toContain('Anna transferred ownership of Example Organization on My App to you.')
+    expect(email.text).toContain(`Go to Example Organization: ${organizationUrl}`)
   })
 
   it('works without the previous owner and the URL', async () => {
     const email = await renderTemplate(builtInTemplates, 'ownershipReceived', { organizationName }, options())
-    expect(email.text).toContain('Ownership of Acme Design on My App was transferred to you.')
-    expect(email.text).not.toContain('Go to Acme Design')
+    expect(email.text).toContain('Ownership of Example Organization on My App was transferred to you.')
+    expect(email.text).not.toContain('Go to Example Organization')
   })
 })
 

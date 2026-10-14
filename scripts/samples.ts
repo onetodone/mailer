@@ -3,6 +3,8 @@ import { join } from 'node:path'
 
 import {
   createMailer,
+  defaultLayout,
+  defineLayout,
   defineTemplate,
   type AccountDeletedProps,
   type AccountLockedProps,
@@ -56,21 +58,33 @@ function numberEnv(name: string): number | undefined {
 
 export const branding: Branding = {
   companyName: 'OneToDone',
-  appUrl: 'https://github.com/onetodone',
-  supportEmail: 'hello@onetodone.com',
+  appUrl: 'https://your-domain.loc',
+  supportEmail: 'support@your-domain.loc',
   logoUrl: env('LOGO_URL'),
   logoWidth: numberEnv('LOGO_WIDTH'),
   logoHeight: numberEnv('LOGO_HEIGHT'),
   footerText: 'You received this email because you signed up for OneToDone.',
+  theme: {
+    primary: '#6b6fe8',
+    background: '#e9e9f0',
+    text: '#35343c',
+    mutedText: '#888a96',
+    border: '#c3c4d0',
+  },
 }
+
+// Sample bodies point to a placeholder domain;
+const layout = defineLayout((context) =>
+  defaultLayout({ ...context, branding: { ...context.branding, supportEmail: 'hello@onetodone.com' } }),
+)
 
 // The OneToDone logo. Without LOGO_URL, the preview and the screenshots render with its public URL
 // and then swap it for the local file, so they work offline and before the file reaches main.
 export const brandLogo = {
   url: 'https://raw.githubusercontent.com/onetodone/mailer/main/scripts/assets/logo.png',
   file: join(import.meta.dirname, 'assets', 'logo.png'),
-  width: 123,
-  height: 32,
+  width: 94,
+  height: 40,
 } as const
 
 export const from: MailAddress = { name: 'OneToDone', address: 'hello@onetodone.com' }
@@ -158,7 +172,7 @@ const media = defineTemplate({
 })
 
 export function createSampleMailer(transport: MailTransport, sender: MailAddress = from, brand: Branding = branding) {
-  return createMailer({ transport, from: sender, branding: brand, templates: { media } })
+  return createMailer({ transport, from: sender, branding: brand, layout, templates: { media } })
 }
 
 interface PropsByTemplate {
@@ -212,12 +226,12 @@ export const samples: readonly Sample[] = [
   {
     slug: 'verify-email',
     template: 'verifyEmail',
-    props: { userName: 'Lizzie', verifyUrl: 'http://fake-url.loc/verify?token=preview', expiresInMinutes: 2880 },
+    props: { userName: 'Lizzie', verifyUrl: 'https://your-domain.loc/verify?token=preview', expiresInMinutes: 2880 },
   },
   {
     slug: 'reset-password',
     template: 'resetPassword',
-    props: { userName: 'Lizzie', resetUrl: 'http://fake-url.loc/reset?token=preview', expiresInMinutes: 30 },
+    props: { userName: 'Lizzie', resetUrl: 'https://your-domain.loc/reset?token=preview', expiresInMinutes: 30 },
   },
   {
     slug: 'password-changed',
@@ -227,7 +241,7 @@ export const samples: readonly Sample[] = [
       changedAt: new Date(),
       timeZone: 'Europe/Minsk',
       ip: '0.0.0.0',
-      supportUrl: 'http://fake-url.loc/support',
+      supportUrl: 'https://your-domain.loc/support',
     },
   },
   { slug: 'password-changed-minimal', template: 'passwordChanged', props: {} },
@@ -236,7 +250,7 @@ export const samples: readonly Sample[] = [
     template: 'verifyEmailChange',
     props: {
       userName: 'Lizzie',
-      verifyUrl: 'http://fake-url.loc/email/verify?token=preview',
+      verifyUrl: 'https://your-domain.loc/email/verify?token=preview',
       expiresInMinutes: 1440,
     },
   },
@@ -249,7 +263,7 @@ export const samples: readonly Sample[] = [
       requestedAt: new Date(),
       timeZone: 'Europe/Minsk',
       ip: '0.0.0.0',
-      cancelUrl: 'http://fake-url.loc/email/cancel?token=preview',
+      cancelUrl: 'https://your-domain.loc/email/cancel?token=preview',
     },
   },
   {
@@ -266,7 +280,7 @@ export const samples: readonly Sample[] = [
       changedAt: new Date(),
       timeZone: 'Europe/Minsk',
       ip: '0.0.0.0',
-      supportUrl: 'http://fake-url.loc/support',
+      supportUrl: 'https://your-domain.loc/support',
     },
   },
   { slug: 'email-changed-minimal', template: 'emailChanged', props: {} },
@@ -278,12 +292,12 @@ export const samples: readonly Sample[] = [
   {
     slug: 'magic-link',
     template: 'magicLink',
-    props: { userName: 'Lizzie', signInUrl: 'http://fake-url.loc/sign-in?token=preview', expiresInMinutes: 15 },
+    props: { userName: 'Lizzie', signInUrl: 'https://your-domain.loc/sign-in?token=preview', expiresInMinutes: 15 },
   },
   {
     slug: 'welcome',
     template: 'welcome',
-    props: { userName: 'Lizzie', startUrl: 'http://fake-url.loc/get-started' },
+    props: { userName: 'Lizzie', startUrl: 'https://your-domain.loc/get-started' },
   },
   { slug: 'welcome-minimal', template: 'welcome', props: {} },
   {
@@ -296,7 +310,7 @@ export const samples: readonly Sample[] = [
       ip: '0.0.0.0',
       device: 'Chrome on macOS',
       location: 'Minsk, Belarus',
-      secureUrl: 'http://fake-url.loc/security?token=preview',
+      secureUrl: 'https://your-domain.loc/security?token=preview',
     },
   },
   { slug: 'new-sign-in-minimal', template: 'newSignIn', props: {} },
@@ -308,7 +322,7 @@ export const samples: readonly Sample[] = [
       changedAt: new Date(),
       timeZone: 'Europe/Minsk',
       ip: '0.0.0.0',
-      supportUrl: 'http://fake-url.loc/support',
+      supportUrl: 'https://your-domain.loc/support',
     },
   },
   {
@@ -324,7 +338,7 @@ export const samples: readonly Sample[] = [
       lockedUntil: new Date(Date.now() + 30 * 60_000),
       timeZone: 'Europe/Minsk',
       ip: '0.0.0.0',
-      unlockUrl: 'http://fake-url.loc/unlock?token=preview',
+      unlockUrl: 'https://your-domain.loc/unlock?token=preview',
     },
   },
   { slug: 'account-locked-minimal', template: 'accountLocked', props: {} },
@@ -333,14 +347,14 @@ export const samples: readonly Sample[] = [
     template: 'confirmAccountDeletion',
     props: {
       userName: 'Lizzie',
-      confirmUrl: 'http://fake-url.loc/account/delete?token=preview',
+      confirmUrl: 'https://your-domain.loc/account/delete?token=preview',
       expiresInMinutes: 60,
     },
   },
   {
     slug: 'account-deleted',
     template: 'accountDeleted',
-    props: { userName: 'Lizzie', supportUrl: 'http://fake-url.loc/support' },
+    props: { userName: 'Lizzie', supportUrl: 'https://your-domain.loc/support' },
   },
   { slug: 'account-deleted-minimal', template: 'accountDeleted', props: {} },
   {
@@ -350,16 +364,16 @@ export const samples: readonly Sample[] = [
       userName: 'Lizzie',
       inviterName: 'Anna Novak',
       inviterEmail: 'anna@example.com',
-      organizationName: 'Acme Design',
+      organizationName: 'Example Organization',
       role: 'Editor',
-      acceptUrl: 'http://fake-url.loc/invite?token=preview',
+      acceptUrl: 'https://your-domain.loc/invite?token=preview',
       expiresInMinutes: 10080,
     },
   },
   {
     slug: 'team-invite-minimal',
     template: 'teamInvite',
-    props: { organizationName: 'Acme Design', acceptUrl: 'http://fake-url.loc/invite?token=preview' },
+    props: { organizationName: 'Example Organization', acceptUrl: 'https://your-domain.loc/invite?token=preview' },
   },
   {
     slug: 'user-invite',
@@ -367,7 +381,7 @@ export const samples: readonly Sample[] = [
     props: {
       userName: 'Lizzie',
       inviterName: 'Anna Novak',
-      acceptUrl: 'http://fake-url.loc/invite?token=preview',
+      acceptUrl: 'https://your-domain.loc/invite?token=preview',
       expiresInMinutes: 4320,
     },
   },
@@ -377,8 +391,8 @@ export const samples: readonly Sample[] = [
     props: {
       userName: 'Anna',
       memberName: 'Lizzie Smith',
-      organizationName: 'Acme Design',
-      membersUrl: 'http://fake-url.loc/org/members',
+      organizationName: 'Example Organization',
+      membersUrl: 'https://your-domain.loc/org/members',
     },
   },
   {
@@ -386,26 +400,26 @@ export const samples: readonly Sample[] = [
     template: 'memberRoleChanged',
     props: {
       userName: 'Lizzie',
-      organizationName: 'Acme Design',
+      organizationName: 'Example Organization',
       role: 'Admin',
       previousRole: 'Editor',
       changedByName: 'Anna Novak',
-      organizationUrl: 'http://fake-url.loc/org',
+      organizationUrl: 'https://your-domain.loc/org',
     },
   },
   {
     slug: 'member-removed',
     template: 'memberRemoved',
-    props: { userName: 'Lizzie', organizationName: 'Acme Design', removedByName: 'Anna Novak' },
+    props: { userName: 'Lizzie', organizationName: 'Example Organization', removedByName: 'Anna Novak' },
   },
   {
     slug: 'ownership-received',
     template: 'ownershipReceived',
     props: {
       userName: 'Lizzie',
-      organizationName: 'Acme Design',
+      organizationName: 'Example Organization',
       previousOwnerName: 'Anna Novak',
-      organizationUrl: 'http://fake-url.loc/org',
+      organizationUrl: 'https://your-domain.loc/org',
     },
   },
   {
@@ -413,13 +427,13 @@ export const samples: readonly Sample[] = [
     template: 'ownershipTransferred',
     props: {
       userName: 'Anna',
-      organizationName: 'Acme Design',
+      organizationName: 'Example Organization',
       newOwnerName: 'Lizzie Smith',
       newRole: 'Admin',
       transferredAt: new Date(),
       timeZone: 'Europe/Minsk',
       ip: '0.0.0.0',
-      supportUrl: 'http://fake-url.loc/support',
+      supportUrl: 'https://your-domain.loc/support',
     },
   },
   {
@@ -432,7 +446,7 @@ export const samples: readonly Sample[] = [
       timeZone: 'Europe/Minsk',
       device: 'Safari on iOS',
       ip: '0.0.0.0',
-      secureUrl: 'http://fake-url.loc/security?token=preview',
+      secureUrl: 'https://your-domain.loc/security?token=preview',
     },
   },
   {
@@ -456,14 +470,14 @@ export const samples: readonly Sample[] = [
       device: 'Chrome on macOS',
       ip: '0.0.0.0',
       remainingCodes: 3,
-      regenerateUrl: 'http://fake-url.loc/security/recovery-codes',
-      secureUrl: 'http://fake-url.loc/security?token=preview',
+      regenerateUrl: 'https://your-domain.loc/security/recovery-codes',
+      secureUrl: 'https://your-domain.loc/security?token=preview',
     },
   },
   {
     slug: 'recovery-code-used-minimal',
     template: 'recoveryCodeUsed',
-    props: { remainingCodes: 0, regenerateUrl: 'http://fake-url.loc/security/recovery-codes' },
+    props: { remainingCodes: 0, regenerateUrl: 'https://your-domain.loc/security/recovery-codes' },
   },
   {
     slug: 'api-key-created',
@@ -475,7 +489,7 @@ export const samples: readonly Sample[] = [
       expiresAt: new Date(Date.now() + 90 * 86_400_000),
       timeZone: 'Europe/Minsk',
       ip: '0.0.0.0',
-      manageUrl: 'http://fake-url.loc/settings/api-keys',
+      manageUrl: 'https://your-domain.loc/settings/api-keys',
     },
   },
   {
@@ -486,7 +500,7 @@ export const samples: readonly Sample[] = [
       keyName: 'CI deploy',
       expiresAt: new Date(Date.now() + 7 * 86_400_000),
       timeZone: 'Europe/Minsk',
-      manageUrl: 'http://fake-url.loc/settings/api-keys',
+      manageUrl: 'https://your-domain.loc/settings/api-keys',
     },
   },
   {
@@ -496,8 +510,8 @@ export const samples: readonly Sample[] = [
       userName: 'Lizzie',
       unlockedAt: new Date(),
       timeZone: 'Europe/Minsk',
-      signInUrl: 'http://fake-url.loc/sign-in',
-      supportUrl: 'http://fake-url.loc/support',
+      signInUrl: 'https://your-domain.loc/sign-in',
+      supportUrl: 'https://your-domain.loc/support',
     },
   },
   {
@@ -505,9 +519,9 @@ export const samples: readonly Sample[] = [
     template: 'dataExportReady',
     props: {
       userName: 'Lizzie',
-      downloadUrl: 'http://fake-url.loc/export?token=preview',
+      downloadUrl: 'https://your-domain.loc/export?token=preview',
       expiresInMinutes: 10080,
-      supportUrl: 'http://fake-url.loc/support',
+      supportUrl: 'https://your-domain.loc/support',
     },
   },
   {
@@ -518,7 +532,7 @@ export const samples: readonly Sample[] = [
       deletionDate: new Date(Date.now() + 30 * 86_400_000),
       lastSignInAt: new Date(Date.now() - 700 * 86_400_000),
       timeZone: 'Europe/Minsk',
-      signInUrl: 'http://fake-url.loc/sign-in',
+      signInUrl: 'https://your-domain.loc/sign-in',
     },
   },
   {
@@ -527,7 +541,7 @@ export const samples: readonly Sample[] = [
     props: {
       userName: 'Lizzie',
       policy: 'terms',
-      policyUrl: 'http://fake-url.loc/terms',
+      policyUrl: 'https://your-domain.loc/terms',
       effectiveAt: new Date(Date.now() + 30 * 86_400_000),
       timeZone: 'Europe/Minsk',
       changes: ['Clearer rules for shared workspaces', 'A new section on refunds'],
@@ -536,7 +550,7 @@ export const samples: readonly Sample[] = [
   {
     slug: 'policy-updated-minimal',
     template: 'policyUpdated',
-    props: { policy: 'privacy', policyUrl: 'http://fake-url.loc/privacy' },
+    props: { policy: 'privacy', policyUrl: 'https://your-domain.loc/privacy' },
   },
   {
     slug: 'media',

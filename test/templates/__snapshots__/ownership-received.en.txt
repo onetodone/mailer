@@ -1,16 +1,16 @@
-Subject: You're now the owner of Acme Design
+Subject: You're now the owner of Example Organization
 
 My App
 
-You're now the owner of Acme Design
+You're now the owner of Example Organization
 
 Hi Lizzie,
 
-Anna Novak transferred ownership of Acme Design on My App to you.
+Anna Novak transferred ownership of Example Organization on My App to you.
 
-As the owner, you have full control over Acme Design, including its members and settings.
+As the owner, you have full control over Example Organization, including its members and settings.
 
-Go to Acme Design: https://myapp.loc/org
+Go to Example Organization: https://myapp.loc/org
 
 If the button doesn't work, copy this link into your browser:
 https://myapp.loc/org

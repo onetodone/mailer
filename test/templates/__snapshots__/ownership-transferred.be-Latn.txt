@@ -1,4 +1,4 @@
-Subject: Prava ŭładalnika Acme Design pieradadziena
+Subject: Prava ŭładalnika Example Organization pieradadziena
 
 My App
 
@@ -6,7 +6,7 @@ Prava ŭładalnika pieradadziena
 
 Vitajem, Liza!
 
-Prava ŭładalnika Acme Design u My App pieradadziena Tom Lee, tamu vy bolš nie ŭładalnik.
+Prava ŭładalnika Example Organization u My App pieradadziena Tom Lee, tamu vy bolš nie ŭładalnik.
 
 Vaša rola: Admin
 IP-adras: 203.0.113.7

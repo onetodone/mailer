@@ -8,10 +8,14 @@ function check(condition: boolean, message: string): asserts condition {
   if (!condition) throw new Error(`Smoke test failed: ${message}`)
 }
 
-const from = 'Acme <no-reply@acme.example>'
+const from = 'Example Organization <no-reply@organization.example>'
 const to = 'lizzie@example.com'
-const branding = { companyName: 'Acme', appUrl: 'https://acme.example', supportEmail: 'help@acme.example' }
-const verifyUrl = 'https://acme.example/verify?token=abc123'
+const branding = {
+  companyName: 'Example Organization',
+  appUrl: 'https://organization.example',
+  supportEmail: 'help@organization.example',
+}
+const verifyUrl = 'https://organization.example/verify?token=abc123'
 
 // Rendering, with locale-aware dates and a right-to-left locale.
 const transport = memoryTransport()

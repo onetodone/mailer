@@ -6,7 +6,7 @@ Your invitation was accepted
 
 Hi Lizzie,
 
-Tom Lee accepted your invitation and joined Acme Design.
+Tom Lee accepted your invitation and joined Example Organization.
 
 View members: https://myapp.loc/org/members
 

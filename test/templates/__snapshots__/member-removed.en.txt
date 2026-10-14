@@ -1,12 +1,12 @@
-Subject: You were removed from Acme Design
+Subject: You were removed from Example Organization
 
 My App
 
-You were removed from Acme Design
+You were removed from Example Organization
 
 Hi Lizzie,
 
-You no longer have access to Acme Design on My App.
+You no longer have access to Example Organization on My App.
 
 Removed by: Anna Novak
 
@@ -14,7 +14,7 @@ Your My App account stays active.
 
 ---
 
-If you think this is a mistake, contact an admin of Acme Design.
+If you think this is a mistake, contact an admin of Example Organization.
 
 --
 You received this email because you have an account at My App.
