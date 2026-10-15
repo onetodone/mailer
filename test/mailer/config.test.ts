@@ -102,7 +102,7 @@ describe('createMailer config', () => {
     [
       'an unknown locale',
       { locale: 'hu' },
-      'locale must be a built-in locale ("en", "be-Latn", "be", "bg", "cs", "da", "de", "es", "et", "fi", "fr", "hr", "it", "ja", "ka", "kk", "ko", "lt", "lv", "nb", "nl", "pl", "pt", "ro", "sl", "sr", "sv", "th", "tr", "uk", "zh") or a key of messages, received "hu"',
+      'locale must be a built-in locale ("en", "be-Latn", "be", "bg", "cs", "da", "de", "es", "et", "fi", "fr", "hr", "it", "ja", "ka", "kk", "ko", "lt", "lv", "nb", "nl", "pl", "pt", "ro", "ru", "sl", "sr", "sv", "th", "tr", "uk", "zh") or a key of messages, received "hu"',
     ],
     [
       'an unknown message key',
@@ -233,7 +233,7 @@ describe('createMailer config', () => {
     [
       'template texts in a locale the mailer does not know',
       { templates: { invoice: withTexts('invoice', { en: { subject: 'Invoice' }, sk: { subject: 'Faktúra' } }) } },
-      'templates.invoice.messages.sk is not a locale of the mailer: use a built-in locale ("en", "be-Latn", "be", "bg", "cs", "da", "de", "es", "et", "fi", "fr", "hr", "it", "ja", "ka", "kk", "ko", "lt", "lv", "nb", "nl", "pl", "pt", "ro", "sl", "sr", "sv", "th", "tr", "uk", "zh") or a key of messages',
+      'templates.invoice.messages.sk is not a locale of the mailer: use a built-in locale ("en", "be-Latn", "be", "bg", "cs", "da", "de", "es", "et", "fi", "fr", "hr", "it", "ja", "ka", "kk", "ko", "lt", "lv", "nb", "nl", "pl", "pt", "ro", "ru", "sl", "sr", "sv", "th", "tr", "uk", "zh") or a key of messages',
     ],
     [
       'template texts under the common section',

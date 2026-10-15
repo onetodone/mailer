@@ -34,7 +34,7 @@
 | Polish               | `pl`      |    ✅     |
 | Portuguese           | `pt`      |    ✅     |
 | Romanian             | `ro`      |    ✅     |
-| Russian              | `ru`      |    ❌     |
+| Russian              | `ru`      |    ✅     |
 | Serbian              | `sr`      |    ✅     |
 | Slovak               | `sk`      |    ❌     |
 | Slovenian            | `sl`      |    ✅     |
