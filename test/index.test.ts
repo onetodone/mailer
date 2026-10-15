@@ -100,6 +100,7 @@ describe('main entry', () => {
       | 'pl'
       | 'pt'
       | 'ro'
+      | 'ru'
       | 'sl'
       | 'sr'
       | 'sv'

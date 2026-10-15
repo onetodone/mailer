@@ -115,6 +115,7 @@ const builtInLocales = Object.keys({
   pl: true,
   pt: true,
   ro: true,
+  ru: true,
   sl: true,
   sr: true,
   sv: true,

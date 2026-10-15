@@ -25,6 +25,7 @@ import { nl } from './nl'
 import { pl } from './pl'
 import { pt } from './pt'
 import { ro } from './ro'
+import { ru } from './ru'
 import { sl } from './sl'
 import { sr } from './sr'
 import { sv } from './sv'
@@ -947,6 +948,7 @@ export const dictionaries = {
   pl,
   pt,
   ro,
+  ru,
   sl,
   sr,
   sv,
