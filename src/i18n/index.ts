@@ -1,38 +1,7 @@
 import { html, type SafeHtml } from '../core/html'
 import type { BuiltInTemplates } from '../templates/built-in'
 import type { TemplateSections } from '../templates/messages'
-import { beLatn } from './be-Latn'
-import { be } from './be'
-import { bg } from './bg'
-import { cs } from './cs'
-import { da } from './da'
-import { de } from './de'
 import { en } from './en'
-import { es } from './es'
-import { et } from './et'
-import { fi } from './fi'
-import { fr } from './fr'
-import { hr } from './hr'
-import { it } from './it'
-import { ja } from './ja'
-import { ka } from './ka'
-import { kk } from './kk'
-import { ko } from './ko'
-import { lt } from './lt'
-import { lv } from './lv'
-import { nb } from './nb'
-import { nl } from './nl'
-import { pl } from './pl'
-import { pt } from './pt'
-import { ro } from './ro'
-import { ru } from './ru'
-import { sl } from './sl'
-import { sr } from './sr'
-import { sv } from './sv'
-import { th } from './th'
-import { tr } from './tr'
-import { uk } from './uk'
-import { zh } from './zh'
 
 /**
  * Forms of one message for each `Intl.PluralRules` category of the locale.
@@ -923,40 +892,40 @@ export type MessagesOverrides<Templates = BuiltInTemplates> = Readonly<
   Record<string, LocaleMessages<Templates> | undefined>
 >
 
-export const dictionaries = {
-  en,
-  'be-Latn': beLatn,
-  be,
-  bg,
-  cs,
-  da,
-  de,
-  es,
-  et,
-  fi,
-  fr,
-  hr,
-  it,
-  ja,
-  ka,
-  kk,
-  ko,
-  lt,
-  lv,
-  nb,
-  nl,
-  pl,
-  pt,
-  ro,
-  ru,
-  sl,
-  sr,
-  sv,
-  th,
-  tr,
-  uk,
-  zh,
-} satisfies MessageSource
+// Loaded on first use, so bundlers can split each locale out of the main entry.
+const loaders = {
+  'be-Latn': async () => (await import('./be-Latn')).beLatn,
+  be: async () => (await import('./be')).be,
+  bg: async () => (await import('./bg')).bg,
+  cs: async () => (await import('./cs')).cs,
+  da: async () => (await import('./da')).da,
+  de: async () => (await import('./de')).de,
+  es: async () => (await import('./es')).es,
+  et: async () => (await import('./et')).et,
+  fi: async () => (await import('./fi')).fi,
+  fr: async () => (await import('./fr')).fr,
+  hr: async () => (await import('./hr')).hr,
+  it: async () => (await import('./it')).it,
+  ja: async () => (await import('./ja')).ja,
+  ka: async () => (await import('./ka')).ka,
+  kk: async () => (await import('./kk')).kk,
+  ko: async () => (await import('./ko')).ko,
+  lt: async () => (await import('./lt')).lt,
+  lv: async () => (await import('./lv')).lv,
+  nb: async () => (await import('./nb')).nb,
+  nl: async () => (await import('./nl')).nl,
+  pl: async () => (await import('./pl')).pl,
+  pt: async () => (await import('./pt')).pt,
+  ro: async () => (await import('./ro')).ro,
+  ru: async () => (await import('./ru')).ru,
+  sl: async () => (await import('./sl')).sl,
+  sr: async () => (await import('./sr')).sr,
+  sv: async () => (await import('./sv')).sv,
+  th: async () => (await import('./th')).th,
+  tr: async () => (await import('./tr')).tr,
+  uk: async () => (await import('./uk')).uk,
+  zh: async () => (await import('./zh')).zh,
+} satisfies Readonly<Record<string, () => Promise<Messages>>>
 
 /**
  * A locale with built-in texts.
@@ -967,7 +936,15 @@ export const dictionaries = {
  * locale through `messages` and it becomes built-in, your overrides still win;
  * keys you did not override come from the built-in texts instead of English.
  */
-export type Locale = keyof typeof dictionaries
+export type Locale = 'en' | keyof typeof loaders
+
+export const builtInLocales: readonly Locale[] = ['en', ...(Object.keys(loaders) as (keyof typeof loaders)[])]
+
+/** Loads the built-in texts of `locale`; `undefined` for a locale without built-in texts. */
+export async function loadDictionary(locale: string): Promise<Messages | undefined> {
+  if (locale === 'en') return en
+  return Object.hasOwn(loaders, locale) ? loaders[locale as keyof typeof loaders]() : undefined
+}
 
 function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -996,8 +973,8 @@ export function mergeMessages(base: Messages, override: LocaleMessages | undefin
  * its overrides is the base, so a locale falls back to it key by key.
  */
 export function buildMessages(
-  overrides: MessagesOverrides = {},
-  source: MessageSource = dictionaries,
+  overrides: MessagesOverrides,
+  source: MessageSource,
 ): Readonly<Record<Locale, Messages> & Record<string, Messages | undefined>> {
   const base = mergeMessages(source.en, overrides.en)
   const result: Record<string, Messages> = { en: base }

@@ -1,3 +1,5 @@
+import { readdirSync } from 'node:fs'
+
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
 
@@ -6,14 +8,16 @@ import { be } from '../../src/i18n/be'
 import { en } from '../../src/i18n/en'
 import {
   buildMessages,
+  builtInLocales,
   createI18n,
-  dictionaries,
+  loadDictionary,
   type Locale,
   type MessagesOverrides,
   type Translate,
 } from '../../src/i18n'
 import type { TemplateRegistry } from '../../src/templates/define'
 import { withTemplateMessages } from '../../src/templates/messages-schema'
+import { dictionaries } from '../support/dictionaries'
 
 function i18n(
   locale: Locale,
@@ -22,7 +26,7 @@ function i18n(
 ) {
   return createI18n({
     locale,
-    messages: buildMessages(overrides)[locale],
+    messages: buildMessages(overrides, dictionaries)[locale],
     companyName: options.companyName ?? 'My App',
     timeZone: options.timeZone,
   })
@@ -36,7 +40,7 @@ function normalize(value: string): string {
 
 describe('buildMessages', () => {
   it('keeps the other keys when one key is overridden', () => {
-    const messages = buildMessages({ en: { verifyEmail: { subject: 'Verify it' } } })
+    const messages = buildMessages({ en: { verifyEmail: { subject: 'Verify it' } } }, dictionaries)
     expect(messages.en.verifyEmail).toEqual({ ...en.verifyEmail, subject: 'Verify it' })
     expect(messages.en.resetPassword).toEqual(en.resetPassword)
     expect(messages.en.common).toEqual(en.common)
@@ -44,19 +48,22 @@ describe('buildMessages', () => {
   })
 
   it('overrides single plural forms', () => {
-    const messages = buildMessages({ be: { common: { minutes: { one: '{count} хв' } } } })
+    const messages = buildMessages({ be: { common: { minutes: { one: '{count} хв' } } } }, dictionaries)
     expect(messages.be.common.minutes).toEqual({ ...be.common.minutes, one: '{count} хв' })
   })
 
   it('skips undefined values', () => {
-    const messages = buildMessages({ en: { verifyEmail: { subject: undefined } }, be: undefined })
+    const messages = buildMessages({ en: { verifyEmail: { subject: undefined } }, be: undefined }, dictionaries)
     expect(messages.en).toEqual(en)
     expect(messages.be).toEqual(be)
   })
 
   it('does not mutate the dictionaries', () => {
     const before = structuredClone(dictionaries)
-    buildMessages({ en: { common: { greeting: 'Hey {name}' } }, be: { passwordChanged: { subject: 'Зменена' } } })
+    buildMessages(
+      { en: { common: { greeting: 'Hey {name}' } }, be: { passwordChanged: { subject: 'Зменена' } } },
+      dictionaries,
+    )
     expect(dictionaries).toEqual(before)
   })
 
@@ -68,7 +75,7 @@ describe('buildMessages', () => {
   })
 
   it('adds a locale that exists only in the overrides', () => {
-    const messages = buildMessages({ sk: { common: { greeting: 'Ahoj {name},' } } })
+    const messages = buildMessages({ sk: { common: { greeting: 'Ahoj {name},' } } }, dictionaries)
     expect(messages.sk?.common.greeting).toBe('Ahoj {name},')
     expect(messages.sk?.verifyEmail).toEqual(en.verifyEmail)
   })
@@ -132,6 +139,25 @@ function placeholders(text: unknown): string[] {
   const names = values.flatMap((value) => [...value.matchAll(/\{(\w+)\}/g)].map((match) => match[1] ?? ''))
   return [...new Set(names)].filter((name) => name !== 'companyName').sort()
 }
+
+describe('loadDictionary', () => {
+  it('has a loader for every locale file', () => {
+    const files = readdirSync(new URL('../../src/i18n', import.meta.url))
+      .filter((file) => !['index.ts', 'schema.ts'].includes(file))
+      .map((file) => file.replace(/\.ts$/, ''))
+    expect([...builtInLocales].sort()).toEqual(files.sort())
+  })
+
+  it('loads the texts of a built-in locale', async () => {
+    expect(await loadDictionary('en')).toBe(en)
+    expect(await loadDictionary('be')).toBe(be)
+  })
+
+  it('returns undefined for a locale without built-in texts', async () => {
+    expect(await loadDictionary('sk')).toBeUndefined()
+    expect(await loadDictionary('toString')).toBeUndefined()
+  })
+})
 
 describe('dictionaries', () => {
   it.each(Object.entries(dictionaries))('%s keeps the placeholders of the English texts', (locale, messages) => {

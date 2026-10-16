@@ -4,7 +4,8 @@ import type { MailErrorEvent, MailSentEvent } from './config'
 import type { Layout } from './core/layout'
 import type { Branding } from './core/theme'
 import { brandingSchema } from './core/theme-schema'
-import { dictionaries, type MessagesOverrides } from './i18n'
+import { builtInLocales, type MessagesOverrides } from './i18n'
+import { en } from './i18n/en'
 import { messagesOverridesSchema } from './i18n/schema'
 import type { AnyTemplate } from './templates/define'
 import type { TemplateTexts } from './templates/messages'
@@ -64,7 +65,7 @@ const templatesSchema = z
   })
 
 export function knownLocales(overrides: MessagesOverrides = {}): string[] {
-  return [...new Set([...Object.keys(dictionaries), ...Object.keys(overrides)])]
+  return [...new Set([...builtInLocales, ...Object.keys(overrides)])]
 }
 
 export function describeLocales(locales: readonly string[]): string {
@@ -85,7 +86,7 @@ export function configSchema(sections: Readonly<Record<string, TemplateTexts>> =
         locale: z.string({ error: expected('a string') }).optional(),
         timeZone: timeZone.optional(),
         branding: z.custom<Branding>((value) => value !== undefined, { error: 'is required' }).pipe(brandingSchema),
-        messages: messagesOverridesSchema({ ...dictionaries.en, ...sections }).optional(),
+        messages: messagesOverridesSchema({ ...en, ...sections }).optional(),
         layout: callable<Layout>('a function').optional(),
         templates: templatesSchema.optional(),
         onSent: callable<(event: MailSentEvent) => unknown>('a function').optional(),
@@ -95,7 +96,7 @@ export function configSchema(sections: Readonly<Record<string, TemplateTexts>> =
     )
     .superRefine((config, ctx) => {
       const locales = knownLocales(config.messages)
-      const expectedLocale = `a built-in locale (${describeLocales(Object.keys(dictionaries))}) or a key of messages`
+      const expectedLocale = `a built-in locale (${describeLocales(builtInLocales)}) or a key of messages`
       if (config.locale !== undefined && !locales.includes(config.locale)) {
         ctx.addIssue({
           code: 'custom',

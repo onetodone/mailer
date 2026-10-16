@@ -41,13 +41,14 @@ import type { UserInviteProps } from '../../src/templates/user-invite'
 import type { VerifyEmailProps } from '../../src/templates/verify-email'
 import type { VerifyEmailChangeProps } from '../../src/templates/verify-email-change'
 import type { WelcomeProps } from '../../src/templates/welcome'
+import { dictionaries } from '../support/dictionaries'
 
 const branding = resolveBranding({
   companyName: 'My App',
   appUrl: 'https://myapp.loc',
   supportEmail: 'support@myapp.loc',
 })
-const messages = buildMessages()
+const messages = buildMessages({}, dictionaries)
 const options: RenderTemplateOptions = { branding, layout: defaultLayout, locale: 'en', messages: messages.en }
 const url = 'https://myapp.loc/verify?token=abc123'
 
@@ -351,9 +352,12 @@ describe('renderTemplate', () => {
 
   it('fills the company name into layout and block texts', async () => {
     const { calls, layout } = capturingLayout()
-    const custom = buildMessages({
-      en: { common: { footerRights: '{companyName} keeps all rights.', linkFallback: 'Open in {companyName}:' } },
-    })
+    const custom = buildMessages(
+      {
+        en: { common: { footerRights: '{companyName} keeps all rights.', linkFallback: 'Open in {companyName}:' } },
+      },
+      dictionaries,
+    )
     const email = await renderTemplate(
       builtInTemplates,
       'verifyEmail',
