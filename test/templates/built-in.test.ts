@@ -3,9 +3,10 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { defaultLayout } from '../../src/core/layout'
 import { resolveBranding } from '../../src/core/theme-schema'
 import { MailerError } from '../../src/errors'
-import { buildMessages, dictionaries, type Locale } from '../../src/i18n'
+import { buildMessages, type Locale } from '../../src/i18n'
 import { builtInTemplates } from '../../src/templates/built-in'
 import { renderTemplate, type RenderedEmail, type RenderTemplateOptions } from '../../src/templates/render'
+import { dictionaries } from '../support/dictionaries'
 
 const branding = resolveBranding({
   companyName: 'My App',
@@ -14,7 +15,7 @@ const branding = resolveBranding({
   footerText: 'You received this email because you have an account at My App.',
   theme: { primary: '#3b82f6' },
 })
-const messages = buildMessages()
+const messages = buildMessages({}, dictionaries)
 const locales = Object.keys(dictionaries) as Locale[]
 const userNames: Partial<Record<Locale, string>> = { be: 'Ліза', 'be-Latn': 'Liza' }
 const verifyUrl = 'https://myapp.loc/verify?token=abc123'
@@ -685,9 +686,12 @@ describe('otpCode', () => {
   })
 
   it('fills {code} in overridden subject and preheader texts', async () => {
-    const overridden = buildMessages({
-      en: { otpCode: { subject: 'Your code: {code}', preheader: '{code} is your {companyName} code.' } },
-    })
+    const overridden = buildMessages(
+      {
+        en: { otpCode: { subject: 'Your code: {code}', preheader: '{code} is your {companyName} code.' } },
+      },
+      dictionaries,
+    )
     const email = await renderTemplate(
       builtInTemplates,
       'otpCode',

@@ -12,7 +12,15 @@ import {
 import { configSchema, describeLocales, knownLocales } from './config-schema'
 import { defaultLayout } from './core/layout'
 import { MailerError } from './errors'
-import { buildMessages, dictionaries, type Locale, type LocaleMessages, type MessagesOverrides } from './i18n'
+import { en } from './i18n/en'
+import {
+  buildMessages,
+  loadDictionary,
+  type Locale,
+  type LocaleMessages,
+  type Messages,
+  type MessagesOverrides,
+} from './i18n'
 import { builtInTemplates, type BuiltInTemplates } from './templates/built-in'
 import type { AnyTemplate, Template, TemplateProps, TemplateRegistry } from './templates/define'
 import { templateSections, withTemplateMessages } from './templates/messages-schema'
@@ -202,7 +210,7 @@ export function createMailer<
   const settings = parseConfig(configSchema(templateSections(isRecord(config) ? config.templates : undefined)), config)
   const { transport, from, branding, timeZone, onSent, onError } = settings
   const templates: TemplateRegistry = { ...builtInTemplates, ...settings.templates }
-  const messages = buildMessages(settings.messages, withTemplateMessages(dictionaries, settings.templates))
+  const resolvedMessages = new Map<string, Promise<Messages>>()
   const defaultLocale = settings.locale ?? 'en'
   const layout = settings.layout ?? defaultLayout
 
@@ -228,12 +236,36 @@ export function createMailer<
   )
   const renderOptions = z.strictObject({ locale, props: z.unknown().optional() }, { error: objectError })
 
-  function renderEmail(name: string, props: unknown, emailLocale: string): Promise<RenderedEmail> {
+  async function resolveMessages(emailLocale: string): Promise<Messages> {
+    const dictionary = await loadDictionary(emailLocale)
+    const source = withTemplateMessages(
+      dictionary === undefined ? { en } : { en, [emailLocale]: dictionary },
+      settings.templates,
+    )
+    const overrides = { en: settings.messages?.en, [emailLocale]: settings.messages?.[emailLocale] }
+    const messages = buildMessages(overrides, source)
+    return messages[emailLocale] ?? messages.en
+  }
+
+  function messagesFor(emailLocale: string): Promise<Messages> {
+    let messages = resolvedMessages.get(emailLocale)
+    if (messages === undefined) {
+      // A failed load is not cached, so the next email retries it.
+      messages = resolveMessages(emailLocale).catch((error: unknown) => {
+        resolvedMessages.delete(emailLocale)
+        throw error
+      })
+      resolvedMessages.set(emailLocale, messages)
+    }
+    return messages
+  }
+
+  async function renderEmail(name: string, props: unknown, emailLocale: string): Promise<RenderedEmail> {
     return renderTemplate(templates, name, props ?? {}, {
       branding,
       layout,
       locale: emailLocale,
-      messages: messages[emailLocale] ?? messages.en,
+      messages: await messagesFor(emailLocale),
       timeZone,
     })
   }
