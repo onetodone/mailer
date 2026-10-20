@@ -1,5 +1,44 @@
 # @onetodone/mailer
 
+## 0.3.7
+
+### Patch Changes
+
+- be6c899: Add built-in texts in Arabic.
+  
+  - `Locale` gains `ar`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - Emails in Arabic render right to left.
+  - If you already send in Arabic through `messages`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+- be6c899: Add built-in texts in Greek.
+  
+  - `Locale` gains `el`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - If you already send in Greek through `messages`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+- be6c899: Add built-in texts in Hebrew.
+  
+  - `Locale` gains `he`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - Emails in Hebrew render right to left.
+  - If you already send in Hebrew through `messages`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+- be6c899: Add built-in texts in Hindi.
+  
+  - `Locale` gains `hi`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - If you already send in Hindi through `messages`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+- be6c899: Add built-in texts in Hungarian.
+  
+  - `Locale` gains `hu`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - If you already send in Hungarian through `messages`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+- be6c899: Add built-in texts in Indonesian.
+  
+  - `Locale` gains `id`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - If you already send in Indonesian through `messages`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+- be6c899: Add built-in texts in Slovak.
+  
+  - `Locale` gains `sk`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - If you already send in Slovak through `messages`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+- be6c899: Add built-in texts in Vietnamese.
+  
+  - `Locale` gains `vi`. The `locale` setting and the `locale` option of `send` and `render` accept it without `messages`.
+  - If you already send in Vietnamese through `messages`, your overrides still win, and the keys you leave out come from the built-in texts instead of English.
+
 ## 0.3.6
 
 ### Patch Changes
