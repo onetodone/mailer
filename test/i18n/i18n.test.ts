@@ -75,9 +75,9 @@ describe('buildMessages', () => {
   })
 
   it('adds a locale that exists only in the overrides', () => {
-    const messages = buildMessages({ sk: { common: { greeting: 'Ahoj {name},' } } }, dictionaries)
-    expect(messages.sk?.common.greeting).toBe('Ahoj {name},')
-    expect(messages.sk?.verifyEmail).toEqual(en.verifyEmail)
+    const messages = buildMessages({ ca: { common: { greeting: 'Hola {name},' } } }, dictionaries)
+    expect(messages.ca?.common.greeting).toBe('Hola {name},')
+    expect(messages.ca?.verifyEmail).toEqual(en.verifyEmail)
   })
 
   it('keeps the overrides of a custom locale that becomes built-in', () => {
@@ -119,9 +119,9 @@ describe('withTemplateMessages', () => {
   })
 
   it('adds the locales of template texts', () => {
-    const messages = build({ invoice: { ...template, messages: { en: texts, sk: { subject: 'Faktúra' } } } })
-    expect(messages.sk?.invoice).toEqual({ subject: 'Faktúra', intro: 'Attached.' })
-    expect(messages.sk?.common).toEqual(en.common)
+    const messages = build({ invoice: { ...template, messages: { en: texts, ca: { subject: 'Factura' } } } })
+    expect(messages.ca?.invoice).toEqual({ subject: 'Factura', intro: 'Attached.' })
+    expect(messages.ca?.common).toEqual(en.common)
   })
 
   it('does not mutate the dictionaries', () => {
@@ -154,7 +154,7 @@ describe('loadDictionary', () => {
   })
 
   it('returns undefined for a locale without built-in texts', async () => {
-    expect(await loadDictionary('sk')).toBeUndefined()
+    expect(await loadDictionary('ca')).toBeUndefined()
     expect(await loadDictionary('toString')).toBeUndefined()
   })
 })

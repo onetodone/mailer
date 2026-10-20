@@ -894,17 +894,23 @@ export type MessagesOverrides<Templates = BuiltInTemplates> = Readonly<
 
 // Loaded on first use, so bundlers can split each locale out of the main entry.
 const loaders = {
+  ar: async () => (await import('./ar')).ar,
   'be-Latn': async () => (await import('./be-Latn')).beLatn,
   be: async () => (await import('./be')).be,
   bg: async () => (await import('./bg')).bg,
   cs: async () => (await import('./cs')).cs,
   da: async () => (await import('./da')).da,
   de: async () => (await import('./de')).de,
+  el: async () => (await import('./el')).el,
   es: async () => (await import('./es')).es,
   et: async () => (await import('./et')).et,
   fi: async () => (await import('./fi')).fi,
   fr: async () => (await import('./fr')).fr,
+  he: async () => (await import('./he')).he,
+  hi: async () => (await import('./hi')).hi,
   hr: async () => (await import('./hr')).hr,
+  hu: async () => (await import('./hu')).hu,
+  id: async () => (await import('./id')).id,
   it: async () => (await import('./it')).it,
   ja: async () => (await import('./ja')).ja,
   ka: async () => (await import('./ka')).ka,
@@ -918,12 +924,14 @@ const loaders = {
   pt: async () => (await import('./pt')).pt,
   ro: async () => (await import('./ro')).ro,
   ru: async () => (await import('./ru')).ru,
+  sk: async () => (await import('./sk')).sk,
   sl: async () => (await import('./sl')).sl,
   sr: async () => (await import('./sr')).sr,
   sv: async () => (await import('./sv')).sv,
   th: async () => (await import('./th')).th,
   tr: async () => (await import('./tr')).tr,
   uk: async () => (await import('./uk')).uk,
+  vi: async () => (await import('./vi')).vi,
   zh: async () => (await import('./zh')).zh,
 } satisfies Readonly<Record<string, () => Promise<Messages>>>
 
