@@ -368,12 +368,12 @@ import { templates } from './mail-templates'
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly mailer: MailerService<typeof templates, 'sk'>) {}
+  constructor(private readonly mailer: MailerService<typeof templates, 'ca'>) {}
 
   async shipped(email: string, orderId: string) {
     await this.mailer.send('orderShipped', {
       to: email,
-      locale: 'sk',
+      locale: 'ca',
       props: { orderId, trackUrl: `https://example.com/orders/${orderId}` },
     })
   }

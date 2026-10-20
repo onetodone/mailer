@@ -85,7 +85,7 @@ export interface MailerConfig<
   readonly branding: Branding
   /**
    * Text overrides by locale, merged key by key over the built-in texts. A
-   * locale without built-in texts, such as `sk`, falls back to English for the
+   * locale without built-in texts, such as `ca`, falls back to English for the
    * keys it leaves out. The texts of a custom template with its own
    * `messages` are overridden under the template's name.
    *
