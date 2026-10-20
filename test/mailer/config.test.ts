@@ -101,8 +101,8 @@ describe('createMailer config', () => {
     ],
     [
       'an unknown locale',
-      { locale: 'hu' },
-      'locale must be a built-in locale ("en", "be-Latn", "be", "bg", "cs", "da", "de", "es", "et", "fi", "fr", "hr", "it", "ja", "ka", "kk", "ko", "lt", "lv", "nb", "nl", "pl", "pt", "ro", "ru", "sl", "sr", "sv", "th", "tr", "uk", "zh") or a key of messages, received "hu"',
+      { locale: 'is' },
+      'locale must be a built-in locale ("en", "ar", "be-Latn", "be", "bg", "cs", "da", "de", "el", "es", "et", "fi", "fr", "he", "hi", "hr", "hu", "id", "it", "ja", "ka", "kk", "ko", "lt", "lv", "nb", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sr", "sv", "th", "tr", "uk", "vi", "zh") or a key of messages, received "is"',
     ],
     [
       'an unknown message key',
@@ -232,8 +232,8 @@ describe('createMailer config', () => {
     ],
     [
       'template texts in a locale the mailer does not know',
-      { templates: { invoice: withTexts('invoice', { en: { subject: 'Invoice' }, sk: { subject: 'Faktúra' } }) } },
-      'templates.invoice.messages.sk is not a locale of the mailer: use a built-in locale ("en", "be-Latn", "be", "bg", "cs", "da", "de", "es", "et", "fi", "fr", "hr", "it", "ja", "ka", "kk", "ko", "lt", "lv", "nb", "nl", "pl", "pt", "ro", "ru", "sl", "sr", "sv", "th", "tr", "uk", "zh") or a key of messages',
+      { templates: { invoice: withTexts('invoice', { en: { subject: 'Invoice' }, ca: { subject: 'Factura' } }) } },
+      'templates.invoice.messages.ca is not a locale of the mailer: use a built-in locale ("en", "ar", "be-Latn", "be", "bg", "cs", "da", "de", "el", "es", "et", "fi", "fr", "he", "hi", "hr", "hu", "id", "it", "ja", "ka", "kk", "ko", "lt", "lv", "nb", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sr", "sv", "th", "tr", "uk", "vi", "zh") or a key of messages',
     ],
     [
       'template texts under the common section',
@@ -313,11 +313,11 @@ describe('createMailer config', () => {
     const receipt = defineTemplate({
       name: 'receipt',
       schema: z.object({}),
-      messages: { en: { subject: 'Receipt' }, sk: { subject: 'Účtenka' } },
+      messages: { en: { subject: 'Receipt' }, ca: { subject: 'Rebut' } },
       render: ({ t }) => ({ subject: t('receipt.subject'), body: [] }),
     })
     expect(() =>
-      createMailer({ transport: memoryTransport(), from, branding, templates: { receipt }, messages: { sk: {} } }),
+      createMailer({ transport: memoryTransport(), from, branding, templates: { receipt }, messages: { ca: {} } }),
     ).not.toThrow()
   })
 
@@ -351,10 +351,10 @@ describe('createMailer config', () => {
         transport: memoryTransport(),
         from,
         branding,
-        // @ts-expect-error: "hu" has no texts
-        locale: 'hu',
+        // @ts-expect-error: "is" has no texts
+        locale: 'is',
       })
-      createMailer({ transport: memoryTransport(), from, branding, locale: 'sk', messages: { sk: {} } })
+      createMailer({ transport: memoryTransport(), from, branding, locale: 'ca', messages: { ca: {} } })
       createMailer({
         transport: memoryTransport(),
         from,

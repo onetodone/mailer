@@ -533,14 +533,14 @@ describe('texts and locales', () => {
       transport,
       from,
       branding,
-      locale: 'sk',
-      messages: { sk: { verifyEmail: { subject: 'Potvrďte svoj e-mail' } } },
+      locale: 'ca',
+      messages: { ca: { verifyEmail: { subject: 'Confirma el teu correu' } } },
     })
 
     await mailer.send('verifyEmail', { to, props: { verifyUrl, expiresInMinutes: 5 } })
 
-    expect(transport.sent[0]?.subject).toBe('Potvrďte svoj e-mail')
-    expect(transport.sent[0]?.html).toContain('<html lang="sk" ')
+    expect(transport.sent[0]?.subject).toBe('Confirma el teu correu')
+    expect(transport.sent[0]?.html).toContain('<html lang="ca" ')
     expect(transport.sent[0]?.text).toContain('The link expires in 5 minutes.')
   })
 
@@ -557,20 +557,20 @@ describe('texts and locales', () => {
   })
 
   it('rejects a locale without texts', async () => {
-    const mailer = createMailer({ transport: memoryTransport(), from, branding, messages: { sk: {} } })
-    const sendError = await mailerRejection(mailer.send('passwordChanged', { to, locale: 'hu' as never }))
+    const mailer = createMailer({ transport: memoryTransport(), from, branding, messages: { ca: {} } })
+    const sendError = await mailerRejection(mailer.send('passwordChanged', { to, locale: 'is' as never }))
     expect(sendError.code).toBe('INVALID_OPTIONS')
     expect(sendError.message).toBe(
-      'Invalid send options: locale must be one of "en", "be-Latn", "be", "bg", "cs", "da", "de", "es", "et", "fi", "fr", "hr", "it", "ja", "ka", "kk", "ko", "lt", "lv", "nb", "nl", "pl", "pt", "ro", "ru", "sl", "sr", "sv", "th", "tr", "uk", "zh", "sk", received "hu".',
+      'Invalid send options: locale must be one of "en", "ar", "be-Latn", "be", "bg", "cs", "da", "de", "el", "es", "et", "fi", "fr", "he", "hi", "hr", "hu", "id", "it", "ja", "ka", "kk", "ko", "lt", "lv", "nb", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sr", "sv", "th", "tr", "uk", "vi", "zh", "ca", received "is".',
     )
-    const renderError = await mailerRejection(mailer.render('passwordChanged', { locale: 'hu' as never }))
+    const renderError = await mailerRejection(mailer.render('passwordChanged', { locale: 'is' as never }))
     expect(renderError.code).toBe('INVALID_OPTIONS')
     expect(renderError.message).toBe(
-      'Invalid render options: locale must be one of "en", "be-Latn", "be", "bg", "cs", "da", "de", "es", "et", "fi", "fr", "hr", "it", "ja", "ka", "kk", "ko", "lt", "lv", "nb", "nl", "pl", "pt", "ro", "ru", "sl", "sr", "sv", "th", "tr", "uk", "zh", "sk", received "hu".',
+      'Invalid render options: locale must be one of "en", "ar", "be-Latn", "be", "bg", "cs", "da", "de", "el", "es", "et", "fi", "fr", "he", "hi", "hr", "hu", "id", "it", "ja", "ka", "kk", "ko", "lt", "lv", "nb", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sr", "sv", "th", "tr", "uk", "vi", "zh", "ca", received "is".',
     )
     const check = async () => {
-      // @ts-expect-error: "hu" has no texts
-      await mailer.send('passwordChanged', { to, locale: 'hu' })
+      // @ts-expect-error: "is" has no texts
+      await mailer.send('passwordChanged', { to, locale: 'is' })
     }
     expect(check).toBeTypeOf('function')
   })

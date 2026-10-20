@@ -24,7 +24,7 @@ type ModuleMailer<Templates, ExtraLocales extends string> = Mailer<WithBuiltIns<
  * @example
  * const templates = { orderShipped }
  *
- * constructor(private readonly mailer: MailerService<typeof templates, 'sk'>) {}
+ * constructor(private readonly mailer: MailerService<typeof templates, 'ca'>) {}
  */
 export class MailerService<
   Templates extends CustomTemplates<Templates> = BuiltInTemplates,

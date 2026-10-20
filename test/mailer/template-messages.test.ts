@@ -106,23 +106,23 @@ describe('template texts', () => {
   })
 
   it('renders a locale defined in messages', async () => {
-    const withSlovak = defineTemplate({
+    const withCatalan = defineTemplate({
       ...receipt,
-      messages: { en: receiptTexts, sk: { subject: 'Vaša účtenka' } },
+      messages: { en: receiptTexts, ca: { subject: 'El teu rebut' } },
     })
     const mailer = createMailer({
       transport: memoryTransport(),
       from,
       branding,
-      templates: { receipt: withSlovak },
-      messages: { sk: { common: { greetingAnonymous: 'Dobrý deň,' } } },
+      templates: { receipt: withCatalan },
+      messages: { ca: { common: { greetingAnonymous: 'Hola,' } } },
     })
 
-    const sk = await mailer.render('receipt', { locale: 'sk' })
+    const ca = await mailer.render('receipt', { locale: 'ca' })
 
-    expect(sk.subject).toBe('Vaša účtenka')
-    expect(sk.text).toContain('Thanks for your order.')
-    expect(sk.html).toContain('<html lang="sk" ')
+    expect(ca.subject).toBe('El teu rebut')
+    expect(ca.text).toContain('Thanks for your order.')
+    expect(ca.html).toContain('<html lang="ca" ')
   })
 
   it('keeps the texts of each template apart', async () => {
