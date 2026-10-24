@@ -224,8 +224,11 @@ for (const page of pages) {
 
 const tmp = await mkdtemp(join(tmpdir(), 'mailer-check-docs-'))
 try {
-  const [pack] = JSON.parse(
-    execFileSync('npm', ['pack', '--json', '--pack-destination', tmp], { cwd: root, encoding: 'utf8' }),
+  // npm 11 prints an array of packages, npm 12 an object keyed by package name.
+  const [pack] = Object.values(
+    JSON.parse(
+      execFileSync('npm', ['pack', '--json', '--pack-destination', tmp], { cwd: root, encoding: 'utf8' }),
+    ) as object,
   ) as [{ filename: string }]
   execFileSync('tar', ['-xzf', join(tmp, pack.filename), '-C', tmp])
   await mkdir(join(tmp, 'node_modules', '@onetodone'), { recursive: true })
