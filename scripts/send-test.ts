@@ -22,13 +22,12 @@ function required(name: string, transport: TransportName): string {
 }
 
 const user = env('SMTP_USER')
-const resendApiKey = env('RESEND_API_KEY')
 const isTransportName = (value: string): value is TransportName => (transports as readonly string[]).includes(value)
 const transportSetting = env('MAIL_TRANSPORT')
 if (transportSetting !== undefined && !isTransportName(transportSetting)) {
   fail(`MAIL_TRANSPORT must be one of ${transports.join(', ')}, received "${transportSetting}".`)
 }
-const transportName = transportSetting ?? (resendApiKey === undefined ? 'smtp' : 'resend')
+const transportName = transportSetting ?? 'smtp'
 
 const mailFrom = env('MAIL_FROM')
 if ((transportName !== 'smtp' || user !== undefined) && mailFrom === undefined) {
