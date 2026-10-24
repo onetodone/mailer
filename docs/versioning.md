@@ -11,7 +11,7 @@ Every release is listed in the [changelog](https://github.com/onetodone/mailer/b
 
 ## Public API
 
-The public API is everything exported from `@onetodone/mailer`, `@onetodone/mailer/smtp`, `@onetodone/mailer/resend` and `@onetodone/mailer/nestjs`: functions, classes, types, options and error codes, with the behavior these docs describe. Files inside the package that these entries do not export, such as the chunks in `dist`, are internal and may change in any release.
+The public API is everything exported from `@onetodone/mailer`, `@onetodone/mailer/smtp`, `@onetodone/mailer/resend`, `@onetodone/mailer/postmark`, `@onetodone/mailer/mailgun` and `@onetodone/mailer/nestjs`: functions, classes, types, options and error codes, with the behavior these docs describe. Files inside the package that these entries do not export, such as the chunks in `dist`, are internal and may change in any release.
 
 Breaking changes include:
 
@@ -30,7 +30,7 @@ These changes are not breaking and come in minor or patch releases:
 
 - Supported Node.js versions are the active and maintenance LTS lines. `engines.node` names the oldest one, and CI tests every supported line.
 - Support for a Node.js line ends with a breaking release after the line reaches its end of life, never in a patch.
-- The main entry and `@onetodone/mailer/resend` also run on Bun, Deno and edge runtimes such as Cloudflare Workers. CI runs a smoke test of the packed package on the latest Bun and Deno 2. `@onetodone/mailer/smtp` needs Node.js.
+- The main entry and the HTTP transports (`@onetodone/mailer/resend`, `@onetodone/mailer/postmark` and `@onetodone/mailer/mailgun`) also run on Bun, Deno and edge runtimes such as Cloudflare Workers. CI runs a smoke test of the packed package on the latest Bun and Deno 2. `@onetodone/mailer/smtp` needs Node.js.
 
 ## TypeScript
 

@@ -1,26 +1,47 @@
 import { randomUUID } from 'node:crypto'
 
-import { MailerError } from '@onetodone/mailer'
+import { MailerError, type MailTransport } from '@onetodone/mailer'
+import { mailgunTransport } from '@onetodone/mailer/mailgun'
+import { postmarkTransport } from '@onetodone/mailer/postmark'
 import { resendTransport } from '@onetodone/mailer/resend'
 import { smtpTransport } from '@onetodone/mailer/smtp'
 
 import { createSampleMailer, env, from, locales, samples } from './samples.ts'
 
+const transports = ['smtp', 'resend', 'postmark', 'mailgun'] as const
+type TransportName = (typeof transports)[number]
+const transportNames = { smtp: 'SMTP', resend: 'Resend', postmark: 'Postmark', mailgun: 'Mailgun' }
+
+function fail(message: string): never {
+  console.error(message)
+  process.exit(1)
+}
+
+function required(name: string, transport: TransportName): string {
+  return env(name) ?? fail(`${name} is required when MAIL_TRANSPORT is "${transport}".`)
+}
+
 const user = env('SMTP_USER')
 const resendApiKey = env('RESEND_API_KEY')
+const isTransportName = (value: string): value is TransportName => (transports as readonly string[]).includes(value)
+const transportSetting = env('MAIL_TRANSPORT')
+if (transportSetting !== undefined && !isTransportName(transportSetting)) {
+  fail(`MAIL_TRANSPORT must be one of ${transports.join(', ')}, received "${transportSetting}".`)
+}
+const transportName = transportSetting ?? (resendApiKey === undefined ? 'smtp' : 'resend')
+
 const mailFrom = env('MAIL_FROM')
-if ((user !== undefined || resendApiKey !== undefined) && mailFrom === undefined) {
-  console.error(
-    `MAIL_FROM is required when ${resendApiKey === undefined ? 'SMTP_USER' : 'RESEND_API_KEY'} is set: ` +
+if ((transportName !== 'smtp' || user !== undefined) && mailFrom === undefined) {
+  const reason = transportName === 'smtp' ? 'SMTP_USER is set' : `sending through ${transportNames[transportName]}`
+  fail(
+    `MAIL_FROM is required when ${reason}: ` +
       'real providers only accept a From address on the authenticated account or its domain.',
   )
-  process.exit(1)
 }
 
 const secureSetting = env('SMTP_SECURE')
 if (secureSetting !== undefined && secureSetting !== 'true' && secureSetting !== 'false') {
-  console.error(`SMTP_SECURE must be "true" or "false", received "${secureSetting}".`)
-  process.exit(1)
+  fail(`SMTP_SECURE must be "true" or "false", received "${secureSetting}".`)
 }
 
 const host = env('SMTP_HOST') ?? 'localhost'
@@ -39,24 +60,38 @@ const slugs = sampleSetting
   .filter((slug) => slug !== '')
 const unknownSlugs = slugs?.filter((slug) => !samples.some((sample) => sample.slug === slug)) ?? []
 if (slugs?.length === 0 || unknownSlugs.length > 0) {
-  console.error(
+  fail(
     `SAMPLES must list sample names (${samples.map((sample) => sample.slug).join(', ')}), received "${sampleSetting ?? ''}".`,
   )
-  process.exit(1)
 }
 const selected = slugs === undefined ? samples : samples.filter((sample) => slugs.includes(sample.slug))
 
-const mailer = createSampleMailer(
-  resendApiKey === undefined
-    ? smtpTransport({
+function createTransport(name: TransportName): MailTransport {
+  switch (name) {
+    case 'smtp':
+      return smtpTransport({
         host,
         port,
         secure,
         auth: user === undefined ? undefined : { user, pass: env('SMTP_PASS') ?? '' },
       })
-    : resendTransport({ apiKey: resendApiKey }),
-  mailFrom ?? from,
-)
+    case 'resend':
+      return resendTransport({ apiKey: required('RESEND_API_KEY', name) })
+    case 'postmark':
+      return postmarkTransport({
+        serverToken: required('POSTMARK_SERVER_TOKEN', name),
+        messageStream: env('POSTMARK_MESSAGE_STREAM'),
+      })
+    case 'mailgun':
+      return mailgunTransport({
+        apiKey: required('MAILGUN_API_KEY', name),
+        domain: required('MAILGUN_DOMAIN', name),
+        region: env('MAILGUN_REGION') as 'us' | 'eu' | undefined,
+      })
+  }
+}
+
+const mailer = createSampleMailer(createTransport(transportName), mailFrom ?? from)
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -90,4 +125,6 @@ try {
   await mailer.close()
 }
 
-console.log(`Sent ${String(sent)} emails through ${resendApiKey === undefined ? `${host}:${String(port)}` : 'Resend'}`)
+console.log(
+  `Sent ${String(sent)} emails through ${transportName === 'smtp' ? `${host}:${String(port)}` : transportNames[transportName]}`,
+)

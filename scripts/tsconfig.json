@@ -8,6 +8,8 @@
       "@onetodone/mailer": ["../src/index.ts"],
       "@onetodone/mailer/smtp": ["../src/smtp/index.ts"],
       "@onetodone/mailer/resend": ["../src/resend/index.ts"],
+      "@onetodone/mailer/postmark": ["../src/postmark/index.ts"],
+      "@onetodone/mailer/mailgun": ["../src/mailgun/index.ts"],
       "@onetodone/mailer/nestjs": ["../src/nestjs/index.ts"]
     }
   },

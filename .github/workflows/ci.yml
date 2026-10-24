@@ -82,7 +82,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
 
-      - name: Main and Resend entries import no Node built-ins
+      - name: Main and HTTP transport entries import no Node built-ins
         run: "! grep -rlE '(from |require\\()\"node:' dist --include='*js' --exclude-dir=smtp"
 
       - name: Install the tarball in an empty project
