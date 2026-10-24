@@ -1,7 +1,16 @@
 import { z } from 'zod'
 
 import { MailerError } from '../errors'
-import type { MailAddress, MailAddresses, MailTransport, OutgoingAttachment } from '../transports/types'
+import {
+  describeNetworkFailure,
+  field,
+  formatAddress,
+  formatAddresses,
+  isRetryableStatus,
+  parseJson,
+  toBase64,
+} from '../transports/http'
+import type { MailTransport, OutgoingAttachment } from '../transports/types'
 import { expected, httpUrl, objectError, parseConfig } from '../validators'
 
 /** Settings for {@link resendTransport}. */
@@ -43,64 +52,10 @@ interface ResendAttachment {
   content_id?: string
 }
 
-function formatAddress(address: MailAddress): string {
-  if (typeof address === 'string') return address
-  const name = address.name ?? ''
-  return name === '' ? address.address : `"${name.replace(/["\\]/g, '\\$&')}" <${address.address}>`
-}
-
-function formatAddresses(addresses: MailAddresses): string[]
-function formatAddresses(addresses: MailAddresses | undefined): string[] | undefined
-function formatAddresses(addresses: MailAddresses | undefined): string[] | undefined {
-  return addresses === undefined ? undefined : [addresses].flat().map(formatAddress)
-}
-
-// btoa over chunks of bytes rather than Buffer, so the transport runs wherever fetch does.
-function toBase64(content: Uint8Array | string): string {
-  const bytes = typeof content === 'string' ? new TextEncoder().encode(content) : content
-  let binary = ''
-  for (let start = 0; start < bytes.length; start += 0x8000) {
-    binary += String.fromCharCode(...bytes.subarray(start, start + 0x8000))
-  }
-  return btoa(binary)
-}
-
 function toResendAttachment({ filename, content, contentType, cid }: OutgoingAttachment): ResendAttachment {
   const attachment: ResendAttachment = { filename, content: toBase64(content), content_type: contentType }
   if (cid !== undefined) attachment.content_id = cid
   return attachment
-}
-
-function parseJson(text: string): unknown {
-  try {
-    return JSON.parse(text) as unknown
-  } catch {
-    return undefined
-  }
-}
-
-function field(body: unknown, key: string): string | undefined {
-  if (typeof body !== 'object' || body === null || !(key in body)) return undefined
-  const value: unknown = (body as Record<string, unknown>)[key]
-  return typeof value === 'string' && value !== '' ? value : undefined
-}
-
-// A rate limit (429), a conflicting request (409), a timeout (408) or a server error may pass on a
-// later attempt; any other 4xx means Resend rejected the email, the sender or the API key.
-function isRetryableStatus(status: number): boolean | undefined {
-  if (status === 408 || status === 409 || status === 429 || status >= 500) return true
-  if (status >= 400) return false
-  return undefined
-}
-
-function describeNetworkFailure(error: unknown): string {
-  const reason = error instanceof Error ? error.message : String(error)
-  const cause: unknown = error instanceof Error ? error.cause : undefined
-  const code =
-    typeof cause === 'object' && cause !== null && 'code' in cause && typeof cause.code === 'string'
-      ? ` (${cause.code})`
-      : ''
-  return `Resend delivery failed${code}: ${reason}`
 }
 
 /**
@@ -157,7 +112,10 @@ export function resendTransport(options: ResendTransportOptions): MailTransport 
         response = await (settings.fetch ?? fetch)(url, { method: 'POST', headers, body })
         text = await response.text()
       } catch (error) {
-        throw new MailerError('TRANSPORT_FAILED', describeNetworkFailure(error), { cause: error, retryable: true })
+        throw new MailerError('TRANSPORT_FAILED', describeNetworkFailure('Resend', error), {
+          cause: error,
+          retryable: true,
+        })
       }
 
       const { status } = response
