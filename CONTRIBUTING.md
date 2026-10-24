@@ -20,7 +20,7 @@ pnpm format:fix && pnpm lint:fix && pnpm typecheck && pnpm test && pnpm build
 ```
 
 - `pnpm check:docs` checks every link and image in `README.md` and `docs/`, and compiles every TypeScript example against the packed package. Run it when you change the public API or the docs.
-- `pnpm check:package` checks the package exports with publint and Are the Types Wrong.
+- `pnpm check:package` checks the package exports with publint and Are the Types Wrong, and checks that every public export and every member of an exported interface, class or object type has JSDoc.
 
 ## Seeing the emails
 

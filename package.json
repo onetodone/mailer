@@ -117,7 +117,7 @@
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit && tsc -p scripts",
     "changeset": "changeset",
-    "check:package": "pnpm build && publint && attw --pack . && node scripts/check-declarations.ts",
+    "check:package": "pnpm build && publint && attw --pack . && node scripts/check-declarations.ts && node scripts/check-jsdoc.ts",
     "check:docs": "pnpm build && node scripts/check-docs.ts",
     "preview": "pnpm build && node --env-file-if-exists=.env scripts/preview.ts",
     "send:test": "pnpm build && node --env-file-if-exists=.env scripts/send-test.ts",
