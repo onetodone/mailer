@@ -1,7 +1,9 @@
 // Smoke test of the installed package outside Node: CI installs the tarball in an empty project and
-// runs this file with Bun and Deno. It covers the main entry and the Resend transport, which must
+// runs this file with Bun and Deno. It covers the main entry and the HTTP transports, which must
 // work wherever `fetch` and the web platform globals are available.
 import { createMailer, MailerError, memoryTransport } from '@onetodone/mailer'
+import { mailgunTransport } from '@onetodone/mailer/mailgun'
+import { postmarkTransport } from '@onetodone/mailer/postmark'
 import { resendTransport, type ResendTransportOptions } from '@onetodone/mailer/resend'
 
 function check(condition: boolean, message: string): asserts condition {
@@ -97,5 +99,45 @@ const error: unknown = await limited
   .catch((rejection: unknown) => rejection)
 check(error instanceof MailerError, 'Resend failures are MailerError instances')
 check(error.retryable === true && error.status === 429, 'a rate limit is retryable with status 429')
+
+// The Postmark transport, with a mocked fetch.
+const postmarkMailer = createMailer({
+  transport: postmarkTransport({ serverToken: 'POSTMARK_API_TEST', fetch: respond(200, { MessageID: 'msg-1' }) }),
+  from,
+  branding,
+})
+const postmarked = await postmarkMailer.send('verifyEmail', {
+  to,
+  props: { verifyUrl },
+  attachments: [{ filename: 'notes.txt', content: 'Grüße' }],
+})
+check(postmarked.messageId === 'msg-1', 'Postmark returns the message ID')
+const postmarkRequest = JSON.parse(requests.at(-1)?.body ?? '{}') as { Attachments?: { Content: string }[] }
+check(postmarkRequest.Attachments?.[0]?.Content === 'R3LDvMOfZQ==', 'Postmark encodes attachments as base64')
+
+// The Mailgun transport, with a mocked fetch that reads the multipart body.
+let mailgunBody = ''
+const mailgunMailer = createMailer({
+  transport: mailgunTransport({
+    apiKey: 'key-test',
+    domain: 'mg.organization.example',
+    fetch: (_url, init) => {
+      mailgunBody = new TextDecoder().decode(init.body)
+      return Promise.resolve({ ok: true, status: 200, text: () => Promise.resolve('{"id":"<1@mg>"}') })
+    },
+  }),
+  from,
+  branding,
+})
+const mailgunned = await mailgunMailer.send('verifyEmail', {
+  to,
+  props: { verifyUrl },
+  attachments: [{ filename: 'notes.txt', content: 'Grüße' }],
+})
+check(mailgunned.messageId === '<1@mg>', 'Mailgun returns the message ID')
+check(
+  mailgunBody.includes('name="attachment"; filename="notes.txt"') && mailgunBody.includes('Grüße'),
+  'Mailgun sends attachments as multipart files',
+)
 
 console.log('Runtime smoke test passed.')

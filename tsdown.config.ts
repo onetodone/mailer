@@ -5,6 +5,8 @@ export default defineConfig({
     index: 'src/index.ts',
     'smtp/index': 'src/smtp/index.ts',
     'resend/index': 'src/resend/index.ts',
+    'postmark/index': 'src/postmark/index.ts',
+    'mailgun/index': 'src/mailgun/index.ts',
     'nestjs/index': 'src/nestjs/index.ts',
   },
   format: ['esm', 'cjs'],

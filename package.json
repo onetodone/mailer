@@ -12,6 +12,8 @@
     "smtp",
     "nodemailer",
     "resend",
+    "postmark",
+    "mailgun",
     "i18n",
     "typescript",
     "otp",
@@ -70,6 +72,26 @@
         "default": "./dist/resend/index.cjs"
       }
     },
+    "./postmark": {
+      "import": {
+        "types": "./dist/postmark/index.d.mts",
+        "default": "./dist/postmark/index.mjs"
+      },
+      "require": {
+        "types": "./dist/postmark/index.d.cts",
+        "default": "./dist/postmark/index.cjs"
+      }
+    },
+    "./mailgun": {
+      "import": {
+        "types": "./dist/mailgun/index.d.mts",
+        "default": "./dist/mailgun/index.mjs"
+      },
+      "require": {
+        "types": "./dist/mailgun/index.d.cts",
+        "default": "./dist/mailgun/index.cjs"
+      }
+    },
     "./nestjs": {
       "import": {
         "types": "./dist/nestjs/index.d.mts",
@@ -91,6 +113,12 @@
       ],
       "resend": [
         "./dist/resend/index.d.cts"
+      ],
+      "postmark": [
+        "./dist/postmark/index.d.cts"
+      ],
+      "mailgun": [
+        "./dist/mailgun/index.d.cts"
       ],
       "nestjs": [
         "./dist/nestjs/index.d.cts"
