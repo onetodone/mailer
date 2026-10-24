@@ -1,6 +1,6 @@
 # Transports
 
-A transport delivers the rendered emails. The package ships four, and you can [write your own](#your-own-transport).
+A transport delivers the rendered emails. The package ships six, and you can [write your own](#your-own-transport).
 
 ## SMTP
 
@@ -84,6 +84,55 @@ const transport = resendTransport({
   fetch: (url, init) => fetch(url, { ...init, signal: AbortSignal.timeout(10_000) }),
 })
 ```
+
+## Postmark
+
+`postmarkTransport` sends through the [Postmark](https://postmarkapp.com) API with the built-in `fetch`, so it needs no other package and also runs on Bun, Deno and edge runtimes:
+
+```ts
+import { postmarkTransport } from '@onetodone/mailer/postmark'
+
+const transport = postmarkTransport({ serverToken: process.env.POSTMARK_SERVER_TOKEN! })
+```
+
+| Option          | Description                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------- |
+| `serverToken`   | Required. Server API token, from the API Tokens tab of a Postmark server.                         |
+| `messageStream` | ID of the message stream. Default `outbound`, the default transactional stream.                   |
+| `baseUrl`       | Base URL of the Postmark API. Default `https://api.postmarkapp.com`.                              |
+| `fetch`         | Function that makes the HTTP request. Default: the global `fetch`. Use it for a timeout or proxy. |
+
+The `from` address must be a confirmed sender signature or on a verified domain in Postmark. Until Postmark approves the account, it only delivers to addresses on the domain of the `from` address. Attachments with a `cid` go out as inline images, the others as regular attachments. The result's `messageId` is the Postmark message ID, which the Postmark activity feed and webhooks use. The transport holds no connections, so `mailer.close()` has nothing to close.
+
+A failed delivery rejects with `TRANSPORT_FAILED`. When Postmark answered, `status` holds the HTTP status, and `cause` holds Postmark's error response, such as `{ ErrorCode: 406, Message: '…' }` for an inactive recipient. `retryable` is `true` for a rate limit (429), a server error or outage (5xx) or a network failure, and `false` for any other 4xx, such as an invalid token, an unconfirmed sender signature or an inactive recipient (see [retries](errors.md#retries)).
+
+## Mailgun
+
+`mailgunTransport` sends through the [Mailgun](https://www.mailgun.com) API with the built-in `fetch`, so it needs no other package and also runs on Bun, Deno and edge runtimes:
+
+```ts
+import { mailgunTransport } from '@onetodone/mailer/mailgun'
+
+const transport = mailgunTransport({
+  apiKey: process.env.MAILGUN_API_KEY!,
+  domain: 'mg.example.com',
+  region: 'eu',
+})
+```
+
+| Option    | Description                                                                                                         |
+| --------- | ------------------------------------------------------------------------------------------------------------------- |
+| `apiKey`  | Required. Mailgun API key: a sending key of the domain or the account's private key.                                |
+| `domain`  | Required. Sending domain registered in Mailgun.                                                                     |
+| `region`  | `us` or `eu`, the region the domain was created in. Default `us`.                                                   |
+| `baseUrl` | Base URL of the Mailgun API. Overrides `region`. Default `https://api.mailgun.net` or `https://api.eu.mailgun.net`. |
+| `fetch`   | Function that makes the HTTP request. Default: the global `fetch`. Use it for a timeout or proxy.                   |
+
+A sandbox domain only delivers to the authorized recipients of the account. Attachments with a `cid` go out as inline images, the others as regular attachments. The result's `messageId` is the Message-ID Mailgun assigned, such as `<20261024123456.1@mg.example.com>`; Mailgun events and webhooks show it without the angle brackets. The transport holds no connections, so `mailer.close()` has nothing to close.
+
+A failed delivery rejects with `TRANSPORT_FAILED`. When Mailgun answered, `status` holds the HTTP status, and `cause` holds Mailgun's error response, such as `{ message: 'Domain not found: mg.example.com' }`, or its text when it is not JSON. `retryable` is `true` for a rate limit (429), a server error (5xx) or a network failure, and `false` for any other 4xx, such as an invalid API key, an unknown domain or a recipient a sandbox domain may not send to (see [retries](errors.md#retries)).
+
+The `fetch` option of the Mailgun transport receives the multipart request body as an `ArrayBuffer`. The timeout example under [Resend](#resend) works for every HTTP transport.
 
 ## Console
 

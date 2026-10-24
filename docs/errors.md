@@ -21,7 +21,7 @@ The package throws `MailerError`, which has a `code` to branch on:
 Retries are up to your application, for example through a job queue. A `TRANSPORT_FAILED` error from a built-in transport says whether another attempt can help:
 
 - `retryable` is `true` when the same email may be delivered later: a rate limit or quota, a server error, a temporary SMTP rejection (4xx reply), or a lost connection or timeout.
-- `retryable` is `false` when the provider rejected the email, its sender or the credentials, such as an SMTP 5xx reply or an HTTP 4xx answer from the Resend API. Another attempt fails the same way.
+- `retryable` is `false` when the provider rejected the email, its sender or the credentials, such as an SMTP 5xx reply or an HTTP 4xx answer from the Resend, Postmark or Mailgun API. Another attempt fails the same way.
 - `retryable` is `undefined` when the transport cannot tell, as for errors your own transport throws without it.
 - `status` holds the SMTP reply code, such as `550`, or the HTTP status of the provider's API, such as `429`, when the provider answered.
 

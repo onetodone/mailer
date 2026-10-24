@@ -25,7 +25,7 @@ pnpm format:fix && pnpm lint:fix && pnpm typecheck && pnpm test && pnpm build
 ## Seeing the emails
 
 - `pnpm preview` renders every sample email in every built-in language to `.preview/`. Open `.preview/index.html` in a browser. `LOCALES=de,fr pnpm preview` limits it to some languages.
-- `pnpm send:test` sends every sample over SMTP, by default to a local SMTP catcher such as [Mailpit](https://mailpit.axllent.org) on `localhost:1025`, or through Resend when `RESEND_API_KEY` is set. `SAMPLES=verify-email,media` limits it to some samples. `.env.example` lists the settings for real inboxes.
+- `pnpm send:test` sends every sample over SMTP, by default to a local SMTP catcher such as [Mailpit](https://mailpit.axllent.org) on `localhost:1025`, or through Resend, Postmark or Mailgun (`MAIL_TRANSPORT`, see `.env.example`). `SAMPLES=verify-email,media` limits it to some samples. `.env.example` lists the settings for real inboxes.
 - `pnpm screenshots` regenerates the images in `docs/images/`. Run it when a change alters how a pictured email looks. It needs Chromium (`pnpm exec playwright install chromium`) and the Roboto and Noto fonts.
 
 ## Changesets

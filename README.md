@@ -17,7 +17,7 @@ Screenshots of every email are in [Built-in templates](https://github.com/onetod
 - **The emails, not just the tools to build them.** Libraries such as React Email and MJML help you write email markup. This package ships the account emails themselves, already written, laid out and tested in major email clients.
 - **Ready for users in other languages.** Built-in texts come in many languages, with plural forms and dates formatted per locale.
 - **Yours to change.** Brand it from config, reword any text, or replace the layout and any template, all through the same typed API.
-- **Fits your stack.** Send over SMTP, through Resend or with your own transport. A NestJS module is included, and [recipes](https://github.com/onetodone/mailer/blob/main/docs/recipes.md) cover Better Auth, Auth.js, Express, Fastify, Next.js, NestJS and BullMQ.
+- **Fits your stack.** Send over SMTP, through Resend, Postmark or Mailgun, or with your own transport. A NestJS module is included, and [recipes](https://github.com/onetodone/mailer/blob/main/docs/recipes.md) cover Better Auth, Auth.js, Express, Fastify, Next.js, NestJS and BullMQ.
 
 ## Features
 
@@ -28,15 +28,15 @@ Screenshots of every email are in [Built-in templates](https://github.com/onetod
 - Custom layouts and templates with the same typed API. Props are validated with any [Standard Schema](https://standardschema.dev) library, such as zod, valibot or arktype, and custom templates can bring their own texts per locale, plural forms included.
 - Table-based HTML with inline styles and an Outlook button fallback, plus a plain-text version of every email.
 - Attachments, such as invoices, and inline images through `cid:` for pictures without a public URL, such as QR codes.
-- SMTP delivery through nodemailer, delivery through the Resend API with no extra dependencies, memory and console transports for tests and development, or a transport of your own. Delivery errors tell retryable failures, such as rate limits, from rejected emails.
+- SMTP delivery through nodemailer, delivery through the Resend, Postmark and Mailgun APIs with no extra dependencies, memory and console transports for tests and development, or a transport of your own. Delivery errors tell retryable failures, such as rate limits, from rejected emails.
 - Safe defaults: interpolated values are escaped, links must be `http:` or `https:`, header injection is rejected, and hook events never contain the email body or attachment content.
 
 ## Requirements
 
-- Node.js 22 or later. The main entry and the Resend transport also run on Bun, Deno and edge runtimes such as Cloudflare Workers, with no Node.js compatibility flags. SMTP delivery needs Node.js.
+- Node.js 22 or later. The main entry and the HTTP transports for Resend, Postmark and Mailgun also run on Bun, Deno and edge runtimes such as Cloudflare Workers, with no Node.js compatibility flags. SMTP delivery needs Node.js.
 - ESM or CommonJS. Type declarations are included and need TypeScript 5.4 or later.
 - `locale: '<code>'` needs no setup for any built-in language. English is part of the main entry; every other language is a separate file of about 4–5 kB gzipped that loads the first time an email uses it. With a bundler that splits code, the main entry is about 75 kB of minified JavaScript (19 kB gzipped) plus zod.
-- [nodemailer](https://nodemailer.com) 6 or later, only for SMTP delivery through `@onetodone/mailer/smtp`. Delivery through Resend with `@onetodone/mailer/resend` needs no extra package.
+- [nodemailer](https://nodemailer.com) 6 or later, only for SMTP delivery through `@onetodone/mailer/smtp`. Delivery through Resend, Postmark or Mailgun needs no extra package.
 - [NestJS](https://nestjs.com) 10 or later, only for the module in `@onetodone/mailer/nestjs`.
 
 ## Install
@@ -109,7 +109,7 @@ const { smtpTransport } = require('@onetodone/mailer/smtp')
 - [Configuration](https://github.com/onetodone/mailer/blob/main/docs/configuration.md): every setting of `createMailer`.
 - [Customization](https://github.com/onetodone/mailer/blob/main/docs/customization.md): branding and theme, layout, and your own templates with their texts.
 - [Texts and locales](https://github.com/onetodone/mailer/blob/main/docs/locales.md): built-in languages, text overrides and your own locales.
-- [Transports](https://github.com/onetodone/mailer/blob/main/docs/transports.md): SMTP, Resend, console, memory and your own transport.
+- [Transports](https://github.com/onetodone/mailer/blob/main/docs/transports.md): SMTP, Resend, Postmark, Mailgun, console, memory and your own transport.
 - [Testing](https://github.com/onetodone/mailer/blob/main/docs/testing.md): tests with `memoryTransport` and `render`.
 - [Recipes](https://github.com/onetodone/mailer/blob/main/docs/recipes.md): Better Auth, Auth.js, Express, Fastify, Next.js, NestJS and background jobs.
 - [Hooks](https://github.com/onetodone/mailer/blob/main/docs/hooks.md): `onSent` and `onError` for logging and metrics.
